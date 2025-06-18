@@ -1,0 +1,22 @@
+class AppStrings {
+  static const String appName = "USER APP";
+  static const String email = "Email";
+  static const String password = "Password";
+  static const String confirmPassword = "Confirm Password";
+  static const String forgotPassword = "Forgot password?";
+  static const String login = "Log in";
+  static const String noAccount = "Don't have an account?";
+  static const String signup = "Sign up";
+  static const String signInWith = "Sign in with";
+  static const String enterEmailInstruction =
+      "Enter your email address to receive a verification code.";
+  static const String sendVerificationCode = "Send verification code";
+  static const String backToLogin = "Back to Log in";
+  static const String signupTerms = "By signing up, you agree to our";
+  static const String firstName = "First Name";
+  static const String lastName = "Last Name";
+  static const String alreadyAccount = "Have an account? Log in";
+  static const String socialMediaSignUp = " Signup with Social Media";
+  static const String emailSignUp = " Signup with Email";
+  static const String city = "City";
+}
