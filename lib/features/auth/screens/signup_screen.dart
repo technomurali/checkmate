@@ -16,7 +16,7 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   bool isSignUpDisabled = true;
-  bool isOptedForEmail = true;
+  // bool isOptedForEmail = true;
   bool isOptedForSocialSignUp = false;
   String selectedValue = 'Select the Pharmacitical';
 
@@ -58,36 +58,40 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 32),
             Text(AppStrings.signupTerms),
-            // Row(
-            //   children: [
-            //     Checkbox(
-            //       value: isOptedForSocialSignUp,
-            //       onChanged: (value) {
-            //         setState(() {
-            //           isOptedForSocialSignUp = value!;
-            //         });
-            //       },
-            //     ),
-            //     const Text(AppStrings.socialMediaSignUp),
-            //     Checkbox(
-            //       value: isOptedForEmail,
-            //       onChanged: (value) {
-            //         setState(() {
-            //           isOptedForEmail = value!;
-            //         });
-            //       },
-            //     ),
-            //     const Text(AppStrings.emailSignUp),
-            //   ],
-            // ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(AppStrings.emailSignUp),
+            const SizedBox(height: 16),
 
+            Row(
+              children: [
+                Checkbox(
+                  value: isOptedForSocialSignUp,
+                  onChanged: (value) {
+                    setState(() {
+                      isOptedForSocialSignUp = value!;
+                    });
+                  },
+                ),
                 const Text(AppStrings.socialMediaSignUp),
               ],
             ),
+
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     const Text(AppStrings.emailSignUp),
+            //     Switch(
+            //       value: isOptedForSocialSignUp,
+            //       onChanged: (value) {
+            //         setState(() {
+            //           isOptedForSocialSignUp = value;
+            //         });
+            //       },
+            //       activeColor: AppColors.primary,
+            //       inactiveThumbColor: Colors.grey[300],
+            //       inactiveTrackColor: AppColors.accentError,
+            //     ),
+            //     const Text(AppStrings.socialMediaSignUp),
+            //   ],
+            // ),
             const SizedBox(height: 16),
             if (isOptedForSocialSignUp) ...{
               const SocialButtonsRow(),
