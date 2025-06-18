@@ -20,7 +20,9 @@ class Button extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isDisabled ? () {} : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: isDisabled
+              ? AppColors.textSecondary
+              : AppColors.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

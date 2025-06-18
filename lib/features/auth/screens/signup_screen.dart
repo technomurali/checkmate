@@ -1,7 +1,10 @@
 import 'package:checkmate/core/widgets/app_logo.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/core/widgets/custom_text_field.dart';
+import 'package:checkmate/features/auth/controllers/pharma_controller.dart';
+import 'package:checkmate/features/auth/controllers/signup_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
+import 'package:checkmate/features/auth/model/signup_modal.dart';
 import 'package:checkmate/features/auth/widgets/social_buttons_row.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
@@ -16,16 +19,12 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   bool isSignUpDisabled = true;
-  // bool isOptedForEmail = true;
   bool isOptedForSocialSignUp = false;
-  String selectedValue = 'Select the Pharmacitical';
+  String selectedValue = AppStrings.selectThePharma;
+  final PharmaController _pharmaController = PharmaController();
+  final SignupController _signupController = SignupController();
 
-  final List<String> items = [
-    'Select the Pharmacitical',
-    'Banana',
-    'Mango',
-    'Orange',
-  ];
+  List<String> items = [AppStrings.selectThePharma, "", ""];
   Map<String, bool> isvalid = {
     "email": false,
     "password": false,
@@ -35,145 +34,300 @@ class _SignupScreenState extends State<SignupScreen> {
     "city": false,
     "pharma": false,
   };
+
+  getPharmaList() {
+    _pharmaController.fetchPharmaCompanies().then(
+      (v) => {
+        setState(() {
+          items = [AppStrings.selectThePharma, ...v.pharmaCompanies];
+        }),
+      },
+    );
+    debugPrint("$items");
+  }
+
+  userSignUp() {
+    SignUpModel data = SignUpModel(
+      email: TextControllers.email.text,
+      password: TextControllers.password.text,
+      firstName: TextControllers.firstName.text,
+      lastName: TextControllers.lastName.text,
+      city: TextControllers.city.text,
+      pharmaCompany: selectedValue,
+    );
+    _signupController
+        .signupUser(data)
+        .then(
+          (v) => {
+            setState(() {
+              TextControllers.email.clear();
+              TextControllers.password.clear();
+              TextControllers.confirmPassword.clear();
+              TextControllers.firstName.clear();
+              TextControllers.lastName.clear();
+              TextControllers.city.clear();
+              TextControllers.pharma.clear();
+              selectedValue = AppStrings.selectThePharma;
+            }),
+          },
+        );
+  }
+
+  void checkFormValidity() {
+    final allValid = isvalid.values.every((element) => element);
+
+    setState(() {
+      isSignUpDisabled = !(allValid && !isOptedForSocialSignUp);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getPharmaList();
+
+    TextControllers.email.addListener(() {
+      isvalid['email'] = TextControllers.email.text.contains('@');
+      checkFormValidity();
+    });
+    TextControllers.password.addListener(() {
+      isvalid['password'] = TextControllers.password.text.length >= 6;
+      isvalid['confirmPassword'] =
+          TextControllers.password.text == TextControllers.confirmPassword.text;
+      checkFormValidity();
+    });
+    TextControllers.confirmPassword.addListener(() {
+      isvalid['confirmPassword'] =
+          TextControllers.password.text == TextControllers.confirmPassword.text;
+      checkFormValidity();
+    });
+    TextControllers.firstName.addListener(() {
+      isvalid['firstName'] = TextControllers.firstName.text.isNotEmpty;
+      checkFormValidity();
+    });
+    TextControllers.lastName.addListener(() {
+      isvalid['lastname'] = TextControllers.lastName.text.isNotEmpty;
+      checkFormValidity();
+    });
+    TextControllers.city.addListener(() {
+      isvalid['city'] = TextControllers.city.text.isNotEmpty;
+      checkFormValidity();
+    });
+    TextControllers.pharma.addListener(() {
+      isvalid['pharma'] =
+          TextControllers.pharma.text != AppStrings.selectThePharma;
+      checkFormValidity();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 64),
-            // Icon(Icons.cancel, size: 48, color: AppColors.primary),
-            AppLogo(),
-            const SizedBox(height: 16),
-            Text(
-              AppStrings.appName,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 32),
-            Text(AppStrings.signupTerms),
-            const SizedBox(height: 16),
-
-            Row(
-              children: [
-                Checkbox(
-                  value: isOptedForSocialSignUp,
-                  onChanged: (value) {
-                    setState(() {
-                      isOptedForSocialSignUp = value!;
-                    });
-                  },
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 64),
+              AppLogo(),
+              const SizedBox(height: 16),
+              Text(
+                AppStrings.appName,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
                 ),
-                const Text(AppStrings.socialMediaSignUp),
-              ],
-            ),
+              ),
+              const SizedBox(height: 32),
+              Text(AppStrings.signupTerms),
+              const SizedBox(height: 16),
 
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   children: [
-            //     const Text(AppStrings.emailSignUp),
-            //     Switch(
-            //       value: isOptedForSocialSignUp,
-            //       onChanged: (value) {
-            //         setState(() {
-            //           isOptedForSocialSignUp = value;
-            //         });
-            //       },
-            //       activeColor: AppColors.primary,
-            //       inactiveThumbColor: Colors.grey[300],
-            //       inactiveTrackColor: AppColors.accentError,
-            //     ),
-            //     const Text(AppStrings.socialMediaSignUp),
-            //   ],
-            // ),
-            const SizedBox(height: 16),
-            if (isOptedForSocialSignUp) ...{
-              const SocialButtonsRow(),
-            } else ...{
+              Row(
+                children: [
+                  Checkbox(
+                    value: isOptedForSocialSignUp,
+                    onChanged: (value) {
+                      setState(() {
+                        isOptedForSocialSignUp = value!;
+                      });
+                    },
+                  ),
+                  const Text(AppStrings.socialMediaSignUp),
+                ],
+              ),
+
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //   children: [
+              //     const Text(AppStrings.emailSignUp),
+              //     Switch(
+              //       value: isOptedForSocialSignUp,
+              //       onChanged: (value) {
+              //         setState(() {
+              //           isOptedForSocialSignUp = value;
+              //         });
+              //       },
+              //       activeColor: AppColors.primary,
+              //       inactiveThumbColor: Colors.grey[300],
+              //       inactiveTrackColor: AppColors.accentError,
+              //     ),
+              //     const Text(AppStrings.socialMediaSignUp),
+              //   ],
+              // ),
+              const SizedBox(height: 16),
+              if (isOptedForSocialSignUp) ...{
+                const SocialButtonsRow(),
+              } else ...{
+                CustomTextField(
+                  isRequired: true,
+                  validator: (value) {
+                    if (value.trim().isEmpty) return ErrorText.emailReq;
+                    final emailRegex = RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    );
+                    if (!emailRegex.hasMatch(value.trim())) {
+                      return ErrorText.emailError;
+                    }
+                    return null;
+                  },
+                  controller: TextControllers.email,
+                  label: AppStrings.email,
+                ),
+                const SizedBox(height: 16),
+                Button(onPressed: () {}, text: AppStrings.sendVerificationCode),
+                const SizedBox(height: 16),
+                CustomTextField(
+                  validator: (val) {
+                    if (val.length < 6) return ErrorText.passMinError;
+                    return null;
+                  },
+                  isRequired: true,
+                  label: AppStrings.newPassword,
+                  obscureText: true,
+                  controller: TextControllers.password,
+                ),
+                SizedBox(height: 16),
+                CustomTextField(
+                  validator: (val) {
+                    if (val.length < 6) {
+                      debugPrint(
+                        "Hello There :: ${TextControllers.password.text != val}",
+                      );
+                      return ErrorText.passMinError;
+                    } else if (val.length < 6 ||
+                        (TextControllers.password.text != val)) {
+                      return ErrorText.passMisMatch;
+                    }
+
+                    return null;
+                  },
+                  isRequired: true,
+                  label: AppStrings.confirmPassword,
+                  obscureText: true,
+                  controller: TextControllers.confirmPassword,
+                ),
+              },
+
+              const SizedBox(height: 16),
               CustomTextField(
-                controller: TextControllers.email,
-                label: AppStrings.email,
+                validator: (val) {
+                  if (val.length < 2) {
+                    return ErrorText.shortName;
+                  } else if (val.isEmpty) {
+                    return ErrorText.nameRequired;
+                  }
+
+                  return null;
+                },
+                isRequired: true,
+                controller: TextControllers.firstName,
+                label: AppStrings.firstName,
               ),
               const SizedBox(height: 16),
               CustomTextField(
-                label: AppStrings.password,
-                obscureText: true,
-                controller: TextControllers.password,
-              ),
-              SizedBox(height: 16),
-              CustomTextField(
-                label: AppStrings.confirmPassword,
-                obscureText: true,
-                controller: TextControllers.confirmPassword,
-              ),
-            },
+                validator: (val) {
+                  if (val.length < 2) {
+                    return ErrorText.shortName;
+                  } else if (val.isEmpty) {
+                    return ErrorText.nameRequired;
+                  }
 
-            const SizedBox(height: 16),
-            CustomTextField(
-              controller: TextControllers.firstName,
-              label: AppStrings.firstName,
-            ),
-            const SizedBox(height: 16),
-            CustomTextField(
-              controller: TextControllers.lastName,
-              label: AppStrings.lastName,
-            ),
-            const SizedBox(height: 16),
-            CustomTextField(
-              controller: TextControllers.city,
-              label: AppStrings.city,
-            ),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: AppColors.border),
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(color: AppColors.border, offset: Offset(4, 4)),
-                ],
-              ),
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: selectedValue,
-                icon: const Icon(Icons.arrow_drop_down),
-
-                // elevation: 16,
-                underline: Container(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedValue = newValue!;
-                  });
+                  return null;
                 },
-                items: items.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
+                isRequired: true,
+                controller: TextControllers.lastName,
+                label: AppStrings.lastName,
               ),
-            ),
-            const SizedBox(height: 16),
-            Button(
-              text: AppStrings.signup,
-              onPressed: () {
-                debugPrint("Sign UP");
-              },
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(AppStrings.alreadyAccount),
-            ),
-          ],
+              const SizedBox(height: 16),
+              CustomTextField(
+                validator: (val) {
+                  if (val.length < 2) {
+                    return ErrorText.smallCity;
+                  } else if (val.isEmpty) {
+                    return ErrorText.cityRequired;
+                  }
+
+                  return null;
+                },
+                isRequired: true,
+                controller: TextControllers.city,
+                label: AppStrings.city,
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(color: AppColors.border, offset: Offset(4, 4)),
+                  ],
+                ),
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: selectedValue,
+                  icon: const Icon(Icons.arrow_drop_down),
+
+                  // elevation: 16,
+                  underline: Container(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      // if (newValue == AppStrings.selectThePharma) {
+
+                      // }
+                      selectedValue = newValue!;
+                      TextControllers.pharma.text = selectedValue;
+                      isvalid['pharma'] =
+                          selectedValue != AppStrings.selectThePharma;
+                    });
+                  },
+                  items: items.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Button(
+                isDisabled: isSignUpDisabled,
+                text: AppStrings.signup,
+                onPressed: () {
+                  userSignUp();
+                },
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppStrings.alreadyAccount),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:checkmate/core/constants/app_paths.dart';
 import 'package:flutter/material.dart';
 
 class AppLogo extends StatelessWidget {
@@ -10,7 +11,7 @@ class AppLogo extends StatelessWidget {
     return SizedBox(
       width: 48,
       height: 59,
-      child: Image.asset('assets/images/logo.png', fit: BoxFit.fill),
+      child: Image.asset(AppPaths.logoPath, fit: BoxFit.fill),
     );
   }
 }
