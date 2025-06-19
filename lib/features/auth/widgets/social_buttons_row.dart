@@ -11,9 +11,8 @@ class SocialButtonsRow extends StatelessWidget {
       children: const [
         _SocialIcon(icon: FontAwesomeIcons.google, size: 18),
         _SocialIcon(icon: Icons.apple),
-        _SocialIcon(icon: Icons.facebook, size: 29),
-        // _SocialIcon(icon: Icons.linked_in),
-        _SocialIcon(icon: FontAwesomeIcons.xTwitter, size: 19),
+        _SocialIcon(icon: FontAwesomeIcons.linkedinIn, size: 29),
+        _SocialIcon(icon: FontAwesomeIcons.microsoft, size: 24),
       ],
     );
   }
@@ -33,7 +32,8 @@ class _SocialIcon extends StatelessWidget {
       borderRadius: BorderRadius.circular(24),
       child: Container(
         padding:
-            icon == FontAwesomeIcons.xTwitter || icon == FontAwesomeIcons.google
+            icon == FontAwesomeIcons.microsoft ||
+                icon == FontAwesomeIcons.google
             ? EdgeInsets.all(12)
             : EdgeInsets.all(8),
         decoration: BoxDecoration(

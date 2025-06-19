@@ -8,4 +8,5 @@ class TextControllers {
   static TextEditingController lastName = TextEditingController();
   static TextEditingController city = TextEditingController();
   static TextEditingController pharma = TextEditingController();
+  static TextEditingController verificationCode = TextEditingController();
 }

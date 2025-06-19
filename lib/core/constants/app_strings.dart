@@ -20,7 +20,9 @@ class AppStrings {
   static const String socialMediaSignUp = " Signup with Social Media";
   static const String emailSignUp = " Signup with Email";
   static const String city = "City";
-  static const String selectThePharma = "Search for Pharmaceutical Companies";
+  static const String selectThePharma = "Select your Company";
+  static const String verifyCode = "Verify Code";
+  static const String enterVerificationCode = "Enter Verification Code";
 }
 
 class ErrorText {
@@ -32,4 +34,9 @@ class ErrorText {
   static const String nameRequired = "Name is Required";
   static const String cityRequired = "City is required";
   static const String smallCity = "City name is too short";
+  static const String somethingWentWrong = "Something went wrong: ";
+
+  /// Pharmacies Load Error
+  static const String failedToLoadPharmaCompanies =
+      "Failed to load pharma companies:";
 }

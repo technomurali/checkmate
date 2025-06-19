@@ -20,30 +20,30 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   bool isSignUpDisabled = true;
   bool isOptedForSocialSignUp = false;
-  String selectedValue = AppStrings.selectThePharma;
   final PharmaController _pharmaController = PharmaController();
   final SignupController _signupController = SignupController();
 
-  List<String> items = [AppStrings.selectThePharma, "", ""];
+  List<String> items = [];
+  List<String> items2 = [];
+  // Used for Signup Button Enabling or Disabling
   Map<String, bool> isvalid = {
     "email": false,
-    "password": false,
+    "newPassword": false,
     "confirmPassword": false,
     "firstName": false,
     "lastname": false,
     "city": false,
-    "pharma": false,
+    "selectYourCompany": false,
   };
 
   getPharmaList() {
     _pharmaController.fetchPharmaCompanies().then(
       (v) => {
         setState(() {
-          items = [AppStrings.selectThePharma, ...v.pharmaCompanies];
+          items2 = v.pharmaCompanies;
         }),
       },
     );
-    debugPrint("$items");
   }
 
   userSignUp() {
@@ -53,7 +53,7 @@ class _SignupScreenState extends State<SignupScreen> {
       firstName: TextControllers.firstName.text,
       lastName: TextControllers.lastName.text,
       city: TextControllers.city.text,
-      pharmaCompany: selectedValue,
+      pharmaCompany: TextControllers.pharma.text,
     );
     _signupController
         .signupUser(data)
@@ -67,7 +67,6 @@ class _SignupScreenState extends State<SignupScreen> {
               TextControllers.lastName.clear();
               TextControllers.city.clear();
               TextControllers.pharma.clear();
-              selectedValue = AppStrings.selectThePharma;
             }),
           },
         );
@@ -84,14 +83,13 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
-    getPharmaList();
 
     TextControllers.email.addListener(() {
       isvalid['email'] = TextControllers.email.text.contains('@');
       checkFormValidity();
     });
     TextControllers.password.addListener(() {
-      isvalid['password'] = TextControllers.password.text.length >= 6;
+      isvalid['newPassword'] = TextControllers.password.text.length >= 6;
       isvalid['confirmPassword'] =
           TextControllers.password.text == TextControllers.confirmPassword.text;
       checkFormValidity();
@@ -114,10 +112,11 @@ class _SignupScreenState extends State<SignupScreen> {
       checkFormValidity();
     });
     TextControllers.pharma.addListener(() {
-      isvalid['pharma'] =
+      isvalid['selectYourCompany'] =
           TextControllers.pharma.text != AppStrings.selectThePharma;
       checkFormValidity();
     });
+    getPharmaList();
   }
 
   @override
@@ -158,24 +157,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 ],
               ),
 
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //   children: [
-              //     const Text(AppStrings.emailSignUp),
-              //     Switch(
-              //       value: isOptedForSocialSignUp,
-              //       onChanged: (value) {
-              //         setState(() {
-              //           isOptedForSocialSignUp = value;
-              //         });
-              //       },
-              //       activeColor: AppColors.primary,
-              //       inactiveThumbColor: Colors.grey[300],
-              //       inactiveTrackColor: AppColors.accentError,
-              //     ),
-              //     const Text(AppStrings.socialMediaSignUp),
-              //   ],
-              // ),
               const SizedBox(height: 16),
               if (isOptedForSocialSignUp) ...{
                 const SocialButtonsRow(),
@@ -196,8 +177,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   label: AppStrings.email,
                 ),
                 const SizedBox(height: 16),
-                Button(onPressed: () {}, text: AppStrings.sendVerificationCode),
-                const SizedBox(height: 16),
                 CustomTextField(
                   validator: (val) {
                     if (val.length < 6) return ErrorText.passMinError;
@@ -212,9 +191,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 CustomTextField(
                   validator: (val) {
                     if (val.length < 6) {
-                      debugPrint(
-                        "Hello There :: ${TextControllers.password.text != val}",
-                      );
                       return ErrorText.passMinError;
                     } else if (val.length < 6 ||
                         (TextControllers.password.text != val)) {
@@ -228,92 +204,109 @@ class _SignupScreenState extends State<SignupScreen> {
                   obscureText: true,
                   controller: TextControllers.confirmPassword,
                 ),
-              },
+                const SizedBox(height: 16),
+                CustomTextField(
+                  validator: (val) {
+                    if (val.length < 2) {
+                      return ErrorText.shortName;
+                    } else if (val.isEmpty) {
+                      return ErrorText.nameRequired;
+                    }
 
-              const SizedBox(height: 16),
-              CustomTextField(
-                validator: (val) {
-                  if (val.length < 2) {
-                    return ErrorText.shortName;
-                  } else if (val.isEmpty) {
-                    return ErrorText.nameRequired;
-                  }
-
-                  return null;
-                },
-                isRequired: true,
-                controller: TextControllers.firstName,
-                label: AppStrings.firstName,
-              ),
-              const SizedBox(height: 16),
-              CustomTextField(
-                validator: (val) {
-                  if (val.length < 2) {
-                    return ErrorText.shortName;
-                  } else if (val.isEmpty) {
-                    return ErrorText.nameRequired;
-                  }
-
-                  return null;
-                },
-                isRequired: true,
-                controller: TextControllers.lastName,
-                label: AppStrings.lastName,
-              ),
-              const SizedBox(height: 16),
-              CustomTextField(
-                validator: (val) {
-                  if (val.length < 2) {
-                    return ErrorText.smallCity;
-                  } else if (val.isEmpty) {
-                    return ErrorText.cityRequired;
-                  }
-
-                  return null;
-                },
-                isRequired: true,
-                controller: TextControllers.city,
-                label: AppStrings.city,
-              ),
-              const SizedBox(height: 16),
-              Container(
-                width: double.infinity,
-
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: AppColors.border),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(color: AppColors.border, offset: Offset(4, 4)),
-                  ],
-                ),
-                child: DropdownButton<String>(
-                  isExpanded: true,
-                  value: selectedValue,
-                  icon: const Icon(Icons.arrow_drop_down),
-
-                  // elevation: 16,
-                  underline: Container(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      // if (newValue == AppStrings.selectThePharma) {
-
-                      // }
-                      selectedValue = newValue!;
-                      TextControllers.pharma.text = selectedValue;
-                      isvalid['pharma'] =
-                          selectedValue != AppStrings.selectThePharma;
-                    });
+                    return null;
                   },
-                  items: items.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+                  isRequired: true,
+                  controller: TextControllers.firstName,
+                  label: AppStrings.firstName,
                 ),
+                const SizedBox(height: 16),
+                CustomTextField(
+                  validator: (val) {
+                    if (val.length < 2) {
+                      return ErrorText.shortName;
+                    } else if (val.isEmpty) {
+                      return ErrorText.nameRequired;
+                    }
+
+                    return null;
+                  },
+                  isRequired: true,
+                  controller: TextControllers.lastName,
+                  label: AppStrings.lastName,
+                ),
+                const SizedBox(height: 16),
+                CustomTextField(
+                  validator: (val) {
+                    if (val.length < 2) {
+                      return ErrorText.smallCity;
+                    } else if (val.isEmpty) {
+                      return ErrorText.cityRequired;
+                    }
+
+                    return null;
+                  },
+                  isRequired: true,
+                  controller: TextControllers.city,
+                  label: AppStrings.city,
+                ),
+              },
+              const SizedBox(height: 16),
+
+              CustomTextField(
+                controller: TextControllers.pharma,
+                label: AppStrings.selectThePharma,
+                onChanged: (p0) {
+                  if (p0.isEmpty) {
+                    debugPrint("Items ::::");
+                    setState(() {
+                      items.clear();
+                    });
+                  } else {
+                    setState(() {
+                      items = items2.where((company) {
+                        debugPrint(
+                          "Items :: $p0 ${company.toLowerCase().contains(p0.toLowerCase())}",
+                        );
+                        return company.toLowerCase().contains(p0.toLowerCase());
+                      }).toList();
+                    });
+                  }
+                },
               ),
+              if (items.isNotEmpty) ...{
+                Container(
+                  padding: EdgeInsets.all(10),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.3,
+                  ),
+
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        for (int i = 0; i < items.length; i++) ...{
+                          InkWell(
+                            child: Text(items[i]),
+                            onTap: () {
+                              TextControllers.pharma.text = items[i];
+                              setState(() {
+                                items.clear();
+                              });
+                            },
+                          ),
+                          i == items.length - 1 ? SizedBox() : Divider(),
+                        },
+                      ],
+                    ),
+                  ),
+                ),
+              },
               const SizedBox(height: 16),
               Button(
                 isDisabled: isSignUpDisabled,

@@ -1,3 +1,5 @@
+import 'package:checkmate/core/constants/modal_keys.dart';
+
 class PharmaModel {
   PharmaModel({required this.pharmaCompanies});
 
@@ -11,13 +13,13 @@ class PharmaModel {
 
   factory PharmaModel.fromJson(Map<String, dynamic> json) {
     return PharmaModel(
-      pharmaCompanies: json["pharma_companies"] == null
+      pharmaCompanies: json[ModalKeys().pharmaCompanies] == null
           ? []
-          : List<String>.from(json["pharma_companies"]!.map((x) => x)),
+          : List<String>.from(json[ModalKeys().pharmaCompanies]!.map((x) => x)),
     );
   }
 
   Map<String, dynamic> toJson() => {
-    "pharma_companies": pharmaCompanies.map((x) => x).toList(),
+    ModalKeys().pharmaCompanies: pharmaCompanies.map((x) => x).toList(),
   };
 }

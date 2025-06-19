@@ -1,3 +1,5 @@
+import 'package:checkmate/core/constants/modal_keys.dart';
+
 class SignUpModel {
   SignUpModel({
     required this.email,
@@ -35,21 +37,21 @@ class SignUpModel {
 
   factory SignUpModel.fromJson(Map<String, dynamic> json) {
     return SignUpModel(
-      email: json["email"],
-      password: json["password"],
-      firstName: json["firstName"],
-      lastName: json["lastName"],
-      city: json["city"],
-      pharmaCompany: json["pharmaCompany"],
+      email: json[ModalKeys().email],
+      password: json[ModalKeys().password],
+      firstName: json[ModalKeys().firstName],
+      lastName: json[ModalKeys().lastName],
+      city: json[ModalKeys().city],
+      pharmaCompany: json[ModalKeys().pharmaCompany],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    "email": email,
-    "password": password,
-    "firstName": firstName,
-    "lastName": lastName,
-    "city": city,
-    "pharmaCompany": pharmaCompany,
+    ModalKeys().email: email,
+    ModalKeys().password: password,
+    ModalKeys().firstName: firstName,
+    ModalKeys().lastName: lastName,
+    ModalKeys().city: city,
+    ModalKeys().pharmaCompany: pharmaCompany,
   };
 }

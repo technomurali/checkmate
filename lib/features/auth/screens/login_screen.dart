@@ -21,7 +21,6 @@ class LoginScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 64),
-            // Icon(Icons.cancel, size: 48, color: AppColors.primary),fff
             AppLogo(),
             const SizedBox(height: 16),
             Text(
@@ -38,15 +37,6 @@ class LoginScreen extends StatelessWidget {
               controller: TextEditingController(),
             ),
             const SizedBox(height: 16),
-            // TextField(
-            //   obscureText: true,
-            //   decoration: InputDecoration(
-            //     labelText: AppStrings.password,
-            //     border: OutlineInputBorder(
-            //       borderRadius: BorderRadius.circular(8),
-            //     ),
-            //   ),
-            // ),
             CustomTextField(
               label: AppStrings.password,
               obscureText: true,
@@ -58,9 +48,7 @@ class LoginScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => const ForgotPasswordScreen(),
-                    ),
+                    MaterialPageRoute(builder: (_) => ForgotPasswordScreen()),
                   );
                 },
                 child: Text(

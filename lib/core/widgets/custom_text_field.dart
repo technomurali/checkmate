@@ -8,6 +8,7 @@ class CustomTextField extends StatefulWidget {
   final bool obscureText;
   final TextInputType keyboardType;
   final String? Function(String)? validator;
+  final void Function(String)? onChanged;
   const CustomTextField({
     super.key,
     required this.controller,
@@ -16,6 +17,7 @@ class CustomTextField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.isRequired = false,
     this.validator,
+    this.onChanged,
   });
 
   @override
@@ -47,14 +49,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
   }
 
   @override
-  void dispose() {
-    widget.controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return TextField(
+      onChanged: widget.onChanged,
       controller: widget.controller,
       obscureText: isPasswordVisible,
       keyboardType: widget.keyboardType,
@@ -74,7 +71,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
             ],
           ),
         ),
-        // labelText: label,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 12,

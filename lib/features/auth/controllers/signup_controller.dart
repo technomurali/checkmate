@@ -7,24 +7,20 @@ class SignupController {
   Future<Map<String, dynamic>> signupUser(SignUpModel user) async {
     try {
       final response = await http.post(
-        Uri.parse(Api.baseUrl + Api.signup),
+        Uri.parse(AppApi.baseUrl + AppApi.signup),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(user.toJson()),
       );
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        return {
-          'success': true,
-          'user': SignUpModel.fromJson(data['user']),
-          'message': data['message'],
-        };
+        return data;
       } else {
         final error = jsonDecode(response.body);
-        return {'success': false, 'error': error['message'] ?? 'Unknown error'};
+        return error;
       }
     } catch (e) {
-      return {'success': false, 'error': 'Failed to sign up: $e'};
+      return {'error': e};
     }
   }
 }
