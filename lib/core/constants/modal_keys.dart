@@ -10,10 +10,11 @@ mixin SignUpModalKeys {
 }
 
 mixin PharmaModalKeys {
-  final String pharmaCompanies = "pharma_companies";
+  final String pharmaModalCompanies = "pharma_companies";
 }
 
 mixin EmailVerificationKeys {
   final String message = "message";
   final String emailVerificationCode = 'code';
+  final String statusCode = 'statusCode';
 }

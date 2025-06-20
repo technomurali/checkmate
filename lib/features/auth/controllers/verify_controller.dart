@@ -5,7 +5,7 @@ import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:http/http.dart' as http;
 
 class VerifyController {
-  Future<String> verifyEmailCode(String code) async {
+  Future<Map<String, dynamic>> verifyEmailCode(String code) async {
     try {
       final response = await http.post(
         Uri.parse(AppApi.baseUrl + AppApi.verifyEmail),
@@ -16,13 +16,18 @@ class VerifyController {
       final responseBody = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
-        return responseBody[ModalKeys().message] ??
-            'Email Verified Successfully';
+        return {
+          ModalKeys().statusCode: response.statusCode,
+          ModalKeys().message: responseBody[ModalKeys().message],
+        };
       } else {
-        return responseBody[ModalKeys().message] ?? 'Verification failed';
+        return {
+          ModalKeys().statusCode: response.statusCode,
+          ModalKeys().message: responseBody[ModalKeys().message],
+        };
       }
     } catch (e) {
-      return '${ErrorText.somethingWentWrong}$e';
+      return {ModalKeys().emailVerificationCode: e.toString()};
     }
   }
 }

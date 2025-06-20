@@ -8,8 +8,8 @@ import '../screens/signup_screen.dart';
 import '../screens/forgot_password_screen.dart';
 import '../widgets/social_buttons_row.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class SiginScreen extends StatelessWidget {
+  const SiginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,7 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
             ),
-            Button(text: AppStrings.login, onPressed: () {}),
+            Button(text: AppStrings.signin, onPressed: () {}),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

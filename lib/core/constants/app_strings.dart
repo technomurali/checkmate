@@ -5,14 +5,14 @@ class AppStrings {
   static const String newPassword = "New Password";
   static const String confirmPassword = "Confirm Password";
   static const String forgotPassword = "Forgot password?";
-  static const String login = "Sign in";
+  static const String signin = "Sign in";
   static const String noAccount = "Don't have an account?";
   static const String signup = "Sign up";
   static const String signInWith = "Sign in with";
   static const String enterEmailInstruction =
       "Enter your email address to receive a verification code.";
   static const String sendVerificationCode = "Send verification code";
-  static const String backToLogin = "Back to Log in";
+  static const String backToSignin = "Back to Sign in";
   static const String signupTerms = "By signing up, you agree to our";
   static const String firstName = "First Name";
   static const String lastName = "Last Name";
@@ -39,4 +39,9 @@ class ErrorText {
   /// Pharmacies Load Error
   static const String failedToLoadPharmaCompanies =
       "Failed to load pharma companies:";
+
+  /// Incorrect code. Please check your email and try again
+  /// Wrong code entered
+  static const String wrongCode =
+      "Incorrect code. Please check your email and try again";
 }

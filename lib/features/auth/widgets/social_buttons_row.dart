@@ -27,7 +27,7 @@ class _SocialIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // TODO: Implement actual social login
+        // TODO: Implement actual social signin
       },
       borderRadius: BorderRadius.circular(24),
       child: Container(

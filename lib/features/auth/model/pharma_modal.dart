@@ -13,13 +13,15 @@ class PharmaModel {
 
   factory PharmaModel.fromJson(Map<String, dynamic> json) {
     return PharmaModel(
-      pharmaCompanies: json[ModalKeys().pharmaCompanies] == null
+      pharmaCompanies: json[ModalKeys().pharmaModalCompanies] == null
           ? []
-          : List<String>.from(json[ModalKeys().pharmaCompanies]!.map((x) => x)),
+          : List<String>.from(
+              json[ModalKeys().pharmaModalCompanies]!.map((x) => x),
+            ),
     );
   }
 
   Map<String, dynamic> toJson() => {
-    ModalKeys().pharmaCompanies: pharmaCompanies.map((x) => x).toList(),
+    ModalKeys().pharmaModalCompanies: pharmaCompanies.map((x) => x).toList(),
   };
 }

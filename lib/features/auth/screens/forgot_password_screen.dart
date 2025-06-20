@@ -1,3 +1,6 @@
+import 'package:checkmate/core/constants/app_api.dart';
+import 'package:checkmate/core/constants/modal_keys.dart';
+import 'package:checkmate/core/utils/validators.dart';
 import 'package:checkmate/core/widgets/app_logo.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/core/widgets/custom_text_field.dart';
@@ -9,7 +12,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
-  ForgotPasswordScreen({super.key});
+  const ForgotPasswordScreen({super.key});
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -18,17 +21,44 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final VerifyController verify = VerifyController();
   bool sentCode = false;
-  handleEmailVerification() async {
+  bool isVerificationCodeEntered = false;
+  bool emailEnteredAndValid = false;
+  bool wrongCodeEntered = false;
+
+  validateEmailVerificationCode() async {
     verify
         .verifyEmailCode(TextControllers.verificationCode.text)
         .then(
           (v) => {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (ctx) => VerficationTrailScreen(message: v),
-              ),
-            ),
+            debugPrint('$v'),
+            setState(() {
+              wrongCodeEntered = false;
+            }),
+            if (v[ModalKeys().statusCode] == AppApiStatusCodes.success)
+              {
+                setState(() {
+                  sentCode = false;
+                  isVerificationCodeEntered = false;
+                  emailEnteredAndValid = false;
+                  wrongCodeEntered = false;
+                  TextControllers.email.clear();
+                  TextControllers.verificationCode.clear();
+                }),
+                Navigator.push(
+                  // ignore: use_build_context_synchronously
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) =>
+                        VerficationTrailScreen(message: v[ModalKeys().message]),
+                  ),
+                ),
+              }
+            else
+              {
+                setState(() {
+                  wrongCodeEntered = true;
+                }),
+              },
           },
         );
   }
@@ -36,6 +66,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   sendEmailVerificationCode() {
     setState(() {
       sentCode = true;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    TextControllers.email.addListener(() {
+      bool isValidEmail = Validators().isValidEmail(TextControllers.email.text);
+      setState(() {
+        emailEnteredAndValid =
+            isValidEmail && TextControllers.email.text.isNotEmpty;
+      });
+      debugPrint(
+        "email :: ${isValidEmail && TextControllers.email.text.isNotEmpty} && $isValidEmail && ${TextControllers.email.text.isNotEmpty} && email ${TextControllers.email.text.isNotEmpty} &&isValidEmail $emailEnteredAndValid ",
+      );
+    });
+    TextControllers.verificationCode.addListener(() {
+      setState(() {
+        isVerificationCodeEntered =
+            TextControllers.verificationCode.text.isNotEmpty;
+      });
     });
   }
 
@@ -62,15 +115,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             Text(AppStrings.enterEmailInstruction),
             const SizedBox(height: 16),
             if (!sentCode) ...{
-              TextField(
-                decoration: InputDecoration(
-                  labelText: AppStrings.email,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
+              CustomTextField(
+                controller: TextControllers.email,
+                label: AppStrings.email,
               ),
             } else ...{
+              if (wrongCodeEntered) ...{
+                Text(
+                  ErrorText.wrongCode,
+                  style: TextStyle(color: AppColors.accentError),
+                ),
+                SizedBox(height: 10),
+              },
               CustomTextField(
                 controller: TextControllers.verificationCode,
                 label: AppStrings.enterVerificationCode,
@@ -78,12 +134,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             },
             const SizedBox(height: 16),
             Button(
+              isDisabled: sentCode
+                  ? !isVerificationCodeEntered
+                  : !emailEnteredAndValid,
               text: !sentCode
                   ? AppStrings.sendVerificationCode
                   : AppStrings.verifyCode,
               onPressed: () {
                 if (sentCode) {
-                  handleEmailVerification();
+                  validateEmailVerificationCode();
                 } else {
                   sendEmailVerificationCode();
                 }
@@ -91,7 +150,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(AppStrings.backToLogin),
+              child: Text(AppStrings.backToSignin),
             ),
           ],
         ),
