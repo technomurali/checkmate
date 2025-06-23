@@ -1,0 +1,52 @@
+import 'package:checkmate/features/auth/model/user_modal.dart';
+import 'package:flutter/material.dart';
+import 'package:checkmate/features/auth/controllers/signin_controller.dart';
+import 'package:checkmate/features/auth/controllers/text_controllers.dart';
+import 'package:checkmate/core/constants/modal_keys.dart';
+
+class SigninScreenLogic extends ChangeNotifier {
+  final SigninController _signinController = SigninController();
+
+  bool isButtonEnabled = false;
+
+  SigninScreenLogic() {
+    TextControllers.email.addListener(_updateButtonState);
+    TextControllers.password.addListener(_updateButtonState);
+  }
+
+  void _updateButtonState() {
+    final enabled =
+        TextControllers.email.text.trim().isNotEmpty &&
+        TextControllers.password.text.trim().isNotEmpty;
+
+    if (enabled != isButtonEnabled) {
+      isButtonEnabled = enabled;
+      notifyListeners();
+    }
+  }
+
+  Future<UserModal?> signinUser(BuildContext context) async {
+    final response = await _signinController.signin(
+      email: TextControllers.email.text.trim(),
+      password: TextControllers.password.text.trim(),
+    );
+
+    if (response[ModalKeys().signinSuccess]) {
+      return response[ModalKeys().signinUser];
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response[ModalKeys().message] ?? 'Login failed'),
+        ),
+      );
+      return null;
+    }
+  }
+
+  @override
+  void dispose() {
+    TextControllers.email.removeListener(_updateButtonState);
+    TextControllers.password.removeListener(_updateButtonState);
+    super.dispose();
+  }
+}

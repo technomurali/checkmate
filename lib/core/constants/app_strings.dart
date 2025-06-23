@@ -23,6 +23,22 @@ class AppStrings {
   static const String selectThePharma = "Select your Company";
   static const String verifyCode = "Verify Code";
   static const String enterVerificationCode = "Enter Verification Code";
+  static const String resetPassword = "Reset Password";
+  static const String helloUser = "Hello";
+  static const String pharmaRep = "Pharma Rep";
+  static const String upcomingEvents = "Upcoming Events";
+  static const String pendingReceipts = "Pending Receipts";
+  static const String cardiovascularInnovation = "Cardiovascular Innovation";
+  static const String neurologyAdvances = "Neurology Advances";
+  static const String diabetesCareSolutions = "Diabetes Care Solutions";
+  static const String respiratoryTherapy = "Respiratory Therapy";
+  static const String checkIn = "Check in";
+  static const String seeAll = "See all";
+  static const String eventHistory = "Event History";
+  static const String receiptHistory = "Receipt History";
+  static const String disputeHistory = "Dispute History";
+  static const String fileDispute = "File Dispute";
+  static const String createNewEvent = "Create New Event";
 }
 
 class ErrorText {
@@ -35,6 +51,7 @@ class ErrorText {
   static const String cityRequired = "City is required";
   static const String smallCity = "City name is too short";
   static const String somethingWentWrong = "Something went wrong: ";
+  static const String passwordCanNotBeEmpty = "Password cannot be empty";
 
   /// Pharmacies Load Error
   static const String failedToLoadPharmaCompanies =

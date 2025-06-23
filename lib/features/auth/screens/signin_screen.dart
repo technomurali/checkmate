@@ -1,18 +1,26 @@
 import 'package:checkmate/core/widgets/app_logo.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/core/widgets/custom_text_field.dart';
+import 'package:checkmate/features/auth/business_logic/forgot_password_screen_logic.dart';
+import 'package:checkmate/features/auth/business_logic/signup_screen_logic.dart';
+import 'package:checkmate/features/auth/business_logic/signin_screen_logic.dart';
+import 'package:checkmate/features/auth/controllers/text_controllers.dart';
+import 'package:checkmate/features/auth/screens/home_screens.dart';
+import 'package:checkmate/features/auth/screens/forgot_password_screen.dart';
+import 'package:checkmate/features/auth/screens/signup_screen.dart';
+import 'package:checkmate/features/auth/widgets/social_buttons_row.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
-import '../screens/signup_screen.dart';
-import '../screens/forgot_password_screen.dart';
-import '../widgets/social_buttons_row.dart';
 
 class SiginScreen extends StatelessWidget {
   const SiginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final logic = context.watch<SigninScreenLogic>();
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Padding(
@@ -21,11 +29,11 @@ class SiginScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 64),
-            AppLogo(),
+            const AppLogo(),
             const SizedBox(height: 16),
             Text(
               AppStrings.appName,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -34,13 +42,13 @@ class SiginScreen extends StatelessWidget {
             const SizedBox(height: 32),
             CustomTextField(
               label: AppStrings.email,
-              controller: TextEditingController(),
+              controller: TextControllers.email,
             ),
             const SizedBox(height: 16),
             CustomTextField(
               label: AppStrings.password,
               obscureText: true,
-              controller: TextEditingController(),
+              controller: TextControllers.password,
             ),
             Align(
               alignment: Alignment.centerRight,
@@ -48,7 +56,12 @@ class SiginScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => ForgotPasswordScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => ChangeNotifierProvider(
+                        create: (_) => ForgotPasswordScreenLogic(),
+                        child: const ForgotPasswordScreen(),
+                      ),
+                    ),
                   );
                 },
                 child: Text(
@@ -57,7 +70,19 @@ class SiginScreen extends StatelessWidget {
                 ),
               ),
             ),
-            Button(text: AppStrings.signin, onPressed: () {}),
+            Button(
+              isDisabled: !logic.isButtonEnabled,
+              text: AppStrings.signin,
+              onPressed: () async {
+                final user = await logic.signinUser(context);
+                if (user != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
+                  );
+                }
+              },
+            ),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -67,7 +92,12 @@ class SiginScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => SignupScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => ChangeNotifierProvider(
+                          create: (_) => SignupScreenLogic(),
+                          child: const SignupScreen(),
+                        ),
+                      ),
                     );
                   },
                   child: Text(

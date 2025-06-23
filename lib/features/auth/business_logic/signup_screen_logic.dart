@@ -1,59 +1,129 @@
-// import 'package:checkmate/features/auth/controllers/pharma_controller.dart';
-// import 'package:checkmate/features/auth/controllers/signup_controller.dart';
-// import 'package:checkmate/features/auth/controllers/text_controllers.dart';
-// import 'package:checkmate/features/auth/model/signup_modal.dart';
+import 'package:flutter/material.dart';
+import 'package:checkmate/features/auth/controllers/pharma_controller.dart';
+import 'package:checkmate/features/auth/controllers/signup_controller.dart';
+import 'package:checkmate/features/auth/controllers/text_controllers.dart';
+import 'package:checkmate/features/auth/model/signup_modal.dart';
+import 'package:checkmate/core/constants/app_strings.dart';
 
-// class SignupScreenLogic {
-//   bool isSignUpDisabled = true;
-//   bool isOptedForSocialSignUp = false;
-//   final PharmaController _pharmaController = PharmaController();
-//   final SignupController _signupController = SignupController();
+class SignupScreenLogic extends ChangeNotifier {
+  final PharmaController _pharmaController = PharmaController();
+  final SignupController _signupController = SignupController();
 
-//   List<String> items = [];
-//   List<String> items2 = [];
-//   // Used for Signup Button Enabling or Disabling
-//   Map<String, bool> isvalid = {
-//     "email": false,
-//     "newPassword": false,
-//     "confirmPassword": false,
-//     "firstName": false,
-//     "lastname": false,
-//     "city": false,
-//     "selectYourCompany": false,
-//   };
-//   getPharmaList() {
-//     _pharmaController.fetchPharmaCompanies().then(
-//       (v) => {
-//         setState(() {
-//           items2 = v.pharmaCompanies;
-//         }),
-//       },
-//     );
-//   }
+  bool isSignUpDisabled = true;
+  bool isOptedForSocialSignUp = false;
 
-//   userSignUp() {
-//     SignUpModel data = SignUpModel(
-//       email: TextControllers.email.text,
-//       password: TextControllers.password.text,
-//       firstName: TextControllers.firstName.text,
-//       lastName: TextControllers.lastName.text,
-//       city: TextControllers.city.text,
-//       pharmaCompany: TextControllers.pharma.text,
-//     );
-//     _signupController
-//         .signupUser(data)
-//         .then(
-//           (v) => {
-//             setState(() {
-//               TextControllers.email.clear();
-//               TextControllers.password.clear();
-//               TextControllers.confirmPassword.clear();
-//               TextControllers.firstName.clear();
-//               TextControllers.lastName.clear();
-//               TextControllers.city.clear();
-//               TextControllers.pharma.clear();
-//             }),
-//           },
-//         );
-//   }
-// }
+  List<String> filteredCompanies = [];
+  List<String> allCompanies = [];
+
+  final Map<String, bool> isValid = {
+    "email": false,
+    "newPassword": false,
+    "confirmPassword": false,
+    "firstName": false,
+    "lastname": false,
+    "city": false,
+    "selectYourCompany": false,
+  };
+
+  SignupViewModel() {
+    _initListeners();
+    getPharmaList();
+  }
+
+  void _initListeners() {
+    TextControllers.email.addListener(() {
+      isValid['email'] = TextControllers.email.text.contains('@');
+      _checkFormValidity();
+    });
+    TextControllers.password.addListener(() {
+      isValid['newPassword'] = TextControllers.password.text.length >= 6;
+      isValid['confirmPassword'] =
+          TextControllers.password.text == TextControllers.confirmPassword.text;
+      _checkFormValidity();
+    });
+    TextControllers.confirmPassword.addListener(() {
+      isValid['confirmPassword'] =
+          TextControllers.password.text == TextControllers.confirmPassword.text;
+      _checkFormValidity();
+    });
+    TextControllers.firstName.addListener(() {
+      isValid['firstName'] = TextControllers.firstName.text.isNotEmpty;
+      _checkFormValidity();
+    });
+    TextControllers.lastName.addListener(() {
+      isValid['lastname'] = TextControllers.lastName.text.isNotEmpty;
+      _checkFormValidity();
+    });
+    TextControllers.city.addListener(() {
+      isValid['city'] = TextControllers.city.text.isNotEmpty;
+      _checkFormValidity();
+    });
+    TextControllers.pharma.addListener(() {
+      isValid['selectYourCompany'] =
+          TextControllers.pharma.text != AppStrings.selectThePharma;
+      _checkFormValidity();
+    });
+  }
+
+  void _checkFormValidity() {
+    final allValid = isValid.values.every((e) => e);
+    isSignUpDisabled = !(allValid && !isOptedForSocialSignUp);
+    notifyListeners();
+  }
+
+  void toggleSocialSignup(bool? value) {
+    isOptedForSocialSignUp = value ?? false;
+    _checkFormValidity();
+    notifyListeners();
+  }
+
+  void getPharmaList() async {
+    final result = await _pharmaController.fetchPharmaCompanies();
+    allCompanies = result.pharmaCompanies;
+    notifyListeners();
+  }
+
+  void filterCompanies(String input) {
+    if (input.isEmpty) {
+      filteredCompanies.clear();
+    } else {
+      filteredCompanies = allCompanies
+          .where(
+            (company) => company.toLowerCase().contains(input.toLowerCase()),
+          )
+          .toList();
+    }
+    notifyListeners();
+  }
+
+  void selectCompany(String company) {
+    TextControllers.pharma.text = company;
+    filteredCompanies.clear();
+    notifyListeners();
+  }
+
+  void signupUser(VoidCallback onSuccess) async {
+    final data = SignUpModel(
+      email: TextControllers.email.text,
+      password: TextControllers.password.text,
+      firstName: TextControllers.firstName.text,
+      lastName: TextControllers.lastName.text,
+      city: TextControllers.city.text,
+      pharmaCompany: TextControllers.pharma.text,
+    );
+
+    await _signupController.signupUser(data);
+
+    // Clear controllers
+    TextControllers.email.clear();
+    TextControllers.password.clear();
+    TextControllers.confirmPassword.clear();
+    TextControllers.firstName.clear();
+    TextControllers.lastName.clear();
+    TextControllers.city.clear();
+    TextControllers.pharma.clear();
+
+    notifyListeners();
+    onSuccess();
+  }
+}
