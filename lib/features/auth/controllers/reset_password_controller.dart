@@ -19,9 +19,7 @@ class PasswordResetController {
           ModalKeys().newPassword: newPassword,
         }),
       );
-      print(
-        'reset ${jsonEncode({ModalKeys().emailPasswordReset: email, ModalKeys().newPassword: newPassword})}',
-      );
+
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {

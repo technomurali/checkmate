@@ -25,7 +25,7 @@ class SignupScreenLogic extends ChangeNotifier {
     "selectYourCompany": false,
   };
 
-  SignupViewModel() {
+  signupViewModel() {
     _initListeners();
     getPharmaList();
   }
