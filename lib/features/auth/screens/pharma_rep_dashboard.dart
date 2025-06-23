@@ -2,6 +2,8 @@ import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/core/widgets/events_recipts_card.dart';
+import 'package:checkmate/features/auth/controllers/events_controller.dart';
+import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:checkmate/features/auth/screens/dispute_history_screen.dart';
 import 'package:checkmate/features/auth/screens/event_history_screen.dart';
@@ -10,12 +12,40 @@ import 'package:checkmate/features/auth/screens/receipt_history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class PharmaRepDashboard extends StatelessWidget {
+class PharmaRepDashboard extends StatefulWidget {
   final UserModal user;
   const PharmaRepDashboard({super.key, required this.user});
 
   @override
+  State<PharmaRepDashboard> createState() => _PharmaRepDashboardState();
+}
+
+class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
+  final EventController _eventController = EventController();
+  List<EventModal> events = [];
+  fetchUpcomingEvents() async {
+    _eventController
+        .fetchEvents(status: "UPCOMING")
+        .then(
+          (v) => {
+            setState(() {
+              events = v.take(3).toList();
+              debugPrint("Events ::: $events");
+            }),
+          },
+        );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchUpcomingEvents();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    debugPrint('EventID : ${events[0].eventId}');
     return Scaffold(
       drawer: Drawer(),
       appBar: AppBar(
@@ -46,7 +76,7 @@ class PharmaRepDashboard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "${AppStrings.helloUser} ${user.firstName}",
+              "${AppStrings.helloUser} ${widget.user.firstName}",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
@@ -58,12 +88,16 @@ class PharmaRepDashboard extends StatelessWidget {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             EventsReciptsCard(
-              items: const [
-                {
-                  "title": AppStrings.cardiovascularInnovation,
-                  "date": "26/JUNE/2024",
+              items: [
+                for (var i = 0; i < events.length; i++) ...{
+                  {
+                    "title": events[i].eventName!,
+                    "date": events[i].startDate!,
+                    "id": events[i].eventId!,
+                  },
                 },
-                {"title": AppStrings.neurologyAdvances, "date": "26/JUNE/2024"},
+                // {"title": events[0].eventName!, "date": events[0].startDate!},
+                // {"title": events[1].eventName!, "date": events[1].startDate!},
               ],
               showCheckIn: true,
               onSeeAll: () {},
@@ -76,8 +110,8 @@ class PharmaRepDashboard extends StatelessWidget {
             ),
             EventsReciptsCard(
               items: const [
-                {"title": AppStrings.diabetesCareSolutions},
-                {"title": AppStrings.respiratoryTherapy},
+                {"title": "diabetesCareSolutions"},
+                {"title": "respiratoryTherapy"},
               ],
               onSeeAll: () {},
             ),

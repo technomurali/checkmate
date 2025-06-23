@@ -38,9 +38,8 @@ class EventsReciptsCard extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => EventDetailsScreen(
-                              eventName: item["title"] ?? '',
-                            ),
+                            builder: (context) =>
+                                EventDetailsScreen(eventId: item["id"] ?? ''),
                           ),
                         );
                       },
@@ -48,14 +47,12 @@ class EventsReciptsCard extends StatelessWidget {
                         message: item["title"],
                         child: SizedBox(
                           width: showCheckIn ? 100 : null,
-                          child: Expanded(
-                            child: Text(
-                              overflow: showCheckIn
-                                  ? TextOverflow.ellipsis
-                                  : null,
+                          child: Text(
+                            overflow: showCheckIn
+                                ? TextOverflow.ellipsis
+                                : null,
 
-                              item["title"] ?? "",
-                            ),
+                            item["title"] ?? "",
                           ),
                         ),
                       ),

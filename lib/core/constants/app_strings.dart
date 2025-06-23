@@ -28,10 +28,6 @@ class AppStrings {
   static const String pharmaRep = "Pharma Rep";
   static const String upcomingEvents = "Upcoming Events";
   static const String pendingReceipts = "Pending Receipts";
-  static const String cardiovascularInnovation = "Cardiovascular Innovation";
-  static const String neurologyAdvances = "Neurology Advances";
-  static const String diabetesCareSolutions = "Diabetes Care Solutions";
-  static const String respiratoryTherapy = "Respiratory Therapy";
   static const String checkIn = "Check in";
   static const String seeAll = "See all";
   static const String eventHistory = "Event History";
@@ -39,6 +35,11 @@ class AppStrings {
   static const String disputeHistory = "Dispute History";
   static const String fileDispute = "File Dispute";
   static const String createNewEvent = "Create New Event";
+  static const String startDate = "Start Date";
+  static const String endDate = "End Date";
+  static const String numberOfStaff = "Number of staff";
+  static const String hcpInEvent = "HCP's in the event";
+  static const String hcoInEvent = "HCO's in the event";
 }
 
 class ErrorText {

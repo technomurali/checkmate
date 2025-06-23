@@ -50,3 +50,18 @@ mixin ResetPasswordKeys {
   final String resetMessage = 'message';
   final String resetSuccess = 'success';
 }
+
+mixin EventsModalKeys {
+  static const String events = 'events';
+  static const String eventIdKey = "eventId";
+  static const String eventPharmaRepId = "pharmaRepId";
+  static const String eventPharmaRepName = "pharmaRepName";
+  static const String eventNameKey = "eventName";
+  static const String eventStartDate = "startDate";
+  static const String eventEndDate = "endDate";
+  static const String eventNumberOfStaff = "numberOfStaff";
+  static const String eventHCO = "HCO";
+  static const String eventHCP = "HCP";
+  static const String eventAmount = "amount";
+  static const String eventStatusKey = "eventStatus";
+}

@@ -5,6 +5,7 @@ class AppApi {
   static const String signin = 'signin';
   static const String verifyEmail = 'validateEmailVerificationCode';
   static const String restPassword = 'reset-password';
+  static const String events = 'events';
 }
 
 class AppApiStatusCodes {
