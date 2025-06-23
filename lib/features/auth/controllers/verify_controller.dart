@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:checkmate/core/constants/app_Api.dart';
-import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:http/http.dart' as http;
 
