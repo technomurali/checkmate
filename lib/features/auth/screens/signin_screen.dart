@@ -5,7 +5,7 @@ import 'package:checkmate/features/auth/business_logic/forgot_password_screen_lo
 import 'package:checkmate/features/auth/business_logic/signup_screen_logic.dart';
 import 'package:checkmate/features/auth/business_logic/signin_screen_logic.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
-import 'package:checkmate/features/auth/screens/home_screens.dart';
+import 'package:checkmate/features/auth/screens/pharma_rep_dashboard.dart';
 import 'package:checkmate/features/auth/screens/forgot_password_screen.dart';
 import 'package:checkmate/features/auth/screens/signup_screen.dart';
 import 'package:checkmate/features/auth/widgets/social_buttons_row.dart';
@@ -78,7 +78,9 @@ class SiginScreen extends StatelessWidget {
                 if (user != null) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
+                    MaterialPageRoute(
+                      builder: (_) => PharmaRepDashboard(user: user),
+                    ),
                   );
                 }
               },

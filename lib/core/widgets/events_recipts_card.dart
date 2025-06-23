@@ -1,4 +1,8 @@
+import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/features/auth/screens/event_details_screen.dart';
+import 'package:checkmate/features/auth/screens/event_history_screen.dart';
+import 'package:checkmate/features/auth/screens/receipt_history_screen.dart';
 import 'package:flutter/material.dart';
 
 class EventsReciptsCard extends StatelessWidget {
@@ -24,17 +28,47 @@ class EventsReciptsCard extends StatelessWidget {
           children: [
             const SizedBox(height: 8),
             ...items.map(
-              (item) => Padding(
+              (item) => Container(
                 padding: const EdgeInsets.symmetric(vertical: 6.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(child: Text(item["title"] ?? "")),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EventDetailsScreen(
+                              eventName: item["title"] ?? '',
+                            ),
+                          ),
+                        );
+                      },
+                      child: Tooltip(
+                        message: item["title"],
+                        child: SizedBox(
+                          width: showCheckIn ? 100 : null,
+                          child: Expanded(
+                            child: Text(
+                              overflow: showCheckIn
+                                  ? TextOverflow.ellipsis
+                                  : null,
+
+                              item["title"] ?? "",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                     Text(item["date"] ?? ""),
+                    SizedBox(width: 10),
                     if (showCheckIn)
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(AppStrings.checkIn),
+                      InkWell(
+                        onTap: () {},
+                        child: const Text(
+                          AppStrings.checkIn,
+                          style: TextStyle(color: AppColors.primary),
+                        ),
                       ),
                   ],
                 ),
@@ -44,8 +78,20 @@ class EventsReciptsCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: onSeeAll,
-                  child: const Text("${AppStrings.seeAll} >"),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => showCheckIn
+                            ? EventHistoryScreen()
+                            : ReceiptHistoryScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "${AppStrings.seeAll} >",
+                    style: TextStyle(color: AppColors.primary),
+                  ),
                 ),
               ],
             ),

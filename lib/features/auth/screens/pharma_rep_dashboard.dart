@@ -1,27 +1,28 @@
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
-import 'package:checkmate/core/widgets/action_button.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/core/widgets/events_recipts_card.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
+import 'package:checkmate/features/auth/screens/dispute_history_screen.dart';
+import 'package:checkmate/features/auth/screens/event_history_screen.dart';
+import 'package:checkmate/features/auth/screens/file_dispute_screen.dart';
+import 'package:checkmate/features/auth/screens/receipt_history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class HomeScreen extends StatelessWidget {
+class PharmaRepDashboard extends StatelessWidget {
   final UserModal user;
-  const HomeScreen({super.key, required this.user});
+  const PharmaRepDashboard({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(),
       appBar: AppBar(
         title: const Text(''),
         elevation: 0,
         backgroundColor: AppColors.background,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: AppColors.textPrimary),
-          onPressed: () {},
-        ),
+
         actions: [
           IconButton(
             icon: const CircleAvatar(
@@ -58,8 +59,11 @@ class HomeScreen extends StatelessWidget {
             ),
             EventsReciptsCard(
               items: const [
-                {"title": AppStrings.cardiovascularInnovation},
-                {"title": AppStrings.neurologyAdvances},
+                {
+                  "title": AppStrings.cardiovascularInnovation,
+                  "date": "26/JUNE/2024",
+                },
+                {"title": AppStrings.neurologyAdvances, "date": "26/JUNE/2024"},
               ],
               showCheckIn: true,
               onSeeAll: () {},
@@ -86,11 +90,51 @@ class HomeScreen extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               childAspectRatio: 2.7,
-              children: const [
-                ActionButton(title: AppStrings.eventHistory),
-                ActionButton(title: AppStrings.receiptHistory),
-                ActionButton(title: AppStrings.disputeHistory),
-                ActionButton(title: AppStrings.fileDispute),
+              children: [
+                Button(
+                  text: AppStrings.eventHistory,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EventHistoryScreen(),
+                      ),
+                    );
+                  },
+                ),
+                Button(
+                  text: AppStrings.receiptHistory,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ReceiptHistoryScreen(),
+                      ),
+                    );
+                  },
+                ),
+                Button(
+                  text: AppStrings.disputeHistory,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DisputeHistoryScreen(),
+                      ),
+                    );
+                  },
+                ),
+                Button(
+                  text: AppStrings.fileDispute,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FileDisputeScreen(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
             const SizedBox(height: 16),
