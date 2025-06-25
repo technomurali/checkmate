@@ -57,7 +57,7 @@ class _PasswordResetScreenView extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Text(
                   message,
-                  style: const TextStyle(color: Colors.green),
+                  style: const TextStyle(color: AppColors.accentSuccess),
                 ),
               ),
             CustomTextField(

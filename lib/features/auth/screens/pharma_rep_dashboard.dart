@@ -8,6 +8,7 @@ import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:checkmate/features/auth/screens/dispute_history_screen.dart';
 import 'package:checkmate/features/auth/screens/event_history_screen.dart';
 import 'package:checkmate/features/auth/screens/file_dispute_screen.dart';
+import 'package:checkmate/features/auth/screens/new_event_screen.dart';
 import 'package:checkmate/features/auth/screens/receipt_history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -45,12 +46,9 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('EventID : ${events[0].eventId}');
     return Scaffold(
       drawer: Drawer(),
       appBar: AppBar(
-        title: const Text(''),
-        elevation: 0,
         backgroundColor: AppColors.background,
 
         actions: [
@@ -69,33 +67,40 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
           SizedBox(width: 10),
         ],
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "${AppStrings.helloUser} ${widget.user.firstName}",
+              " ${AppStrings.helloUser} ${widget.user.firstName}",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            const Text(AppStrings.pharmaRep, style: TextStyle(fontSize: 16)),
+            const Text(
+              " ${AppStrings.pharmaRep}",
+              style: TextStyle(fontSize: 16),
+            ),
 
             const SizedBox(height: 20),
             Text(
-              AppStrings.upcomingEvents,
+              " ${AppStrings.upcomingEvents}",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 10),
             EventsReciptsCard(
               items: [
-                for (var i = 0; i < events.length; i++) ...{
-                  {
-                    "title": events[i].eventName!,
-                    "date": events[i].startDate!,
-                    "id": events[i].eventId!,
+                if (events.isNotEmpty) ...{
+                  for (var i = 0; i < events.length; i++) ...{
+                    {
+                      "title": events[i].eventName!,
+                      "date": events[i].startDate!,
+                      "id": events[i].eventId!,
+                    },
                   },
-                },
+                } else
+                  ...{},
                 // {"title": events[0].eventName!, "date": events[0].startDate!},
                 // {"title": events[1].eventName!, "date": events[1].startDate!},
               ],
@@ -105,13 +110,14 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
 
             const SizedBox(height: 16),
             Text(
-              AppStrings.pendingReceipts,
+              " ${AppStrings.pendingReceipts}",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 10),
             EventsReciptsCard(
               items: const [
-                {"title": "diabetesCareSolutions"},
-                {"title": "respiratoryTherapy"},
+                {"title": "diabetesCareSolutions", "date": "26/JUNE/2024"},
+                {"title": "respiratoryTherapy", "date": "26/JUNE/2024"},
               ],
               onSeeAll: () {},
             ),
@@ -172,7 +178,15 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
               ],
             ),
             const SizedBox(height: 16),
-            Button(text: AppStrings.createNewEvent, onPressed: () {}),
+            Button(
+              text: AppStrings.createNewEvent,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NewEventScreen()),
+                );
+              },
+            ),
           ],
         ),
       ),

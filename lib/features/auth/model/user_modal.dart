@@ -60,4 +60,17 @@ class UserModal {
     ModalKeys().userCity: city,
     ModalKeys().userPharmaCompany: pharmaCompany,
   };
+  factory UserModal.empty() {
+    return UserModal(
+      id: 0,
+      email: '',
+      password: 'password',
+      firstName: 'firstName',
+      lastName: 'lastName',
+      city: 'city',
+      pharmaCompany: 'pharmaCompany',
+    );
+  }
 }
+
+UserModal userModal = UserModal.empty();

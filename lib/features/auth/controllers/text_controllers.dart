@@ -9,4 +9,10 @@ class TextControllers {
   static TextEditingController city = TextEditingController();
   static TextEditingController pharma = TextEditingController();
   static TextEditingController verificationCode = TextEditingController();
+  static TextEditingController eventNameController = TextEditingController();
+  static TextEditingController startDateController = TextEditingController();
+  static TextEditingController endDateController = TextEditingController();
+  static TextEditingController numberOfStaffController =
+      TextEditingController();
+  static TextEditingController amountController = TextEditingController();
 }

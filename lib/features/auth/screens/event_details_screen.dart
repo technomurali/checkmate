@@ -38,7 +38,13 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: AppColors.transparent),
+      appBar: AppBar(
+        backgroundColor: AppColors.transparent,
+        actions: [
+          Icon(Icons.delete, color: AppColors.accentError),
+          SizedBox(width: 10),
+        ],
+      ),
       body: Container(
         width: double.infinity,
         padding: EdgeInsets.all(15),

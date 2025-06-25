@@ -14,8 +14,8 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 
-class SiginScreen extends StatelessWidget {
-  const SiginScreen({super.key});
+class SigninScreen extends StatelessWidget {
+  const SigninScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +112,7 @@ class SiginScreen extends StatelessWidget {
             const SizedBox(height: 8),
             const Text(AppStrings.signInWith),
             const SizedBox(height: 8),
+
             const SocialButtonsRow(),
           ],
         ),

@@ -32,7 +32,8 @@ class ForgotPasswordScreenLogic extends ChangeNotifier {
           TextControllers.verificationCode.text.isNotEmpty;
       notifyListeners();
     };
-
+    TextControllers.email.clear();
+    TextControllers.verificationCode.clear();
     _initListeners();
   }
 

@@ -32,6 +32,7 @@ class SigninScreenLogic extends ChangeNotifier {
     );
 
     if (response[ModalKeys().signinSuccess]) {
+      userModal = response[ModalKeys().signinUser];
       return response[ModalKeys().signinUser];
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

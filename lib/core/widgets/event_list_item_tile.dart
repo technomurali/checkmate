@@ -23,10 +23,11 @@ class EventListItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       height: 130,
       margin: EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.all(10),
@@ -50,37 +51,25 @@ class EventListItemTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                eventName,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text("From: $startDate    To: $endDate"),
-              Text("Pharma Rep:  $pharmaRep"),
-              Align(
-                alignment: Alignment.centerRight,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EventDetailsScreen(eventId: id),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    "View More Details",
-                    style: TextStyle(
-                      color: Theme.of(
-                        context,
-                      ).primaryColor, // or AppColors.primary
-                      fontWeight: FontWeight.w500,
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EventDetailsScreen(eventId: id),
                     ),
+                  );
+                },
+                child: Text(
+                  eventName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
+              Text("From: $startDate    To: $endDate"),
+              //Text("Pharma Rep:  $pharmaRep"),
             ],
           ),
         ],

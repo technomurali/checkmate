@@ -31,7 +31,7 @@ class Button extends StatelessWidget {
           text,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.background,
           ),
         ),
       ),

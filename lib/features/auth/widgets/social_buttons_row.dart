@@ -1,46 +1,84 @@
+import 'package:checkmate/core/constants/app_colors.dart';
+import 'package:checkmate/core/utils/social_svg.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SocialButtonsRow extends StatelessWidget {
-  const SocialButtonsRow({super.key});
+  final bool disabled;
+  final VoidCallback? onDisabledTap;
+  const SocialButtonsRow({
+    super.key,
+    this.disabled = false,
+    this.onDisabledTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: const [
-        _SocialIcon(icon: FontAwesomeIcons.google, size: 18),
-        _SocialIcon(icon: Icons.apple),
-        _SocialIcon(icon: FontAwesomeIcons.linkedinIn, size: 29),
-        _SocialIcon(icon: FontAwesomeIcons.microsoft, size: 24),
+      children: [
+        _SocialIcon(
+          icon: SocialSvg.googleSvg,
+          size: 18,
+          disabled: disabled,
+          onDisabledTap: onDisabledTap,
+        ),
+        _SocialIcon(
+          icon: SocialSvg.appleSvg,
+          size: 50,
+          disabled: disabled,
+          onDisabledTap: onDisabledTap,
+        ),
+        _SocialIcon(
+          icon: SocialSvg.linkedInSvg,
+          size: 29,
+          disabled: disabled,
+          onDisabledTap: onDisabledTap,
+        ),
+        _SocialIcon(
+          icon: SocialSvg.windowsSvg,
+          size: 24,
+          disabled: disabled,
+          onDisabledTap: onDisabledTap,
+        ),
       ],
     );
   }
 }
 
 class _SocialIcon extends StatelessWidget {
-  final IconData icon;
+  final String icon;
   final double size;
-  const _SocialIcon({required this.icon, this.size = 28});
+  final bool disabled;
+  final VoidCallback? onDisabledTap;
+  const _SocialIcon({
+    required this.icon,
+    this.size = 28,
+    this.disabled = false,
+    this.onDisabledTap,
+  });
   isAndroid() {}
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        // TODO: Implement actual social signin
-      },
+      onTap: disabled
+          ? () {
+              if (onDisabledTap != null) onDisabledTap!();
+            }
+          : () {
+              // TODO: Implement actual social signin
+            },
       borderRadius: BorderRadius.circular(24),
-      child: Container(
-        padding:
-            icon == FontAwesomeIcons.microsoft ||
-                icon == FontAwesomeIcons.google
-            ? EdgeInsets.all(12)
-            : EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.grey.shade300),
+      child: Opacity(
+        opacity: disabled ? 0.5 : 1.0,
+        child: Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.border),
+          ),
+          child: SvgPicture.string(icon, height: size, width: 24),
         ),
-        child: FaIcon(icon, size: size),
       ),
     );
   }

@@ -27,14 +27,14 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.background,
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.white,
+          fillColor: AppColors.background,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(color: AppColors.border),
           ),
         ),
       ),
-      home: const SiginScreen(),
+      home: const SigninScreen(),
     );
   }
 }

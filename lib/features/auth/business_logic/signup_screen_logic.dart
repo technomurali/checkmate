@@ -25,7 +25,10 @@ class SignupScreenLogic extends ChangeNotifier {
     "selectYourCompany": false,
   };
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   signupViewModel() {
+    debugPrint("signupViewModel fetchPharmaCompanies");
     _initListeners();
     getPharmaList();
   }
@@ -79,6 +82,7 @@ class SignupScreenLogic extends ChangeNotifier {
 
   void getPharmaList() async {
     final result = await _pharmaController.fetchPharmaCompanies();
+    debugPrint("fetchPharmaCompanies : $result");
     allCompanies = result.pharmaCompanies;
     notifyListeners();
   }
@@ -115,6 +119,13 @@ class SignupScreenLogic extends ChangeNotifier {
     await _signupController.signupUser(data);
 
     // Clear controllers
+    clearAllTextControllers();
+
+    notifyListeners();
+    onSuccess();
+  }
+
+  clearAllTextControllers() {
     TextControllers.email.clear();
     TextControllers.password.clear();
     TextControllers.confirmPassword.clear();
@@ -122,8 +133,5 @@ class SignupScreenLogic extends ChangeNotifier {
     TextControllers.lastName.clear();
     TextControllers.city.clear();
     TextControllers.pharma.clear();
-
-    notifyListeners();
-    onSuccess();
   }
 }

@@ -29,23 +29,42 @@ class _CustomTextFieldState extends State<CustomTextField> {
   bool isPasswordVisible = false;
   void validate(String value) {
     final trimmed = value.trim();
+    String? newError;
+
     if (widget.isRequired && trimmed.isEmpty) {
-      errorText = '${widget.label} is required';
+      newError = '${widget.label} is required';
     } else if (widget.validator != null) {
-      errorText = widget.validator!(trimmed);
+      newError = widget.validator!(trimmed);
     } else {
-      errorText = null;
+      newError = null;
     }
-    setState(() {});
+
+    if (newError != errorText) {
+      if (mounted) {
+        setState(() {
+          errorText = newError;
+        });
+      }
+    }
+  }
+
+  VoidCallback _controllerListener = () {};
+  @override
+  void initState() {
+    isPasswordVisible = widget.obscureText;
+    // TODO: implement initState
+    super.initState();
+    _controllerListener = () {
+      validate(widget.controller.text);
+    };
+    widget.controller.addListener(_controllerListener);
   }
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    widget.controller.addListener(() {
-      validate(widget.controller.text);
-    });
+  void dispose() {
+    // TODO: implement dispose
+    widget.controller.removeListener(_controllerListener);
+    super.dispose();
   }
 
   @override
@@ -60,13 +79,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
           text: TextSpan(
             style: Theme.of(
               context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.black),
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
             children: [
               TextSpan(text: widget.label),
               if (widget.isRequired)
                 const TextSpan(
                   text: ' *',
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(color: AppColors.accentError),
                 ),
             ],
           ),

@@ -18,59 +18,67 @@ class EventsReciptsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
+    return Container(
+      // shape: RoundedRectangleBorder(),
+      // elevation: 2,
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 8),
-            ...items.map(
-              (item) => Container(
-                padding: const EdgeInsets.symmetric(vertical: 6.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                EventDetailsScreen(eventId: item["id"] ?? ''),
-                          ),
-                        );
-                      },
-                      child: Tooltip(
-                        message: item["title"],
-                        child: SizedBox(
-                          width: showCheckIn ? 100 : null,
-                          child: Text(
-                            overflow: showCheckIn
-                                ? TextOverflow.ellipsis
-                                : null,
-
-                            item["title"] ?? "",
-                          ),
-                        ),
-                      ),
-                    ),
-                    Text(item["date"] ?? ""),
-                    SizedBox(width: 10),
-                    if (showCheckIn)
+            if (items.isNotEmpty) ...{
+              ...items.map(
+                (item) => Container(
+                  padding: const EdgeInsets.symmetric(vertical: 6.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
                       InkWell(
-                        onTap: () {},
-                        child: const Text(
-                          AppStrings.checkIn,
-                          style: TextStyle(color: AppColors.primary),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  EventDetailsScreen(eventId: item["id"] ?? ''),
+                            ),
+                          );
+                        },
+                        child: Tooltip(
+                          message: item["title"],
+                          child: SizedBox(
+                            width: showCheckIn ? 100 : null,
+                            child: Text(
+                              style: TextStyle(color: AppColors.primary),
+                              overflow: showCheckIn
+                                  ? TextOverflow.ellipsis
+                                  : null,
+
+                              item["title"] ?? "",
+                            ),
+                          ),
                         ),
                       ),
-                  ],
+                      Text(item["date"] ?? ""),
+                      SizedBox(width: 10),
+                      if (showCheckIn)
+                        InkWell(
+                          onTap: () {},
+                          child: const Text(
+                            AppStrings.checkIn,
+                            style: TextStyle(color: AppColors.primary),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
+            },
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

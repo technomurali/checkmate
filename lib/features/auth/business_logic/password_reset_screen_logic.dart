@@ -52,9 +52,11 @@ class PasswordResetScreenLogic extends ChangeNotifier {
         context,
       ).showSnackBar(SnackBar(content: Text(result[ModalKeys().resetMessage])));
       if (result[ModalKeys().resetSuccess]) {
+        TextControllers.password.clear();
+        TextControllers.confirmPassword.clear();
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => SiginScreen()),
+          MaterialPageRoute(builder: (context) => SigninScreen()),
         );
       }
     }

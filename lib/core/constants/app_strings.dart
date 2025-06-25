@@ -40,6 +40,19 @@ class AppStrings {
   static const String numberOfStaff = "Number of staff";
   static const String hcpInEvent = "HCP's in the event";
   static const String hcoInEvent = "HCO's in the event";
+  static const String labelEventName = "Event Name";
+  static const String labelStartDate = "Start Date";
+  static const String labelEndDate = "End Date";
+  static const String labelNumberOfStaff = "Number of Staff";
+  static const String labelHCO = "HCO";
+  static const String labelHCP = "HCP";
+  static const String createEvent = "Create Event";
+  static const String requiredField = "Required";
+  static const String selectHCO = "Please select HCO";
+  static const String selectHCP = "Please select HCP";
+  static const String eventCreated = "Event Created";
+  static const String enterTheCompanyNameWarning =
+      "Please choose or enter your company name to move forward.";
 }
 
 class ErrorText {

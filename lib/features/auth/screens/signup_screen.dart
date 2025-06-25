@@ -19,6 +19,19 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final signupScreenLogic = Provider.of<SignupScreenLogic>(
+        context,
+        listen: false,
+      );
+      signupScreenLogic.signupViewModel();
+      signupScreenLogic.clearAllTextControllers();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final signupScreenLogic = context.watch<SignupScreenLogic>();
 
@@ -56,7 +69,16 @@ class _SignupScreenState extends State<SignupScreen> {
 
               // Social or normal form
               if (signupScreenLogic.isOptedForSocialSignUp) ...[
-                const SocialButtonsRow(),
+                SocialButtonsRow(
+                  disabled: TextControllers.pharma.text.isEmpty,
+                  onDisabledTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(AppStrings.enterTheCompanyNameWarning),
+                      ),
+                    );
+                  },
+                ),
               ] else ...[
                 CustomTextField(
                   isRequired: true,
@@ -177,19 +199,23 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ],
               const SizedBox(height: 16),
-              Button(
-                text: AppStrings.signup,
-                isDisabled: signupScreenLogic.isSignUpDisabled,
-                onPressed: () {
-                  signupScreenLogic.signupUser(() {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Signup successful!')),
-                    );
-                  });
-                },
-              ),
+              if (!signupScreenLogic.isOptedForSocialSignUp)
+                Button(
+                  text: AppStrings.signup,
+                  isDisabled: signupScreenLogic.isSignUpDisabled,
+                  onPressed: () {
+                    signupScreenLogic.signupUser(() {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Signup successful!')),
+                      );
+                    });
+                  },
+                ),
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.pop(context);
+                  signupScreenLogic.clearAllTextControllers();
+                },
                 child: const Text(AppStrings.alreadyAccount),
               ),
             ],
