@@ -27,10 +27,11 @@ class CustomTextField extends StatefulWidget {
 class _CustomTextFieldState extends State<CustomTextField> {
   String? errorText;
   bool isPasswordVisible = false;
+  bool hasUserInteracted = false;
   void validate(String value) {
     final trimmed = value.trim();
     String? newError;
-
+    if (!hasUserInteracted) return;
     if (widget.isRequired && trimmed.isEmpty) {
       newError = '${widget.label} is required';
     } else if (widget.validator != null) {
@@ -48,29 +49,36 @@ class _CustomTextFieldState extends State<CustomTextField> {
     }
   }
 
-  VoidCallback _controllerListener = () {};
   @override
   void initState() {
     isPasswordVisible = widget.obscureText;
     // TODO: implement initState
     super.initState();
-    _controllerListener = () {
+
+    widget.controller.addListener(() {
       validate(widget.controller.text);
-    };
-    widget.controller.addListener(_controllerListener);
+    });
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
-    widget.controller.removeListener(_controllerListener);
+    widget.controller.removeListener(() {
+      validate(widget.controller.text);
+    });
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return TextField(
-      onChanged: widget.onChanged,
+      onChanged: (value) {
+        setState(() {
+          hasUserInteracted = true;
+        });
+        widget.onChanged?.call(value);
+        validate(value);
+      },
       controller: widget.controller,
       obscureText: isPasswordVisible,
       keyboardType: widget.keyboardType,
