@@ -16,6 +16,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
   DateTime startDatePicked = DateTime.now();
   String? _selectedHCO;
   List<String> _selectedHCP = [];
+  bool isMultiDay = false;
 
   final List<String> _hcos = [
     "Appolo Hospitals",
@@ -43,11 +44,11 @@ class _NewEventScreenState extends State<NewEventScreen> {
     if (_formKey.currentState!.validate()) {
       final newEvent = {
         // "pharmaRepId": UserModal().id,
-        "eventName": TextControllers.eventNameController.text,
-        "startDate": TextControllers.startDateController.text,
-        "endDate": TextControllers.endDateController.text,
-        "numberOfStaff": TextControllers.numberOfStaffController.text,
-        "amount": TextControllers.amountController.text,
+        "eventName": EventTextControllers.eventNameController.text,
+        "startDate": EventTextControllers.startDateController.text,
+        "endDate": EventTextControllers.endDateController.text,
+        "numberOfStaff": EventTextControllers.numberOfStaffController.text,
+        "amount": EventTextControllers.amountController.text,
         "HCO": _selectedHCO,
         "HCP": _selectedHCP,
         "eventStatus": "U",
@@ -60,11 +61,11 @@ class _NewEventScreenState extends State<NewEventScreen> {
       ).showSnackBar(const SnackBar(content: Text(AppStrings.eventCreated)));
 
       _formKey.currentState!.reset();
-      TextControllers.eventNameController.clear();
-      TextControllers.startDateController.clear();
-      TextControllers.endDateController.clear();
-      TextControllers.numberOfStaffController.clear();
-      TextControllers.amountController.clear();
+      EventTextControllers.eventNameController.clear();
+      EventTextControllers.startDateController.clear();
+      EventTextControllers.endDateController.clear();
+      EventTextControllers.numberOfStaffController.clear();
+      EventTextControllers.amountController.clear();
       setState(() {
         _selectedHCO = null;
         _selectedHCP = [];
@@ -85,8 +86,22 @@ class _NewEventScreenState extends State<NewEventScreen> {
             children: [
               Column(
                 children: [
+                  // Multi-day Event Checkbox
+                  CheckboxListTile(
+                    title: Text('Multi-day Event'),
+                    value: isMultiDay,
+                    onChanged: (val) {
+                      setState(() {
+                        isMultiDay = val ?? false;
+                        if (!isMultiDay) {
+                          EventTextControllers.endDateController.clear();
+                        }
+                      });
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
                   TextFormField(
-                    controller: TextControllers.eventNameController,
+                    controller: EventTextControllers.eventNameController,
                     decoration: const InputDecoration(
                       labelText: AppStrings.labelEventName,
                     ),
@@ -96,10 +111,12 @@ class _NewEventScreenState extends State<NewEventScreen> {
                   ),
                   const SizedBox(height: 10),
                   TextFormField(
-                    controller: TextControllers.startDateController,
+                    controller: EventTextControllers.startDateController,
                     readOnly: true,
-                    decoration: const InputDecoration(
-                      labelText: AppStrings.labelStartDate,
+                    decoration: InputDecoration(
+                      labelText: !!isMultiDay
+                          ? AppStrings.labelEventStartDate
+                          : AppStrings.labelStartDate,
                     ),
                     onTap: () async {
                       final DateTime? pickedDate = await showDatePicker(
@@ -109,7 +126,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         lastDate: DateTime(2030),
                       );
                       if (pickedDate != null) {
-                        TextControllers.startDateController.text =
+                        EventTextControllers.startDateController.text =
                             "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
                         startDatePicked = pickedDate;
                       }
@@ -119,31 +136,33 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         : null,
                   ),
                   const SizedBox(height: 10),
-                  TextFormField(
-                    controller: TextControllers.endDateController,
-                    readOnly: true,
-                    decoration: const InputDecoration(
-                      labelText: AppStrings.labelEndDate,
+                  if (isMultiDay)
+                    TextFormField(
+                      controller: EventTextControllers.endDateController,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        labelText: AppStrings.labelEndDate,
+                      ),
+                      onTap: () async {
+                        final DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: startDatePicked,
+                          firstDate: startDatePicked,
+                          lastDate: DateTime(2030),
+                        );
+                        if (pickedDate != null) {
+                          EventTextControllers.endDateController.text =
+                              "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                        }
+                      },
+                      validator: (value) =>
+                          isMultiDay && (value == null || value.isEmpty)
+                          ? AppStrings.requiredField
+                          : null,
                     ),
-                    onTap: () async {
-                      final DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: startDatePicked,
-                        firstDate: startDatePicked,
-                        lastDate: DateTime(2030),
-                      );
-                      if (pickedDate != null) {
-                        TextControllers.endDateController.text =
-                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                      }
-                    },
-                    validator: (value) => value == null || value.isEmpty
-                        ? AppStrings.requiredField
-                        : null,
-                  ),
-                  const SizedBox(height: 10),
+                  if (isMultiDay) const SizedBox(height: 10),
                   TextFormField(
-                    controller: TextControllers.numberOfStaffController,
+                    controller: EventTextControllers.numberOfStaffController,
                     decoration: const InputDecoration(
                       labelText: AppStrings.labelNumberOfStaff,
                     ),

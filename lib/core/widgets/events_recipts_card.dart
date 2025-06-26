@@ -18,14 +18,13 @@ class EventsReciptsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // shape: RoundedRectangleBorder(),
-      // elevation: 2,
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        border: Border.all(color: AppColors.border),
+    return Card(
+      color: AppColors.border,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: AppColors.border),
       ),
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(

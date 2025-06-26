@@ -10,11 +10,11 @@ class SigninScreenLogic extends ChangeNotifier {
   bool isButtonEnabled = false;
 
   SigninScreenLogic() {
-    TextControllers.email.addListener(_updateButtonState);
-    TextControllers.password.addListener(_updateButtonState);
+    TextControllers.email.addListener(updateButtonState);
+    TextControllers.password.addListener(updateButtonState);
   }
 
-  void _updateButtonState() {
+  void updateButtonState() {
     final enabled =
         TextControllers.email.text.trim().isNotEmpty &&
         TextControllers.password.text.trim().isNotEmpty;
@@ -46,8 +46,8 @@ class SigninScreenLogic extends ChangeNotifier {
 
   @override
   void dispose() {
-    TextControllers.email.removeListener(_updateButtonState);
-    TextControllers.password.removeListener(_updateButtonState);
+    TextControllers.email.removeListener(updateButtonState);
+    TextControllers.password.removeListener(updateButtonState);
     super.dispose();
   }
 }

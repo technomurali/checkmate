@@ -29,20 +29,20 @@ class AppStrings {
   static const String upcomingEvents = "Upcoming Events";
   static const String pendingReceipts = "Pending Receipts";
   static const String checkIn = "Check in";
+  static const String updateEvent = "Update Event";
   static const String seeAll = "See all";
   static const String eventHistory = "Event History";
   static const String receiptHistory = "Receipt History";
   static const String disputeHistory = "Dispute History";
   static const String fileDispute = "File Dispute";
   static const String createNewEvent = "Create New Event";
-  static const String startDate = "Start Date";
-  static const String endDate = "End Date";
+
   static const String numberOfStaff = "Number of staff";
   static const String hcpInEvent = "HCP's in the event";
   static const String hcoInEvent = "HCO's in the event";
   static const String labelEventName = "Event Name";
-  static const String labelStartDate = "Start Date";
-  static const String labelEndDate = "End Date";
+  static const String labelStartDate = "Event Date";
+  static const String labelEndDate = "Event End Date";
   static const String labelNumberOfStaff = "Number of Staff";
   static const String labelHCO = "HCO";
   static const String labelHCP = "HCP";
@@ -53,6 +53,14 @@ class AppStrings {
   static const String eventCreated = "Event Created";
   static const String enterTheCompanyNameWarning =
       "Please choose or enter your company name to move forward.";
+  static const String deleteEvent = 'Delete Event';
+  static const String deleteEventContent =
+      'Are you sure you want to delete this event?';
+  static const String searchEvents = "Search events...";
+  static const String amount = "Amount";
+  static const String uploadReceipt = "Upload Receipt";
+  static const String chooseFile = "Choose File";
+  static const String labelEventStartDate = "Event Start Date";
 }
 
 class ErrorText {

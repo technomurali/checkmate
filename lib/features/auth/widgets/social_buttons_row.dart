@@ -77,7 +77,9 @@ class _SocialIcon extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.border),
           ),
-          child: SvgPicture.string(icon, height: size, width: 24),
+          child: Center(
+            child: SvgPicture.string(icon, height: size, width: 24),
+          ),
         ),
       ),
     );

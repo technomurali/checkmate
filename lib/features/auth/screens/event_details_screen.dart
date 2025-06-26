@@ -2,8 +2,11 @@ import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
+import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:file_picker/file_picker.dart';
 
 class EventDetailsScreen extends StatefulWidget {
   final String eventId;
@@ -16,11 +19,27 @@ class EventDetailsScreen extends StatefulWidget {
 class _EventDetailsScreenState extends State<EventDetailsScreen> {
   final EventController _eventController = EventController();
   EventModal event = EventModal.empty();
+  bool isCheckedIn = false;
+  String? _selectedFileName;
+  DateTime? _checkInDateTime;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     fetchEvent();
+    EventTextControllers.startDateController = TextEditingController(
+      text: event.startDate,
+    );
+    EventTextControllers.endDateController = TextEditingController(
+      text: event.endDate,
+    );
+  }
+
+  @override
+  void dispose() {
+    EventTextControllers.startDateController.dispose();
+    EventTextControllers.endDateController.dispose();
+    super.dispose();
   }
 
   fetchEvent() {
@@ -30,6 +49,17 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           (v) => {
             setState(() {
               event = v;
+              EventTextControllers.eventNameController.text =
+                  event.eventName ?? '';
+              EventTextControllers.pharmaRepController.text =
+                  event.pharmaRepName ?? '';
+              EventTextControllers.startDateController.text =
+                  event.startDate ?? '';
+              EventTextControllers.endDateController.text = event.endDate ?? '';
+              EventTextControllers.numberOfStaffController.text =
+                  event.numberOfStaff ?? '';
+              EventTextControllers.hcoController.text = event.hco[0];
+              // Add other controllers as needed
             }),
           },
         );
@@ -37,6 +67,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(
+      'Update event ${isCheckedIn} ${_selectedFileName == null} ${event.amount == null} ${event.amount} ${isCheckedIn && _selectedFileName == null || event.amount == null}',
+    );
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.transparent,
@@ -48,74 +81,286 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       body: Container(
         width: double.infinity,
         padding: EdgeInsets.all(15),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  "${event.eventName}",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(AppStrings.pharmaRep),
-                    Text("${event.pharmaRepName}"),
-                  ],
-                ),
-                Divider(),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(AppStrings.startDate),
-                    Text("${event.startDate}"),
-                  ],
-                ),
-                Divider(),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(AppStrings.endDate),
-                    Text("${event.endDate}"),
-                  ],
-                ),
-                Divider(),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(AppStrings.numberOfStaff),
-                    Text("${event.numberOfStaff}"),
-                  ],
-                ),
-                Divider(),
-                SizedBox(height: 16),
-                Text(AppStrings.hcoInEvent),
-                SizedBox(height: 10),
-                for (var i = 0; i < event.hco.length; i++) ...{
-                  Row(children: [Text("${i + 1}. ${event.hco[i]}")]),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  TextFormField(
+                    controller: EventTextControllers.eventNameController,
+                    decoration: InputDecoration(
+                      labelText: AppStrings.labelEventName,
+                    ),
+                    onChanged: (val) {
+                      setState(() {
+                        event = event.copyWith(eventName: val);
+                      });
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(AppStrings.pharmaRep),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: TextFormField(
+                          controller: EventTextControllers.pharmaRepController,
+                          decoration: InputDecoration(
+                            labelText: AppStrings.pharmaRep,
+                          ),
+                          onChanged: (val) {
+                            setState(() {
+                              event = event.copyWith(pharmaRepName: val);
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                   Divider(),
-                  SizedBox(height: 10),
-                },
-                SizedBox(height: 16),
-                Text(AppStrings.hcpInEvent),
-                SizedBox(height: 10),
-                for (var i = 0; i < event.hcp.length; i++) ...{
-                  Row(children: [Text("${i + 1}. ${event.hcp[i]}")]),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(AppStrings.labelEventStartDate),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: TextFormField(
+                          controller: EventTextControllers.startDateController,
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            labelText: AppStrings.labelStartDate,
+                          ),
+                          onTap: () async {
+                            final DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (pickedDate != null) {
+                              EventTextControllers.startDateController.text =
+                                  "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                              setState(() {
+                                event = event.copyWith(
+                                  startDate: EventTextControllers
+                                      .startDateController
+                                      .text,
+                                );
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                   Divider(),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(AppStrings.labelEndDate),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: TextFormField(
+                          controller: EventTextControllers.endDateController,
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            labelText: AppStrings.labelEndDate,
+                          ),
+                          onTap: () async {
+                            final DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (pickedDate != null) {
+                              EventTextControllers.endDateController.text =
+                                  "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                              setState(() {
+                                event = event.copyWith(
+                                  endDate: EventTextControllers
+                                      .endDateController
+                                      .text,
+                                );
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  Divider(),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(AppStrings.numberOfStaff),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: TextFormField(
+                          controller:
+                              EventTextControllers.numberOfStaffController,
+                          decoration: InputDecoration(
+                            labelText: AppStrings.labelNumberOfStaff,
+                          ),
+                          onChanged: (val) {
+                            setState(() {
+                              event = event.copyWith(numberOfStaff: val);
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  Divider(),
+                  SizedBox(height: 16),
+                  Text(AppStrings.hcoInEvent),
                   SizedBox(height: 10),
+                  for (var i = 0; i < event.hco.length; i++) ...{
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          child: TextFormField(
+                            controller: EventTextControllers.hcoController,
+                            decoration: InputDecoration(
+                              labelText: AppStrings.labelHCO,
+                            ),
+                            onChanged: (val) {
+                              setState(() {
+                                final newHco = List<String>.from(event.hco);
+                                newHco[i] = val;
+                                event = event.copyWith(hco: newHco);
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    Divider(),
+                    SizedBox(height: 10),
+                  },
+                  SizedBox(height: 16),
+                  Text(AppStrings.hcpInEvent),
+                  SizedBox(height: 10),
+                  DropdownSearch<String>.multiSelection(
+                    items: (filter, loadProps) => [
+                      "Dr. Murali",
+                      "Dr. Ramesh",
+                      "Dr. Sneha",
+                      "Dr. Kavitha",
+                      "Dr. Latha",
+                      "Dr. Kiran",
+                      "Dr. Anita",
+                      "Dr. Anuradha",
+                      "Dr. Shalini",
+                    ],
+                    selectedItems: event.hcp,
+                    decoratorProps: const DropDownDecoratorProps(
+                      decoration: InputDecoration(
+                        labelText: AppStrings.labelHCP,
+                      ),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        event = event.copyWith(hcp: value);
+                      });
+                    },
+                    validator: (value) => value == null || value.isEmpty
+                        ? AppStrings.selectHCP
+                        : null,
+                  ),
+                  SizedBox(height: 16),
+                  if (isCheckedIn && _checkInDateTime != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'Checked in at: '
+                        '${_checkInDateTime!.day}/${_checkInDateTime!.month}/${_checkInDateTime!.year} '
+                        '${_checkInDateTime!.hour}:${_checkInDateTime!.minute.toString().padLeft(2, '0')}',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Amount'),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: TextFormField(
+                          controller: EventTextControllers.amountController,
+                          decoration: InputDecoration(labelText: 'Amount'),
+                          enabled: isCheckedIn,
+                          onChanged: (val) {
+                            setState(() {
+                              event = event.copyWith(amount: val);
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  // Receipt upload button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Upload Receipt'),
+                      ElevatedButton(
+                        onPressed: isCheckedIn
+                            ? () async {
+                                FilePickerResult? result = await FilePicker
+                                    .platform
+                                    .pickFiles();
+                                if (result != null && result.files.isNotEmpty) {
+                                  setState(() {
+                                    _selectedFileName =
+                                        result.files.single.name;
+                                  });
+                                }
+                              }
+                            : () {
+                                debugPrint('Not checked in');
+                              },
+                        child: Text('Choose File'),
+                      ),
+                    ],
+                  ),
+                  if (_selectedFileName != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'Selected: [32m[1m[4m$_selectedFileName[0m',
+                      ),
+                    ),
+                  SizedBox(height: 16),
+                ],
+              ),
+              Button(
+                isDisabled:
+                    (_selectedFileName == null ||
+                        EventTextControllers.amountController.text.isEmpty) &&
+                    isCheckedIn,
+                text: isCheckedIn ? AppStrings.updateEvent : AppStrings.checkIn,
+                onPressed: () {
+                  setState(() {
+                    isCheckedIn = true;
+                    _checkInDateTime = DateTime.now();
+                  });
                 },
-              ],
-            ),
-            Button(text: AppStrings.checkIn, onPressed: () {}),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
