@@ -13,7 +13,7 @@ class SigninController {
     required String password,
   }) async {
     debugPrint(
-      "sigin /////// ${jsonEncode({ModalKeys().signinEmail: email, ModalKeys().password: password})}",
+      "sigin /////// ${jsonEncode({SigninModalKeys.signinEmail: email, SigninModalKeys.signinPassword: password})}",
     );
     final url = Uri.parse(AppApi.baseUrl + AppApi.signin);
 
@@ -22,8 +22,8 @@ class SigninController {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          ModalKeys().signinEmail: email,
-          ModalKeys().password: password,
+          SigninModalKeys.signinEmail: email,
+          SigninModalKeys.signinPassword: password,
         }),
       );
 
@@ -31,22 +31,22 @@ class SigninController {
 
       if (response.statusCode == 200) {
         // Parse user using your UserModal
-        final user = UserModal.fromJson(data[ModalKeys().signinUser]);
+        final user = UserModal.fromJson(data[SigninModalKeys.signinUser]);
         return {
-          ModalKeys().signinSuccess: true,
-          ModalKeys().signinMessage: data[ModalKeys().signinMessage],
-          ModalKeys().signinUser: user,
+          SigninModalKeys.signinSuccess: true,
+          SigninModalKeys.signinMessage: data[SigninModalKeys.signinMessage],
+          SigninModalKeys.signinUser: user,
         };
       } else {
         return {
-          ModalKeys().signinSuccess: false,
-          ModalKeys().signinMessage: data[ModalKeys().signinMessage],
+          SigninModalKeys.signinSuccess: false,
+          SigninModalKeys.signinMessage: data[SigninModalKeys.signinMessage],
         };
       }
     } catch (e) {
       return {
-        ModalKeys().signinSuccess: false,
-        ModalKeys().signinMessage: e.toString(),
+        SigninModalKeys.signinSuccess: false,
+        SigninModalKeys.signinMessage: e.toString(),
       };
     }
   }

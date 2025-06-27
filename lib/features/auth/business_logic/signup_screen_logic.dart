@@ -25,8 +25,6 @@ class SignupScreenLogic extends ChangeNotifier {
     "selectYourCompany": false,
   };
 
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
   signupViewModel() {
     debugPrint("signupViewModel fetchPharmaCompanies");
     _initListeners();

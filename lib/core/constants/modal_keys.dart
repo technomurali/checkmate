@@ -17,11 +17,11 @@ mixin SignUpModalKeys {
 }
 
 mixin SigninModalKeys {
-  final String signinSuccess = 'success';
-  final String signinMessage = 'message';
-  final String signinUser = 'user';
-  final String signinEmail = 'email';
-  final String signinPassword = 'password';
+  static const String signinSuccess = 'success';
+  static const String signinMessage = 'message';
+  static const String signinUser = 'user';
+  static const String signinEmail = 'email';
+  static const String signinPassword = 'password';
 }
 
 mixin UserModalKeys {
