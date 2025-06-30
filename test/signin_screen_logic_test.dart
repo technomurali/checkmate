@@ -381,10 +381,7 @@ void main() {
     ).thenAnswer((invocation) async {
       final email = invocation.namedArguments[#email];
       final password = invocation.namedArguments[#password];
-      print(
-        'MOCK RECEIVED email: '
-        '[33m$email[0m, password: [33m$password[0m',
-      );
+
       if (email == 'slow@example.com' && password == 'delayed123') {
         return {
           SigninModalKeys.signinSuccess: true,
@@ -407,10 +404,7 @@ void main() {
     );
 
     await tester.runAsync(() async {
-      print('CALLING SIGNIN USER');
       final result = await logic.signinUser(ctx);
-      print('🔎 SIGN-IN RESULT: $result');
-      print('📧 EMAIL: ${result?.email}');
       expect(result?.email, equals('slow@example.com')); // ✅ Will now pass
     });
 

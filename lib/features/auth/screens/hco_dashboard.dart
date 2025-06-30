@@ -12,6 +12,7 @@ import 'package:checkmate/features/auth/screens/event_history_screen.dart';
 import 'package:checkmate/features/auth/screens/file_dispute_screen.dart';
 import 'package:checkmate/features/auth/screens/new_event_screen.dart';
 import 'package:checkmate/features/auth/screens/receipt_history_screen.dart';
+// ignore: unused_import
 import 'package:checkmate/features/auth/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -42,7 +43,6 @@ class _HCPDashboardState extends State<HCPDashboard> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     fetchUpcomingEvents();
   }

@@ -10,14 +10,14 @@ class ConfirmAlertDialog extends StatelessWidget {
   final String cancelText;
 
   const ConfirmAlertDialog({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     required this.onConfirm,
     this.onCancel,
     this.confirmText = 'Delete',
     this.cancelText = 'Cancel',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

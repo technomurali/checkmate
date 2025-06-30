@@ -22,7 +22,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
   List<EventModal> events = [];
   List<EventModal> filteredEvents = [];
   SlidableController? _slidableController;
-  TextEditingController _searchController = TextEditingController();
+  TextEditingController searchController = TextEditingController();
   String _searchQuery = '';
   String? _selectedStatus = 'All';
   String? _selectedApproval = 'All';
@@ -107,7 +107,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
                   children: [
                     Expanded(
                       child: TextField(
-                        controller: _searchController,
+                        controller: searchController,
                         decoration: InputDecoration(
                           hintText: AppStrings.searchEvents,
                           prefixIcon: Icon(Icons.search),

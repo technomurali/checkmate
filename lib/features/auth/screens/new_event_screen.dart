@@ -3,7 +3,6 @@ import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:checkmate/features/auth/controllers/events_controller.dart';
 import 'package:checkmate/features/auth/controllers/new_event_controller.dart';
 
 class NewEventScreen extends StatefulWidget {
@@ -21,11 +20,9 @@ class _NewEventScreenState extends State<NewEventScreen> {
   List<String> _selectedHCP = [];
   bool isMultiDay = false;
 
-  final EventController _eventController = EventController();
   final NewEventController _newEventController = NewEventController();
   List<Map<String, dynamic>> _hcos = [];
   List<String> _hcps = [];
-  bool _isHcpLoading = false;
 
   @override
   void initState() {
@@ -233,22 +230,19 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         : null,
                   ),
                   const SizedBox(height: 10),
-                  _isHcpLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : DropdownSearch<String>.multiSelection(
-                          items: (filter, loadProps) => _hcps,
-                          selectedItems: _selectedHCP,
-                          decoratorProps: const DropDownDecoratorProps(
-                            decoration: InputDecoration(
-                              labelText: AppStrings.labelHCP,
-                            ),
-                          ),
-                          onChanged: (value) =>
-                              setState(() => _selectedHCP = value),
-                          validator: (value) => value == null || value.isEmpty
-                              ? AppStrings.selectHCP
-                              : null,
-                        ),
+                  DropdownSearch<String>.multiSelection(
+                    items: (filter, loadProps) => _hcps,
+                    selectedItems: _selectedHCP,
+                    decoratorProps: const DropDownDecoratorProps(
+                      decoration: InputDecoration(
+                        labelText: AppStrings.labelHCP,
+                      ),
+                    ),
+                    onChanged: (value) => setState(() => _selectedHCP = value),
+                    validator: (value) => value == null || value.isEmpty
+                        ? AppStrings.selectHCP
+                        : null,
+                  ),
                   const SizedBox(height: 10),
                 ],
               ),

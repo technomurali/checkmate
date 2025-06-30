@@ -52,7 +52,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   void initState() {
     isPasswordVisible = widget.obscureText;
-    // TODO: implement initState
     super.initState();
 
     widget.controller.addListener(() {
@@ -62,7 +61,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     widget.controller.removeListener(() {
       validate(widget.controller.text);
     });
