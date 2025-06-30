@@ -20,7 +20,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   final EventController _eventController = EventController();
   EventModal event = EventModal.empty();
   bool isCheckedIn = false;
-  String? _selectedFileName;
+  String? _selectedSignInSheetFileName;
+  String? _selectedReceiptFileName;
   DateTime? _checkInDateTime;
 
   @override
@@ -67,9 +68,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(
-      'Update event ${isCheckedIn} ${_selectedFileName == null} ${event.amount == null} ${event.amount} ${isCheckedIn && _selectedFileName == null || event.amount == null}',
-    );
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.transparent,
@@ -89,6 +87,21 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  SizedBox(height: 10),
+                  TextFormField(
+                    enabled: false,
+                    controller: EventTextControllers.pharmaRepController,
+                    decoration: InputDecoration(
+                      labelText: AppStrings.pharmaRep,
+                    ),
+                    onChanged: (val) {
+                      setState(() {
+                        event = event.copyWith(pharmaRepName: val);
+                      });
+                    },
+                  ),
+                  Divider(),
+                  SizedBox(height: 16),
                   TextFormField(
                     controller: EventTextControllers.eventNameController,
                     decoration: InputDecoration(
@@ -100,148 +113,92 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       });
                     },
                   ),
+                  Divider(),
+
                   SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(AppStrings.pharmaRep),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: TextFormField(
-                          controller: EventTextControllers.pharmaRepController,
-                          decoration: InputDecoration(
-                            labelText: AppStrings.pharmaRep,
-                          ),
-                          onChanged: (val) {
-                            setState(() {
-                              event = event.copyWith(pharmaRepName: val);
-                            });
-                          },
-                        ),
-                      ),
-                    ],
+                  TextFormField(
+                    controller: EventTextControllers.startDateController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: AppStrings.labelEventStartDate,
+                    ),
+                    onTap: () async {
+                      final DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (pickedDate != null) {
+                        EventTextControllers.startDateController.text =
+                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                        setState(() {
+                          event = event.copyWith(
+                            startDate:
+                                EventTextControllers.startDateController.text,
+                          );
+                        });
+                      }
+                    },
                   ),
                   Divider(),
                   SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(AppStrings.labelEventStartDate),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: TextFormField(
-                          controller: EventTextControllers.startDateController,
-                          readOnly: true,
-                          decoration: InputDecoration(
-                            labelText: AppStrings.labelStartDate,
-                          ),
-                          onTap: () async {
-                            final DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (pickedDate != null) {
-                              EventTextControllers.startDateController.text =
-                                  "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                              setState(() {
-                                event = event.copyWith(
-                                  startDate: EventTextControllers
-                                      .startDateController
-                                      .text,
-                                );
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
+                  TextFormField(
+                    controller: EventTextControllers.endDateController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: AppStrings.labelEndDate,
+                    ),
+                    onTap: () async {
+                      final DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (pickedDate != null) {
+                        EventTextControllers.endDateController.text =
+                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                        setState(() {
+                          event = event.copyWith(
+                            endDate:
+                                EventTextControllers.endDateController.text,
+                          );
+                        });
+                      }
+                    },
                   ),
                   Divider(),
                   SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(AppStrings.labelEndDate),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: TextFormField(
-                          controller: EventTextControllers.endDateController,
-                          readOnly: true,
-                          decoration: InputDecoration(
-                            labelText: AppStrings.labelEndDate,
-                          ),
-                          onTap: () async {
-                            final DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (pickedDate != null) {
-                              EventTextControllers.endDateController.text =
-                                  "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                              setState(() {
-                                event = event.copyWith(
-                                  endDate: EventTextControllers
-                                      .endDateController
-                                      .text,
-                                );
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  Divider(),
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(AppStrings.numberOfStaff),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: TextFormField(
-                          controller:
-                              EventTextControllers.numberOfStaffController,
-                          decoration: InputDecoration(
-                            labelText: AppStrings.labelNumberOfStaff,
-                          ),
-                          onChanged: (val) {
-                            setState(() {
-                              event = event.copyWith(numberOfStaff: val);
-                            });
-                          },
-                        ),
-                      ),
-                    ],
+                  TextFormField(
+                    controller: EventTextControllers.numberOfStaffController,
+                    decoration: InputDecoration(
+                      labelText: AppStrings.labelNumberOfStaff,
+                    ),
+                    onChanged: (val) {
+                      setState(() {
+                        event = event.copyWith(numberOfStaff: val);
+                      });
+                    },
                   ),
                   Divider(),
                   SizedBox(height: 16),
                   Text(AppStrings.hcoInEvent),
                   SizedBox(height: 10),
                   for (var i = 0; i < event.hco.length; i++) ...{
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.5,
-                          child: TextFormField(
-                            controller: EventTextControllers.hcoController,
-                            decoration: InputDecoration(
-                              labelText: AppStrings.labelHCO,
-                            ),
-                            onChanged: (val) {
-                              setState(() {
-                                final newHco = List<String>.from(event.hco);
-                                newHco[i] = val;
-                                event = event.copyWith(hco: newHco);
-                              });
-                            },
-                          ),
-                        ),
-                      ],
+                    TextFormField(
+                      enabled: false,
+                      controller: EventTextControllers.hcoController,
+                      decoration: InputDecoration(
+                        labelText: AppStrings.labelHCO,
+                      ),
+                      onChanged: (val) {
+                        setState(() {
+                          final newHco = List<String>.from(event.hco);
+                          newHco[i] = val;
+                          event = event.copyWith(hco: newHco);
+                        });
+                      },
                     ),
                     Divider(),
                     SizedBox(height: 10),
@@ -285,30 +242,21 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         '${_checkInDateTime!.day}/${_checkInDateTime!.month}/${_checkInDateTime!.year} '
                         '${_checkInDateTime!.hour}:${_checkInDateTime!.minute.toString().padLeft(2, '0')}',
                         style: TextStyle(
-                          color: Colors.green,
+                          color: AppColors.accentSuccess,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Amount'),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: TextFormField(
-                          controller: EventTextControllers.amountController,
-                          decoration: InputDecoration(labelText: 'Amount'),
-                          enabled: isCheckedIn,
-                          onChanged: (val) {
-                            setState(() {
-                              event = event.copyWith(amount: val);
-                            });
-                          },
-                        ),
-                      ),
-                    ],
+                  TextFormField(
+                    controller: EventTextControllers.amountController,
+                    decoration: InputDecoration(labelText: 'Amount'),
+                    enabled: isCheckedIn,
+                    onChanged: (val) {
+                      setState(() {
+                        event = event.copyWith(amount: val);
+                      });
+                    },
                   ),
                   SizedBox(height: 16),
                   // Receipt upload button
@@ -324,7 +272,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                     .pickFiles();
                                 if (result != null && result.files.isNotEmpty) {
                                   setState(() {
-                                    _selectedFileName =
+                                    _selectedReceiptFileName =
                                         result.files.single.name;
                                   });
                                 }
@@ -336,11 +284,44 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       ),
                     ],
                   ),
-                  if (_selectedFileName != null)
+                  if (_selectedReceiptFileName != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        'Selected: [32m[1m[4m$_selectedFileName[0m',
+                        'Selected: [32m[1m[4m$_selectedReceiptFileName[0m',
+                      ),
+                    ),
+                  SizedBox(height: 16),
+                  // Receipt upload button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Upload Sign-In Sheet'),
+                      ElevatedButton(
+                        onPressed: isCheckedIn
+                            ? () async {
+                                FilePickerResult? result = await FilePicker
+                                    .platform
+                                    .pickFiles();
+                                if (result != null && result.files.isNotEmpty) {
+                                  setState(() {
+                                    _selectedSignInSheetFileName =
+                                        result.files.single.name;
+                                  });
+                                }
+                              }
+                            : () {
+                                debugPrint('Not checked in');
+                              },
+                        child: Text('Choose File'),
+                      ),
+                    ],
+                  ),
+                  if (_selectedSignInSheetFileName != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'Selected: [32m[1m[4m$_selectedSignInSheetFileName[0m',
                       ),
                     ),
                   SizedBox(height: 16),
@@ -348,7 +329,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               ),
               Button(
                 isDisabled:
-                    (_selectedFileName == null ||
+                    (_selectedReceiptFileName == null ||
                         EventTextControllers.amountController.text.isEmpty) &&
                     isCheckedIn,
                 text: isCheckedIn ? AppStrings.updateEvent : AppStrings.checkIn,

@@ -9,6 +9,7 @@ class UserModal {
     required this.lastName,
     required this.city,
     required this.pharmaCompany,
+    required this.role,
   });
 
   final int? id;
@@ -18,6 +19,7 @@ class UserModal {
   final String? lastName;
   final String? city;
   final String? pharmaCompany;
+  final String? role;
 
   UserModal copyWith({
     int? id,
@@ -27,6 +29,7 @@ class UserModal {
     String? lastName,
     String? city,
     String? pharmaCompany,
+    String? role,
   }) {
     return UserModal(
       id: id ?? this.id,
@@ -36,6 +39,7 @@ class UserModal {
       lastName: lastName ?? this.lastName,
       city: city ?? this.city,
       pharmaCompany: pharmaCompany ?? this.pharmaCompany,
+      role: role ?? this.role,
     );
   }
 
@@ -48,6 +52,7 @@ class UserModal {
       lastName: json[ModalKeys().userLastName],
       city: json[ModalKeys().userCity],
       pharmaCompany: json[ModalKeys().userPharmaCompany],
+      role: json[ModalKeys().userRole],
     );
   }
 
@@ -59,6 +64,7 @@ class UserModal {
     ModalKeys().userLastName: lastName,
     ModalKeys().userCity: city,
     ModalKeys().userPharmaCompany: pharmaCompany,
+    ModalKeys().userRole: role,
   };
   factory UserModal.empty() {
     return UserModal(
@@ -69,6 +75,7 @@ class UserModal {
       lastName: 'lastName',
       city: 'city',
       pharmaCompany: 'pharmaCompany',
+      role: 'role',
     );
   }
 }

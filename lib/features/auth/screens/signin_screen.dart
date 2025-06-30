@@ -5,6 +5,7 @@ import 'package:checkmate/features/auth/business_logic/forgot_password_screen_lo
 import 'package:checkmate/features/auth/business_logic/signup_screen_logic.dart';
 import 'package:checkmate/features/auth/business_logic/signin_screen_logic.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
+import 'package:checkmate/features/auth/screens/hco_dashboard.dart';
 import 'package:checkmate/features/auth/screens/pharma_rep_dashboard.dart';
 import 'package:checkmate/features/auth/screens/forgot_password_screen.dart';
 import 'package:checkmate/features/auth/screens/signup_screen.dart';
@@ -76,12 +77,22 @@ class SigninScreen extends StatelessWidget {
               onPressed: () async {
                 final user = await logic.signinUser(context);
                 if (user != null) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PharmaRepDashboard(user: user),
-                    ),
-                  );
+                  debugPrint("user: ${user.role}");
+                  if (user.role == "HCP") {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => HCPDashboard(user: user),
+                      ),
+                    );
+                  } else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PharmaRepDashboard(user: user),
+                      ),
+                    );
+                  }
                 }
               },
             ),

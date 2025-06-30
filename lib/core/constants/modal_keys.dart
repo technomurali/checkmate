@@ -32,6 +32,7 @@ mixin UserModalKeys {
   final String userLastName = 'lastName';
   final String userCity = 'city';
   final String userPharmaCompany = 'pharmaCompany';
+  final String userRole = 'user_role';
 }
 
 mixin PharmaModalKeys {
@@ -64,4 +65,5 @@ mixin EventsModalKeys {
   static const String eventHCP = "HCP";
   static const String eventAmount = "amount";
   static const String eventStatusKey = "eventStatus";
+  static const String eventApprovalStatus = "approvalStatus";
 }

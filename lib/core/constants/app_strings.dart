@@ -29,7 +29,7 @@ class AppStrings {
   static const String upcomingEvents = "Upcoming Events";
   static const String pendingReceipts = "Pending Receipts";
   static const String checkIn = "Check in";
-  static const String updateEvent = "Update Event";
+  static const String updateEvent = "Submit Check-in";
   static const String seeAll = "See all";
   static const String eventHistory = "Event History";
   static const String receiptHistory = "Receipt History";

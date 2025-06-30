@@ -1,5 +1,7 @@
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/core/widgets/app_appbar.dart';
+import 'package:checkmate/core/widgets/drawer_screen.dart';
 import 'package:checkmate/core/widgets/event_list_item_tile.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
@@ -23,12 +25,14 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String? _selectedStatus = 'All';
+  String? _selectedApproval = 'All';
   final List<String> _statusOptions = [
     'All',
     'UPCOMING',
     'COMPLETED',
     'CANCELLED',
   ];
+  final List<String> _approvalOptions = ['All', 'Approved', 'Not Approved'];
 
   @override
   void initState() {
@@ -56,7 +60,14 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
             _selectedStatus == null || _selectedStatus == 'All'
             ? true
             : event.eventStatus == _selectedStatus;
-        return matchesQuery && matchesStatus;
+        final matchesApproval =
+            _selectedApproval == null || _selectedApproval == 'All'
+            ? true
+            : (_selectedApproval == 'Approved'
+                  ? event.isApproved == true
+                  : event.isApproved == false || event.isApproved == null);
+
+        return matchesQuery && matchesStatus && matchesApproval;
       }).toList();
     });
   }
@@ -76,43 +87,140 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppStrings.eventHistory)),
+      drawer: DrawerScreen(),
+      appBar: AppAppbar(actions: [], title: AppStrings.eventHistory),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: AppStrings.searchEvents,
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: AppStrings.searchEvents,
+                          prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.background,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0,
+                            horizontal: 16,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          _searchQuery = value;
+                          _filterEvents();
+                        },
                       ),
                     ),
-                    onChanged: (value) {
-                      _searchQuery = value;
-                      _filterEvents();
-                    },
-                  ),
+                    const SizedBox(width: 12),
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.filter_list),
+                      tooltip: 'Filter',
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      onSelected: (value) {
+                        setState(() {
+                          _selectedStatus = value;
+                        });
+                        _filterEvents();
+                      },
+                      itemBuilder: (context) => _statusOptions
+                          .map(
+                            (status) => PopupMenuItem<String>(
+                              value: status,
+                              child: Row(
+                                children: [
+                                  if (status == 'All')
+                                    Icon(
+                                      Icons.all_inclusive,
+                                      color: AppColors.grey,
+                                    )
+                                  else if (status == 'UPCOMING')
+                                    Icon(Icons.schedule, color: AppColors.blue)
+                                  else if (status == 'COMPLETED')
+                                    Icon(
+                                      Icons.check_circle,
+                                      color: AppColors.successGreen,
+                                    )
+                                  else if (status == 'CANCELLED')
+                                    Icon(
+                                      Icons.cancel,
+                                      color: AppColors.accentError,
+                                    )
+                                  else
+                                    Icon(Icons.filter_list),
+                                  const SizedBox(width: 8),
+                                  Text(status),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    const SizedBox(width: 12),
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.verified_user),
+                      tooltip: 'Approval',
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      onSelected: (value) {
+                        setState(() {
+                          _selectedApproval = value;
+                        });
+                        _filterEvents();
+                      },
+                      itemBuilder: (context) => _approvalOptions
+                          .map(
+                            (option) => PopupMenuItem<String>(
+                              value: option,
+                              child: Row(
+                                children: [
+                                  if (option == 'All')
+                                    Icon(
+                                      Icons.all_inclusive,
+                                      color: AppColors.grey,
+                                    )
+                                  else if (option == 'Approved')
+                                    Icon(
+                                      Icons.verified,
+                                      color: AppColors.successGreen,
+                                    )
+                                  else if (option == 'Not Approved')
+                                    Icon(
+                                      Icons.cancel,
+                                      color: AppColors.accentError,
+                                    )
+                                  else
+                                    Icon(Icons.verified_user),
+                                  const SizedBox(width: 8),
+                                  Text(option),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                DropdownButton<String>(
-                  value: _selectedStatus ?? 'All',
-                  items: _statusOptions.map((status) {
-                    return DropdownMenuItem(value: status, child: Text(status));
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedStatus = value;
-                    });
-                    _filterEvents();
-                  },
-                ),
-              ],
+              ),
             ),
             const SizedBox(height: 10),
             Expanded(
@@ -157,6 +265,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
                       pharmaRep: event.pharmaRepName!,
                       id: event.eventId!,
                       status: event.eventStatus!,
+                      approvalStatus: event.isApproved ?? false,
                     ),
                   );
                 },

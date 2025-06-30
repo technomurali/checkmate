@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:checkmate/features/auth/controllers/signin_controller.dart';
@@ -28,24 +26,33 @@ class SigninScreenLogic extends ChangeNotifier {
   }
 
   Future<UserModal?> signinUser(BuildContext context) async {
-    final response = await _signinController.signin(
-      email: TextControllers.email.text.trim(),
-      password: TextControllers.password.text.trim(),
-    );
+    try {
+      final response = await _signinController.signin(
+        email: TextControllers.email.text.trim(),
+        password: TextControllers.password.text.trim(),
+      );
 
-    if (response[SigninModalKeys.signinSuccess] == true) {
-      final user = response[SigninModalKeys.signinUser] as UserModal;
-      userModal = user;
-      isButtonEnabled = false;
-      notifyListeners();
-      return user;
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            response[SigninModalKeys.signinMessage] ?? 'Login failed',
+      if (response[SigninModalKeys.signinSuccess] == true) {
+        final user = response[SigninModalKeys.signinUser] as UserModal;
+        userModal = user;
+        isButtonEnabled = false;
+        notifyListeners();
+        TextControllers.email.clear();
+        TextControllers.password.clear();
+        return user;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              response[SigninModalKeys.signinMessage] ?? 'Login failed',
+            ),
           ),
-        ),
+        );
+        return null;
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Network error. Please try again.')),
       );
       return null;
     }

@@ -21,3 +21,14 @@ class EventTextControllers {
   static TextEditingController pharmaRepController = TextEditingController();
   static TextEditingController hcoController = TextEditingController();
 }
+
+class NewEventTextControllers {
+  static TextEditingController eventNameController = TextEditingController();
+  static TextEditingController startDateController = TextEditingController();
+  static TextEditingController endDateController = TextEditingController();
+  static TextEditingController numberOfStaffController =
+      TextEditingController();
+  static TextEditingController amountController = TextEditingController();
+  static TextEditingController pharmaRepController = TextEditingController();
+  static TextEditingController hcoController = TextEditingController();
+}

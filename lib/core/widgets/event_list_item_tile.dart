@@ -9,6 +9,7 @@ class EventListItemTile extends StatelessWidget {
   final String pharmaRep;
   final String id;
   final String status;
+  final bool approvalStatus;
 
   const EventListItemTile({
     super.key,
@@ -18,6 +19,7 @@ class EventListItemTile extends StatelessWidget {
     required this.pharmaRep,
     required this.id,
     required this.status,
+    required this.approvalStatus,
   });
 
   @override
@@ -37,14 +39,31 @@ class EventListItemTile extends StatelessWidget {
             right: -1,
             top: 0,
             child: Container(
+              margin: EdgeInsets.only(right: 10),
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: status[0].toLowerCase() == "u"
                     ? AppColors.accentPending
-                    : AppColors.accentSuccess,
+                    : AppColors.successGreen,
               ),
               child: Text(status[0]),
+            ),
+          ),
+
+          Positioned(
+            right: 50,
+            top: 0,
+            child: Container(
+              margin: EdgeInsets.only(right: 10),
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: !approvalStatus
+                    ? AppColors.accentPending
+                    : AppColors.successGreen,
+              ),
+              child: Text(approvalStatus ? "A" : "P"),
             ),
           ),
           Column(

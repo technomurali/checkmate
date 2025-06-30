@@ -10,4 +10,7 @@ class AppColors {
   static const Color border = Color(0xFFE5E7EB);
   static const Color accentPending = Color.fromARGB(255, 255, 189, 48);
   static const Color transparent = Color.fromARGB(0, 252, 252, 252);
+  static const Color successGreen = Color.fromRGBO(76, 175, 80, 1);
+  static const Color blue = Color.fromRGBO(33, 150, 243, 1);
+  static const Color grey = Color.fromRGBO(107, 114, 128, 1);
 }

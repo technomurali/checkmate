@@ -46,7 +46,7 @@ class EventController {
         final jsonBody = json.decode(response.body);
 
         final dynamic eventsJson = jsonBody[EventsModalKeys.events];
-
+        debugPrint("eventsJson: ${jsonBody}");
         return EventModal.fromJson(eventsJson);
       } else {
         debugPrint("Failed to fetch events. Status: ${response.statusCode}");

@@ -13,6 +13,7 @@ class EventModal with EventsModalKeys {
     required this.hcp,
     required this.amount,
     required this.eventStatus,
+    required this.isApproved,
   });
 
   final String? eventId;
@@ -26,6 +27,7 @@ class EventModal with EventsModalKeys {
   final List<String> hcp;
   final String? amount;
   final String? eventStatus;
+  final bool? isApproved;
 
   EventModal copyWith({
     String? eventId,
@@ -52,6 +54,7 @@ class EventModal with EventsModalKeys {
       hcp: hcp ?? this.hcp,
       amount: amount ?? this.amount,
       eventStatus: eventStatus ?? this.eventStatus,
+      isApproved: isApproved ?? this.isApproved,
     );
   }
 
@@ -72,6 +75,7 @@ class EventModal with EventsModalKeys {
           : List<String>.from(json[EventsModalKeys.eventHCP].map((x) => x)),
       amount: json[EventsModalKeys.eventAmount],
       eventStatus: json[EventsModalKeys.eventStatusKey],
+      isApproved: json[EventsModalKeys.eventApprovalStatus],
     );
   }
 
@@ -88,6 +92,7 @@ class EventModal with EventsModalKeys {
       EventsModalKeys.eventHCP: hcp,
       EventsModalKeys.eventAmount: amount,
       EventsModalKeys.eventStatusKey: eventStatus,
+      EventsModalKeys.eventApprovalStatus: isApproved,
     };
   }
 
@@ -104,6 +109,7 @@ class EventModal with EventsModalKeys {
       hcp: [],
       amount: '0',
       eventStatus: 'UNKNOWN',
+      isApproved: false,
     );
   }
 }

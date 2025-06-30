@@ -16,15 +16,15 @@ import 'package:checkmate/features/auth/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class PharmaRepDashboard extends StatefulWidget {
+class HCPDashboard extends StatefulWidget {
   final UserModal user;
-  const PharmaRepDashboard({super.key, required this.user});
+  const HCPDashboard({super.key, required this.user});
 
   @override
-  State<PharmaRepDashboard> createState() => _PharmaRepDashboardState();
+  State<HCPDashboard> createState() => _HCPDashboardState();
 }
 
-class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
+class _HCPDashboardState extends State<HCPDashboard> {
   final EventController _eventController = EventController();
   List<EventModal> events = [];
   fetchUpcomingEvents() async {
@@ -80,7 +80,7 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
             ),
             const SizedBox(height: 4),
             const Text(
-              " ${AppStrings.pharmaRep}",
+              " ${AppStrings.labelHCP}",
               style: TextStyle(fontSize: 16),
             ),
 
@@ -145,12 +145,34 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
                   },
                 ),
                 Button(
+                  text: AppStrings.receiptHistory,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ReceiptHistoryScreen(),
+                      ),
+                    );
+                  },
+                ),
+                Button(
                   text: AppStrings.disputeHistory,
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => DisputeHistoryScreen(),
+                      ),
+                    );
+                  },
+                ),
+                Button(
+                  text: AppStrings.fileDispute,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FileDisputeScreen(),
                       ),
                     );
                   },

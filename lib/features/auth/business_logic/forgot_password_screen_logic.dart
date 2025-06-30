@@ -44,6 +44,7 @@ class ForgotPasswordScreenLogic extends ChangeNotifier {
 
   void sendVerificationCode() {
     sentCode = true;
+    //TODO: Add API call to send verification code
     notifyListeners();
   }
 

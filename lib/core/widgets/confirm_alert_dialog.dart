@@ -34,7 +34,7 @@ class ConfirmAlertDialog extends StatelessWidget {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.accentError,
             foregroundColor: AppColors.background,
           ),
           onPressed: () {
