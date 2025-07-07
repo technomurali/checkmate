@@ -21,7 +21,7 @@ class EventsReciptsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("items: ${items}");
+    debugPrint("items: $items");
     return Card(
       color: isPending
           ? AppColors.pendingCardColor

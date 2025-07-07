@@ -1,6 +1,5 @@
 import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
-import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';

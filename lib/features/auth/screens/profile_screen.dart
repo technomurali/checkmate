@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 /// A fully-featured profile editing page with Save and Cancel buttons.
 class UserProfileScreen extends StatefulWidget {
-  const UserProfileScreen({Key? key}) : super(key: key);
+  const UserProfileScreen({super.key});
 
   @override
   State<UserProfileScreen> createState() => _UserProfileScreenState();

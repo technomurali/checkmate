@@ -28,7 +28,7 @@ class SigninController {
       );
 
       final data = jsonDecode(response.body);
-      debugPrint("signin data /////// ${data}");
+      debugPrint("signin data /////// $data");
       if (response.statusCode == 200) {
         // Parse user using your UserModal
         final user = UserModal.fromJson(data[SigninModalKeys.signinUser]);

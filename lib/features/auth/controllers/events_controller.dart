@@ -69,7 +69,7 @@ class EventController {
       debugPrint("response: ${200.runtimeType}");
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
-        debugPrint("jsonBody: ${jsonBody}");
+        debugPrint("jsonBody: $jsonBody");
         final dynamic eventsJson = jsonBody[EventsModalKeys.events];
         return List<EventModal>.from(
           eventsJson.map((e) => EventModal.fromJson(e)),

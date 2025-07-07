@@ -109,7 +109,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
 
         return matchesQuery && matchesStatus;
       }).toList();
-      debugPrint('Filtered events: ${filteredEvents}');
+      debugPrint('Filtered events: $filteredEvents');
     });
   }
 

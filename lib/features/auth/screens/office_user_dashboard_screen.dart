@@ -1,20 +1,11 @@
-import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
-import 'package:checkmate/core/widgets/app_appbar.dart';
-import 'package:checkmate/core/widgets/custom_button.dart';
-import 'package:checkmate/core/widgets/drawer_screen.dart';
 import 'package:checkmate/core/widgets/events_recipts_card.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
-import 'package:checkmate/features/auth/screens/dispute_history_screen.dart';
-import 'package:checkmate/features/auth/screens/event_history_screen.dart';
-import 'package:checkmate/features/auth/screens/file_dispute_screen.dart';
-import 'package:checkmate/features/auth/screens/new_event_screen.dart';
 import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class OfficeUserDashboardScreen extends StatefulWidget {
   final UserModal user;

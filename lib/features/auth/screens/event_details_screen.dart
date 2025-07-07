@@ -83,7 +83,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     _eventController.fetchHcp(hcoId: hcoId).then((v) {
       setState(() {
         hcpList = v;
-        debugPrint("hcpList: ${hcpList}");
+        debugPrint("hcpList: $hcpList");
       });
     });
   }

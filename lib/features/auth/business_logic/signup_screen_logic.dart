@@ -87,7 +87,7 @@ class SignupScreenLogic extends ChangeNotifier {
 
   void filterCompanies(String input) {
     debugPrint(
-      "filterCompanies : $input , ${allCompanies} ,$filteredCompanies",
+      "filterCompanies : $input , $allCompanies ,$filteredCompanies",
     );
     if (input.isEmpty) {
       filteredCompanies.clear();

@@ -4,7 +4,6 @@ import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:checkmate/features/auth/screens/event_history_screen.dart';
-import 'package:checkmate/features/auth/screens/receipt_history_screen.dart';
 import 'package:checkmate/features/auth/screens/file_dispute_screen.dart';
 import 'package:checkmate/features/auth/screens/dispute_history_screen.dart';
 import 'package:checkmate/features/auth/screens/signin_screen.dart';

@@ -60,7 +60,7 @@ class EventModal with EventsModalKeys {
       hcp: hcp ?? this.hcp,
       amount: amount ?? this.amount,
       eventStatus: eventStatus ?? this.eventStatus,
-      isApproved: isApproved ?? this.isApproved,
+      isApproved: isApproved ?? isApproved,
       eventDescription: eventDescription ?? this.eventDescription,
       eventType: eventType ?? this.eventType,
     );
