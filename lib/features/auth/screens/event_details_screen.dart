@@ -1,9 +1,7 @@
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
-import 'package:checkmate/core/widgets/app_appbar.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
-import 'package:checkmate/core/widgets/drawer_screen.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';

@@ -1,7 +1,5 @@
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
-import 'package:checkmate/core/widgets/app_appbar.dart';
-import 'package:checkmate/core/widgets/drawer_screen.dart';
 import 'package:checkmate/core/widgets/event_list_item_tile.dart';
 import 'package:checkmate/core/widgets/filter_icon.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
@@ -93,9 +91,6 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
         }
 
         // Debug print for status comparison
-        print(
-          "Filtering: event.eventStatus=${event.eventStatus}, event.isApproved=${event.isApproved}, _selectedStatus=$_selectedStatus, ${statusCodeFor(_selectedStatus!)['code'] == 'B'}, eventStatus: ${event.eventStatus == statusCodeFor(_selectedStatus!)['status']} , isApproved: ${event.isApproved == statusCodeFor(_selectedStatus!)['status']}",
-        );
         final matchesStatus =
             _selectedStatus == null || _selectedStatus == 'All'
             ? true

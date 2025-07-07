@@ -40,6 +40,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     super.dispose();
   }
 
+  // ignore: unused_element
   void _handleSave() {
     if (_formKey.currentState?.validate() ?? false) {
       final updated = userModal.copyWith(
