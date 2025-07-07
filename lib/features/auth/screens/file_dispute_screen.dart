@@ -1,4 +1,5 @@
 import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 
 class FileDisputeScreen extends StatelessWidget {
@@ -6,6 +7,6 @@ class FileDisputeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text(AppStrings.fileDispute)));
+    return const TopNav(body: Center(child: Text(AppStrings.fileDispute)));
   }
 }

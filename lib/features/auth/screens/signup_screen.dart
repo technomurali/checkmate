@@ -1,4 +1,5 @@
 import 'package:checkmate/features/auth/business_logic/signup_screen_logic.dart';
+import 'package:checkmate/features/auth/screens/terms_and_conditions_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,6 +19,7 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  bool _acceptedTerms = false;
   @override
   void initState() {
     super.initState();
@@ -156,7 +158,13 @@ class _SignupScreenState extends State<SignupScreen> {
               ],
 
               const SizedBox(height: 16),
+
+              ///Pharma Company Selection TextField Search Button
               CustomTextField(
+                suffixIcon: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.search),
+                ),
                 controller: TextControllers.pharma,
                 label: AppStrings.selectThePharma,
                 onChanged: signupScreenLogic.filterCompanies,
@@ -199,10 +207,37 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ],
               const SizedBox(height: 16),
+
+              ///Terms and Conditions button
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () async {
+                    final accepted = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TermsAndConditionsScreen(),
+                      ),
+                    );
+                    if (accepted == true) {
+                      setState(() {
+                        _acceptedTerms = true;
+                      });
+                    } else if (accepted == false) {
+                      setState(() {
+                        _acceptedTerms = false;
+                      });
+                    }
+                  },
+                  child: Text(AppStrings.termsAndConditions),
+                ),
+              ),
+              const SizedBox(height: 16),
               if (!signupScreenLogic.isOptedForSocialSignUp)
                 Button(
                   text: AppStrings.signup,
-                  isDisabled: signupScreenLogic.isSignUpDisabled,
+                  isDisabled:
+                      signupScreenLogic.isSignUpDisabled || !_acceptedTerms,
                   onPressed: () {
                     signupScreenLogic.signupUser(() {
                       ScaffoldMessenger.of(context).showSnackBar(

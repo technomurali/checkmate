@@ -14,6 +14,8 @@ class EventModal with EventsModalKeys {
     required this.amount,
     required this.eventStatus,
     required this.isApproved,
+    required this.eventDescription,
+    required this.eventType,
   });
 
   final String? eventId;
@@ -23,11 +25,13 @@ class EventModal with EventsModalKeys {
   final String? startDate;
   final String? endDate;
   final String? numberOfStaff;
-  final List<String> hco;
-  final List<String> hcp;
+  final List<dynamic> hco;
+  final List<dynamic> hcp;
   final String? amount;
   final String? eventStatus;
-  final bool? isApproved;
+  final String? isApproved;
+  final String? eventDescription;
+  final String? eventType;
 
   EventModal copyWith({
     String? eventId,
@@ -37,10 +41,12 @@ class EventModal with EventsModalKeys {
     String? startDate,
     String? endDate,
     String? numberOfStaff,
-    List<String>? hco,
-    List<String>? hcp,
+    List<dynamic>? hco,
+    List<dynamic>? hcp,
     String? amount,
     String? eventStatus,
+    String? eventDescription,
+    String? eventType,
   }) {
     return EventModal(
       eventId: eventId ?? this.eventId,
@@ -54,7 +60,9 @@ class EventModal with EventsModalKeys {
       hcp: hcp ?? this.hcp,
       amount: amount ?? this.amount,
       eventStatus: eventStatus ?? this.eventStatus,
-      isApproved: isApproved ?? isApproved,
+      isApproved: isApproved ?? this.isApproved,
+      eventDescription: eventDescription ?? this.eventDescription,
+      eventType: eventType ?? this.eventType,
     );
   }
 
@@ -69,13 +77,15 @@ class EventModal with EventsModalKeys {
       numberOfStaff: json[EventsModalKeys.eventNumberOfStaff],
       hco: json[EventsModalKeys.eventHCO] == null
           ? []
-          : List<String>.from(json[EventsModalKeys.eventHCO].map((x) => x)),
+          : List<dynamic>.from(json[EventsModalKeys.eventHCO].map((x) => x)),
       hcp: json[EventsModalKeys.eventHCP] == null
           ? []
-          : List<String>.from(json[EventsModalKeys.eventHCP].map((x) => x)),
+          : List<dynamic>.from(json[EventsModalKeys.eventHCP].map((x) => x)),
       amount: json[EventsModalKeys.eventAmount],
       eventStatus: json[EventsModalKeys.eventStatusKey],
       isApproved: json[EventsModalKeys.eventApprovalStatus],
+      eventDescription: json[EventsModalKeys.eventDescription],
+      eventType: json[EventsModalKeys.eventType],
     );
   }
 
@@ -93,6 +103,8 @@ class EventModal with EventsModalKeys {
       EventsModalKeys.eventAmount: amount,
       EventsModalKeys.eventStatusKey: eventStatus,
       EventsModalKeys.eventApprovalStatus: isApproved,
+      EventsModalKeys.eventDescription: eventDescription,
+      EventsModalKeys.eventType: eventType,
     };
   }
 
@@ -109,7 +121,9 @@ class EventModal with EventsModalKeys {
       hcp: [],
       amount: '0',
       eventStatus: 'UNKNOWN',
-      isApproved: false,
+      isApproved: '',
+      eventDescription: '',
+      eventType: '',
     );
   }
 }

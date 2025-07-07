@@ -1,3 +1,4 @@
+import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -7,9 +8,13 @@ import 'package:checkmate/features/auth/screens/receipt_history_screen.dart';
 import 'package:checkmate/features/auth/screens/file_dispute_screen.dart';
 import 'package:checkmate/features/auth/screens/dispute_history_screen.dart';
 import 'package:checkmate/features/auth/screens/signin_screen.dart';
+import 'package:checkmate/features/auth/screens/pharma_rep_dashboard.dart';
+import 'package:checkmate/features/auth/screens/office_user_dashboard_screen.dart';
+import 'package:checkmate/features/auth/screens/hcp_dashboard.dart';
 
 class DrawerScreen extends StatelessWidget {
-  const DrawerScreen({super.key});
+  final bool inDashboard;
+  const DrawerScreen({super.key, this.inDashboard = false});
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +41,40 @@ class DrawerScreen extends StatelessWidget {
               style: TextStyle(fontSize: 14, color: AppColors.border),
             ),
           ),
+
           ListTile(
             leading: Icon(Icons.event, color: AppColors.primary),
-            title: Text('Event History'),
+            title: Text(AppStrings.dashboard),
+            onTap: () {
+              if (userModal.role == UserType.pharmaRep) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PharmaRepDashboard(user: userModal),
+                  ),
+                );
+              } else if (userModal.role == UserType.hco) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        OfficeUserDashboardScreen(user: userModal),
+                  ),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HCPDashboard(user: userModal),
+                  ),
+                );
+              }
+            },
+          ),
+
+          ListTile(
+            leading: Icon(Icons.event, color: AppColors.primary),
+            title: Text(AppStrings.eventHistory),
             onTap: () {
               Navigator.push(
                 context,
@@ -46,20 +82,10 @@ class DrawerScreen extends StatelessWidget {
               );
             },
           ),
-          ListTile(
-            leading: Icon(Icons.receipt_long, color: AppColors.primary),
-            title: Text('Receipt History'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ReceiptHistoryScreen()),
-              );
-            },
-          ),
-          if (userModal.role != "PHARMA_REP") ...{
+          if (userModal.role != UserType.pharmaRep) ...{
             ListTile(
               leading: Icon(Icons.report_problem, color: AppColors.primary),
-              title: Text('File Dispute'),
+              title: Text(AppStrings.fileDispute),
               onTap: () {
                 Navigator.push(
                   context,
@@ -70,7 +96,7 @@ class DrawerScreen extends StatelessWidget {
           },
           ListTile(
             leading: Icon(Icons.history, color: AppColors.primary),
-            title: Text('Dispute History'),
+            title: Text(AppStrings.disputeHistory),
             onTap: () {
               Navigator.push(
                 context,
@@ -81,10 +107,9 @@ class DrawerScreen extends StatelessWidget {
           Divider(),
           ListTile(
             leading: Icon(Icons.logout, color: AppColors.accentError),
-            title: Text('Logout'),
+            title: Text(AppStrings.signOut),
             onTap: () {
               userModal = UserModal.empty();
-              // TODO: Implement logout logic
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => SigninScreen()),

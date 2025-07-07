@@ -1,4 +1,6 @@
 import 'package:checkmate/core/constants/app_colors.dart';
+import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/core/widgets/filter_icon.dart';
 import 'package:checkmate/features/auth/screens/event_details_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +11,7 @@ class EventListItemTile extends StatelessWidget {
   final String pharmaRep;
   final String id;
   final String status;
-  final bool approvalStatus;
+  final String approvalStatus;
 
   const EventListItemTile({
     super.key,
@@ -26,9 +28,10 @@ class EventListItemTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 130,
       margin: EdgeInsets.only(bottom: 10),
+      // padding: EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
+        color: AppColors.listTileColor,
         border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(10),
       ),
@@ -38,36 +41,26 @@ class EventListItemTile extends StatelessWidget {
           Positioned(
             right: -1,
             top: 0,
-            child: Container(
-              margin: EdgeInsets.only(right: 10),
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: status[0].toLowerCase() == "u"
-                    ? AppColors.accentPending
-                    : AppColors.successGreen,
-              ),
-              child: Text(status[0]),
+            child: Tooltip(
+              message: status,
+              child: FilterIcon(status: status),
             ),
           ),
 
-          Positioned(
-            right: 50,
-            top: 0,
-            child: Container(
-              margin: EdgeInsets.only(right: 10),
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: !approvalStatus
-                    ? AppColors.accentPending
-                    : AppColors.successGreen,
+          if (status[0].toLowerCase() != "u") ...{
+            if (status[1].toLowerCase() == "o") ...{
+              Positioned(
+                right: 50,
+                top: 0,
+                child: Tooltip(
+                  message: approvalStatus,
+                  child: FilterIcon(status: approvalStatus),
+                ),
               ),
-              child: Text(approvalStatus ? "A" : "P"),
-            ),
-          ),
+            },
+          },
           Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               InkWell(
@@ -87,7 +80,11 @@ class EventListItemTile extends StatelessWidget {
                   ),
                 ),
               ),
-              Text("From: $startDate    To: $endDate"),
+              SizedBox(height: 16),
+              if (endDate.isEmpty)
+                Text("${AppStrings.labelStartDate}: $startDate"),
+              if (endDate.isNotEmpty)
+                Text("From : $startDate       To : $endDate"),
               //Text("Pharma Rep:  $pharmaRep"),
             ],
           ),

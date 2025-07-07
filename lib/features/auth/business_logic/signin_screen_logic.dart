@@ -10,6 +10,8 @@ class SigninScreenLogic extends ChangeNotifier {
     : _signinController = controller ?? SigninController() {
     TextControllers.email.addListener(updateButtonState);
     TextControllers.password.addListener(updateButtonState);
+    TextControllers.email.clear();
+    TextControllers.password.clear();
   }
 
   bool isButtonEnabled = false;

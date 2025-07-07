@@ -1,5 +1,6 @@
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/core/widgets/app_appbar.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/core/widgets/drawer_screen.dart';
@@ -9,51 +10,32 @@ import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:checkmate/features/auth/screens/dispute_history_screen.dart';
 import 'package:checkmate/features/auth/screens/event_history_screen.dart';
+import 'package:checkmate/features/auth/screens/file_dispute_screen.dart';
 import 'package:checkmate/features/auth/screens/new_event_screen.dart';
-import 'package:checkmate/features/auth/screens/profile_screen.dart';
 import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class PharmaRepDashboard extends StatefulWidget {
+class OfficeUserDashboardScreen extends StatefulWidget {
   final UserModal user;
-  const PharmaRepDashboard({super.key, required this.user});
+  const OfficeUserDashboardScreen({super.key, required this.user});
 
   @override
-  State<PharmaRepDashboard> createState() => _PharmaRepDashboardState();
+  State<OfficeUserDashboardScreen> createState() =>
+      _OfficeUserDashboardScreenState();
 }
 
-class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
+class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
   final EventController _eventController = EventController();
   List<EventModal> events = [];
-  List<EventModal> pendingEvents = [];
-  List<EventModal> upcomingEvents = [];
   fetchUpcomingEvents() async {
+    debugPrint("ouser : ${widget.user.hco![0][HCOModalKeys.hcoId]}");
     _eventController
-        .fetchEvents(status: "UPCOMING")
+        .fetchHCOEvents(widget.user.hco![0][HCOModalKeys.hcoId])
         .then(
           (v) => {
             setState(() {
               events = v.take(3).toList();
-
-              upcomingEvents = v
-                  .where((e) => e.eventStatus == EventStatus.upcoming)
-                  .take(3)
-                  .toList();
-            }),
-          },
-        );
-  }
-
-  fetchPendingEvents() async {
-    _eventController
-        .fetchEvents(status: EventStatus.completed)
-        .then(
-          (v) => {
-            setState(() {
-              pendingEvents = v
-                  .where((e) => e.isApproved == EventStatus.pending)
-                  .toList();
             }),
           },
         );
@@ -63,32 +45,38 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
   void initState() {
     super.initState();
     fetchUpcomingEvents();
-    fetchPendingEvents();
   }
 
   @override
   Widget build(BuildContext context) {
     return TopNav(
       body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             /// Welcome Text
             Text(
-              "${AppStrings.helloUser} ${widget.user.firstName}",
+              " ${AppStrings.helloUser} ${widget.user.firstName}",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
 
             /// User Role Text
             const Text(
-              " ${AppStrings.pharmaRep}",
+              " ${AppStrings.labelHCOOfficeUser}",
               style: TextStyle(fontSize: 16),
             ),
+            const SizedBox(height: 4),
 
+            /// HCO Name Text
+            Text(
+              " ${widget.user.hco![0][HCOModalKeys.hcoName]}",
+              style: TextStyle(fontSize: 16),
+            ),
             const SizedBox(height: 20),
 
-            /// Upcoming Events
+            /// Upcoming Events Text
             Text(
               " ${AppStrings.upcomingEvents}",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -98,12 +86,16 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
             /// Upcoming Events Card
             EventsReciptsCard(
               items: [
-                if (upcomingEvents.isNotEmpty) ...{
-                  for (var i = 0; i < 3; i++) ...{
+                if (events.isNotEmpty) ...{
+                  for (
+                    var i = 0;
+                    i < (events.length > 3 ? 3 : events.length);
+                    i++
+                  ) ...{
                     {
-                      "title": upcomingEvents[i].eventName!,
-                      "date": upcomingEvents[i].startDate!,
-                      "id": upcomingEvents[i].eventId!,
+                      "title": events[i].eventName!,
+                      "date": events[i].startDate!,
+                      "id": events[i].eventId!,
                     },
                   },
                 } else
@@ -115,26 +107,19 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
 
             const SizedBox(height: 16),
 
-            /// Pending Receipts Text
+            /// Receipts for Approval Text
             Text(
-              " ${AppStrings.pendingReceipts}",
+              " ${AppStrings.receiptForApproval}",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
 
-            /// Pending Receipts Card
+            /// Receipts for Approval Card
             EventsReciptsCard(
-              isPending: true,
-              items: [
-                if (pendingEvents.isNotEmpty) ...{
-                  for (var i = 0; i < 3; i++) ...{
-                    {
-                      "title": pendingEvents[i].eventName!,
-                      "date": pendingEvents[i].startDate!,
-                      "id": pendingEvents[i].eventId!,
-                    },
-                  },
-                },
+              items: const [
+                {"title": "diabetesCareSolutions", "date": "26/JUNE/2024"},
+                {"title": "diabetesCareSolutions", "date": "26/JUNE/2024"},
+                {"title": "respiratoryTherapy", "date": "26/JUNE/2024"},
               ],
               onSeeAll: () {},
             ),

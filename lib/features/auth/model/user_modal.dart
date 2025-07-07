@@ -10,6 +10,9 @@ class UserModal {
     required this.city,
     required this.pharmaCompany,
     required this.role,
+    required this.hco,
+    required this.profileUrl,
+    required this.modeOfAuthentication,
   });
 
   final int? id;
@@ -20,6 +23,9 @@ class UserModal {
   final String? city;
   final String? pharmaCompany;
   final String? role;
+  final List<dynamic>? hco;
+  final String? profileUrl;
+  final String? modeOfAuthentication;
 
   UserModal copyWith({
     int? id,
@@ -30,6 +36,9 @@ class UserModal {
     String? city,
     String? pharmaCompany,
     String? role,
+    List<dynamic>? hco,
+    String? profileUrl,
+    String? modeOfAuthentication,
   }) {
     return UserModal(
       id: id ?? this.id,
@@ -40,6 +49,9 @@ class UserModal {
       city: city ?? this.city,
       pharmaCompany: pharmaCompany ?? this.pharmaCompany,
       role: role ?? this.role,
+      hco: hco ?? this.hco,
+      profileUrl: profileUrl ?? this.profileUrl,
+      modeOfAuthentication: modeOfAuthentication ?? this.modeOfAuthentication,
     );
   }
 
@@ -53,6 +65,9 @@ class UserModal {
       city: json[ModalKeys().userCity],
       pharmaCompany: json[ModalKeys().userPharmaCompany],
       role: json[ModalKeys().userRole],
+      hco: json[ModalKeys().userHco],
+      profileUrl: json[ModalKeys().userProfileUrl],
+      modeOfAuthentication: json[ModalKeys().userModeOfAuthentication],
     );
   }
 
@@ -65,6 +80,9 @@ class UserModal {
     ModalKeys().userCity: city,
     ModalKeys().userPharmaCompany: pharmaCompany,
     ModalKeys().userRole: role,
+    ModalKeys().userHco: hco,
+    ModalKeys().userProfileUrl: profileUrl,
+    ModalKeys().userModeOfAuthentication: modeOfAuthentication,
   };
   factory UserModal.empty() {
     return UserModal(
@@ -76,6 +94,9 @@ class UserModal {
       city: 'city',
       pharmaCompany: 'pharmaCompany',
       role: 'role',
+      hco: [],
+      profileUrl: '',
+      modeOfAuthentication: '',
     );
   }
 }

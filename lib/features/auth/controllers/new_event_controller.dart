@@ -3,15 +3,15 @@ import 'package:checkmate/core/constants/app_api.dart';
 import 'package:http/http.dart' as http;
 
 class NewEventController {
-  Future<Map<String, dynamic>> getHCO({String? hcoId}) async {
+  Future<Map<String, dynamic>> getHCO() async {
     try {
-      final uri = Uri.parse(
-        "${AppApi.baseUrl}${AppApi.hcoLists}",
-      ).replace(queryParameters: hcoId != null ? {'hcoId': hcoId} : null);
+      final uri = Uri.parse("${AppApi.baseUrl}${AppApi.hcoLists}");
+
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+
         return {
           'success': true,
           'data': data['hco'],

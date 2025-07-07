@@ -10,10 +10,7 @@ import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:checkmate/features/auth/screens/dispute_history_screen.dart';
 import 'package:checkmate/features/auth/screens/event_history_screen.dart';
 import 'package:checkmate/features/auth/screens/file_dispute_screen.dart';
-import 'package:checkmate/features/auth/screens/new_event_screen.dart';
-import 'package:checkmate/features/auth/screens/receipt_history_screen.dart';
-// ignore: unused_import
-import 'package:checkmate/features/auth/screens/signin_screen.dart';
+import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -49,47 +46,35 @@ class _HCPDashboardState extends State<HCPDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: DrawerScreen(),
-      appBar: AppAppbar(
-        actions: [
-          IconButton(
-            icon: CircleAvatar(
-              radius: 20,
-              backgroundColor: AppColors.border,
-              child: FaIcon(
-                FontAwesomeIcons.user,
-                color: AppColors.textSecondary,
-                size: 20,
-              ),
-            ),
-            onPressed: () {},
-          ),
-          SizedBox(width: 10),
-        ],
-      ),
-      backgroundColor: AppColors.background,
+    return TopNav(
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// Welcome Text
             Text(
               " ${AppStrings.helloUser} ${widget.user.firstName}",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
+
+            /// User Role Text
             const Text(
               " ${AppStrings.labelHCP}",
               style: TextStyle(fontSize: 16),
             ),
 
             const SizedBox(height: 20),
+
+            /// Upcoming Events Text
             Text(
               " ${AppStrings.upcomingEvents}",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
+
+            /// Upcoming Events Card
             EventsReciptsCard(
               items: [
                 if (events.isNotEmpty) ...{
@@ -102,19 +87,21 @@ class _HCPDashboardState extends State<HCPDashboard> {
                   },
                 } else
                   ...{},
-                // {"title": events[0].eventName!, "date": events[0].startDate!},
-                // {"title": events[1].eventName!, "date": events[1].startDate!},
               ],
               showCheckIn: true,
               onSeeAll: () {},
             ),
 
             const SizedBox(height: 16),
+
+            /// Receipts for Approval Text
             Text(
-              " ${AppStrings.pendingReceipts}",
+              " ${AppStrings.receiptForApproval}",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
+
+            /// Receipts for Approval Card
             EventsReciptsCard(
               items: const [
                 {"title": "diabetesCareSolutions", "date": "26/JUNE/2024"},
@@ -122,72 +109,6 @@ class _HCPDashboardState extends State<HCPDashboard> {
                 {"title": "respiratoryTherapy", "date": "26/JUNE/2024"},
               ],
               onSeeAll: () {},
-            ),
-
-            const SizedBox(height: 20),
-            GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 2.7,
-              children: [
-                Button(
-                  text: AppStrings.eventHistory,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EventHistoryScreen(),
-                      ),
-                    );
-                  },
-                ),
-                Button(
-                  text: AppStrings.receiptHistory,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReceiptHistoryScreen(),
-                      ),
-                    );
-                  },
-                ),
-                Button(
-                  text: AppStrings.disputeHistory,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DisputeHistoryScreen(),
-                      ),
-                    );
-                  },
-                ),
-                Button(
-                  text: AppStrings.fileDispute,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FileDisputeScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Button(
-              text: AppStrings.createNewEvent,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NewEventScreen()),
-                );
-              },
             ),
           ],
         ),

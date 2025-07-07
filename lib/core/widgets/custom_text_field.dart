@@ -9,6 +9,7 @@ class CustomTextField extends StatefulWidget {
   final TextInputType keyboardType;
   final String? Function(String)? validator;
   final void Function(String)? onChanged;
+  final Widget? suffixIcon;
   const CustomTextField({
     super.key,
     required this.controller,
@@ -18,6 +19,7 @@ class CustomTextField extends StatefulWidget {
     this.isRequired = false,
     this.validator,
     this.onChanged,
+    this.suffixIcon,
   });
 
   @override
@@ -124,7 +126,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   });
                 },
               )
-            : null,
+            : widget.suffixIcon,
       ),
     );
   }

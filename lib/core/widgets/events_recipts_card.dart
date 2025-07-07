@@ -1,25 +1,31 @@
 import 'package:checkmate/core/constants/app_colors.dart';
+import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/features/auth/screens/event_details_screen.dart';
 import 'package:checkmate/features/auth/screens/event_history_screen.dart';
-import 'package:checkmate/features/auth/screens/receipt_history_screen.dart';
+import 'package:checkmate/features/auth/screens/pending_receipt_screen.dart';
 import 'package:flutter/material.dart';
 
 class EventsReciptsCard extends StatelessWidget {
   final List<Map<String, String>> items;
   final VoidCallback onSeeAll;
   final bool showCheckIn;
+  final bool isPending;
   const EventsReciptsCard({
     super.key,
     required this.items,
     required this.onSeeAll,
     this.showCheckIn = false,
+    this.isPending = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("items: ${items}");
     return Card(
-      color: AppColors.border,
+      color: isPending
+          ? AppColors.pendingCardColor
+          : AppColors.upcomingCardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: AppColors.border),
@@ -40,20 +46,35 @@ class EventsReciptsCard extends StatelessWidget {
                     children: [
                       InkWell(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  EventDetailsScreen(eventId: item["id"] ?? ''),
-                            ),
-                          );
+                          if (isPending) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PendingReceiptScreen(
+                                  eventId: item["id"] ?? '',
+                                ),
+                              ),
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EventDetailsScreen(
+                                  eventId: item["id"] ?? '',
+                                ),
+                              ),
+                            );
+                          }
                         },
                         child: Tooltip(
                           message: item["title"],
                           child: SizedBox(
-                            width: showCheckIn ? 100 : null,
+                            width: AppSizes().dashboardCardTextLimiter,
                             child: Text(
-                              style: TextStyle(color: AppColors.primary),
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 15,
+                              ),
                               overflow: showCheckIn
                                   ? TextOverflow.ellipsis
                                   : null,
@@ -64,15 +85,15 @@ class EventsReciptsCard extends StatelessWidget {
                         ),
                       ),
                       Text(item["date"] ?? ""),
-                      SizedBox(width: 10),
-                      if (showCheckIn)
-                        InkWell(
-                          onTap: () {},
-                          child: const Text(
-                            AppStrings.checkIn,
-                            style: TextStyle(color: AppColors.primary),
-                          ),
-                        ),
+
+                      // if (showCheckIn)
+                      //   InkWell(
+                      //     onTap: () {},
+                      //     child: const Text(
+                      //       AppStrings.checkIn,
+                      //       style: TextStyle(color: AppColors.primary),
+                      //     ),
+                      //   ),
                     ],
                   ),
                 ),
@@ -87,8 +108,8 @@ class EventsReciptsCard extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => showCheckIn
-                            ? EventHistoryScreen()
-                            : ReceiptHistoryScreen(),
+                            ? EventHistoryScreen(fromDashboard: true)
+                            : EventHistoryScreen(isPending: true),
                       ),
                     );
                   },

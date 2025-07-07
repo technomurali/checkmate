@@ -20,14 +20,14 @@ class AppStrings {
   static const String socialMediaSignUp = " Signup with Social Media";
   static const String emailSignUp = " Signup with Email";
   static const String city = "City";
-  static const String selectThePharma = "Select your Company";
+  static const String selectThePharma = "Search & Select your Company";
   static const String verifyCode = "Verify Code";
   static const String enterVerificationCode = "Enter Verification Code";
   static const String resetPassword = "Reset Password";
   static const String helloUser = "Hello";
   static const String pharmaRep = "Pharma Rep";
   static const String upcomingEvents = "Upcoming Events";
-  static const String pendingReceipts = "Pending Receipts";
+  static const String pendingReceipts = "Pending Approval";
   static const String checkIn = "Check in";
   static const String updateEvent = "Submit Check-in";
   static const String seeAll = "See all";
@@ -36,7 +36,7 @@ class AppStrings {
   static const String disputeHistory = "Dispute History";
   static const String fileDispute = "File Dispute";
   static const String createNewEvent = "Create New Event";
-
+  static const String receiptForApproval = "Awaiting Approval";
   static const String numberOfStaff = "Number of staff";
   static const String hcpInEvent = "HCP's in the event";
   static const String hcoInEvent = "HCO's in the event";
@@ -45,6 +45,7 @@ class AppStrings {
   static const String labelEndDate = "Event End Date";
   static const String labelNumberOfStaff = "Number of Staff";
   static const String labelHCO = "HCO";
+  static const String labelHCOOfficeUser = "OFFICE USER";
   static const String labelHCP = "HCP";
   static const String createEvent = "Create Event";
   static const String requiredField = "Required";
@@ -61,6 +62,22 @@ class AppStrings {
   static const String uploadReceipt = "Upload Receipt";
   static const String chooseFile = "Choose File";
   static const String labelEventStartDate = "Event Start Date";
+  static const String accept = "Accept";
+  static const String deny = "Deny";
+  static const String termsAndConditions = "Please accept terms and conditions";
+  static const String dashboard = "Dashboard";
+  static const String signOut = "Sign out";
+  static const String labelEventDescription = "Event Details";
+  static const String approved = "Approved";
+  static const String pending = "Pending";
+  static const String userProfile = "Profile";
+  static const String sendRequest = "Send Approval Request";
+  static const String save = "Save";
+  static const String edit = "Edit";
+  static const String pharmaCompany = "Pharma Company";
+  static const String labelEventType = "Event Type";
+  static const String selectEventType = "Please select event type";
+  static const String multiDayEvent = "Multi-day Event";
 }
 
 class ErrorText {
@@ -83,4 +100,28 @@ class ErrorText {
   /// Wrong code entered
   static const String wrongCode =
       "Incorrect code. Please check your email and try again";
+}
+
+class UserType {
+  static const String pharmaRep = "PHARMA_REP";
+  static const String hco = "OFFICE_USER";
+  static const String hcp = "HCP";
+}
+
+class EventStatus {
+  static const String upcoming = "UPCOMING";
+  static const String completed = "COMPLETED";
+  static const String pending = "PENDING";
+  static const String approved = "APPROVED";
+  static const String rejected = "REJECTED";
+  static const String cancelled = "CANCELLED";
+}
+
+class SuccessStrings {
+  static const String profileSaved = "Profile saved";
+}
+
+class EventType {
+  static const String lunch = "Lunch";
+  static const String dinner = "Dinner";
 }

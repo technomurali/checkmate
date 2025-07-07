@@ -5,7 +5,8 @@ import 'package:checkmate/features/auth/business_logic/forgot_password_screen_lo
 import 'package:checkmate/features/auth/business_logic/signup_screen_logic.dart';
 import 'package:checkmate/features/auth/business_logic/signin_screen_logic.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
-import 'package:checkmate/features/auth/screens/hco_dashboard.dart';
+import 'package:checkmate/features/auth/screens/hcp_dashboard.dart';
+import 'package:checkmate/features/auth/screens/office_user_dashboard_screen.dart';
 import 'package:checkmate/features/auth/screens/pharma_rep_dashboard.dart';
 import 'package:checkmate/features/auth/screens/forgot_password_screen.dart';
 import 'package:checkmate/features/auth/screens/signup_screen.dart';
@@ -51,6 +52,8 @@ class SigninScreen extends StatelessWidget {
               obscureText: true,
               controller: TextControllers.password,
             ),
+
+            ///Forget Password Button
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
@@ -71,6 +74,8 @@ class SigninScreen extends StatelessWidget {
                 ),
               ),
             ),
+
+            ///Sign in button
             Button(
               isDisabled: !logic.isButtonEnabled,
               text: AppStrings.signin,
@@ -78,14 +83,21 @@ class SigninScreen extends StatelessWidget {
                 final user = await logic.signinUser(context);
                 if (user != null) {
                   debugPrint("user: ${user.role}");
-                  if (user.role == "HCP") {
+                  if (user.role == UserType.hcp) {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (_) => HCPDashboard(user: user),
                       ),
                     );
-                  } else {
+                  } else if (user.role == UserType.hco) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => OfficeUserDashboardScreen(user: user),
+                      ),
+                    );
+                  } else if (user.role == UserType.pharmaRep) {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -97,6 +109,8 @@ class SigninScreen extends StatelessWidget {
               },
             ),
             const SizedBox(height: 16),
+
+            ///Sign-up Text and button
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -124,6 +138,7 @@ class SigninScreen extends StatelessWidget {
             const Text(AppStrings.signInWith),
             const SizedBox(height: 8),
 
+            ///Social Media Signin
             const SocialButtonsRow(),
           ],
         ),

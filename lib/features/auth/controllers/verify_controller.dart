@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:checkmate/core/constants/app_Api.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class VerifyController {
@@ -13,7 +14,7 @@ class VerifyController {
       );
 
       final responseBody = jsonDecode(response.body);
-
+      debugPrint(responseBody.toString());
       if (response.statusCode == 201) {
         return {
           ModalKeys().statusCode: response.statusCode,

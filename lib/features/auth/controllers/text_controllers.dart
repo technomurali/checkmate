@@ -20,6 +20,8 @@ class EventTextControllers {
   static TextEditingController amountController = TextEditingController();
   static TextEditingController pharmaRepController = TextEditingController();
   static TextEditingController hcoController = TextEditingController();
+  static TextEditingController eventDescriptionController =
+      TextEditingController();
 }
 
 class NewEventTextControllers {
@@ -31,4 +33,21 @@ class NewEventTextControllers {
   static TextEditingController amountController = TextEditingController();
   static TextEditingController pharmaRepController = TextEditingController();
   static TextEditingController hcoController = TextEditingController();
+  static TextEditingController eventDescriptionController =
+      TextEditingController();
+}
+
+class UserProfileTextControllers {
+  static TextEditingController profileUrlController = TextEditingController();
+  static TextEditingController fullNameController = TextEditingController();
+  static TextEditingController firstNameController = TextEditingController();
+  static TextEditingController lastNameController = TextEditingController();
+  static TextEditingController emailController = TextEditingController();
+  static TextEditingController phoneNumberController = TextEditingController();
+  static TextEditingController cityController = TextEditingController();
+  static TextEditingController stateController = TextEditingController();
+  static TextEditingController countryController = TextEditingController();
+  static TextEditingController zipCodeController = TextEditingController();
+  static TextEditingController companyController = TextEditingController();
+  static TextEditingController roleController = TextEditingController();
 }

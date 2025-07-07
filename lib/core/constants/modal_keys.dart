@@ -5,7 +5,8 @@ class ModalKeys
         EmailVerificationKeys,
         ResetPasswordKeys,
         SigninModalKeys,
-        UserModalKeys {}
+        UserModalKeys,
+        HCOModalKeys {}
 
 mixin SignUpModalKeys {
   final String email = "email";
@@ -33,6 +34,9 @@ mixin UserModalKeys {
   final String userCity = 'city';
   final String userPharmaCompany = 'pharmaCompany';
   final String userRole = 'user_role';
+  final String userHco = 'hco';
+  final String userProfileUrl = 'profileUrl';
+  final String userModeOfAuthentication = 'modeOfAuthentication';
 }
 
 mixin PharmaModalKeys {
@@ -61,9 +65,20 @@ mixin EventsModalKeys {
   static const String eventStartDate = "startDate";
   static const String eventEndDate = "endDate";
   static const String eventNumberOfStaff = "numberOfStaff";
-  static const String eventHCO = "HCO";
-  static const String eventHCP = "HCP";
+  static const String eventHCO = "hco";
+  static const String eventHCP = "hcp";
   static const String eventAmount = "amount";
   static const String eventStatusKey = "eventStatus";
   static const String eventApprovalStatus = "approvalStatus";
+  static const String eventDescription = "eventDescription";
+  static const String eventType = "eventType";
+}
+
+mixin HCOModalKeys {
+  static const String hcoId = "hcoId";
+  static const String hcoName = "hcoName";
+}
+mixin HCPModalKeys {
+  static const String hcpId = "hcpId";
+  static const String hcpName = "hcpName";
 }

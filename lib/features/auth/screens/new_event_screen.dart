@@ -1,6 +1,9 @@
+import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
+import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:checkmate/features/auth/controllers/new_event_controller.dart';
@@ -17,12 +20,13 @@ class _NewEventScreenState extends State<NewEventScreen> {
   DateTime startDatePicked = DateTime.now();
   String? _selectedHCOId;
   String? _selectedHCOName;
-  List<String> _selectedHCP = [];
+  List<Map<String, dynamic>> _selectedHCP = [];
   bool isMultiDay = false;
+  String? _selectedEventType;
 
   final NewEventController _newEventController = NewEventController();
   List<Map<String, dynamic>> _hcos = [];
-  List<String> _hcps = [];
+  List<Map<String, dynamic>> _hcps = [];
 
   @override
   void initState() {
@@ -45,7 +49,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
   // void fetchHCPs(String hcoId) async {
   //   setState(() {
-  //     _isHcpLoading = true;
   //     _hcps = [];
   //     _selectedHCP = [];
   //   });
@@ -53,12 +56,12 @@ class _NewEventScreenState extends State<NewEventScreen> {
   //   if (result['success'] == true && result['data'] != null) {
   //     setState(() {
   //       _hcps = List<String>.from(result['data'].map((e) => e.toString()));
-  //       _isHcpLoading = false;
+
   //     });
   //   } else {
   //     setState(() {
   //       _hcps = [];
-  //       _isHcpLoading = false;
+
   //     });
   //   }
   // }
@@ -74,6 +77,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
         "amount": NewEventTextControllers.amountController.text,
         "HCO": _selectedHCOId,
         "HCP": _selectedHCP,
+        "eventType": _selectedEventType,
         "eventStatus": "U",
       };
 
@@ -99,8 +103,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.createNewEvent)),
+    return TopNav(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -110,6 +113,67 @@ class _NewEventScreenState extends State<NewEventScreen> {
             children: [
               Column(
                 children: [
+                  /// HCO Dropdown
+                  DropdownSearch<String>(
+                    items: (filter, loadProps) {
+                      return _hcos
+                          .map((hco) => hco['hcoName'] as String)
+                          .toList();
+                    },
+                    selectedItem: _selectedHCOName,
+                    decoratorProps: const DropDownDecoratorProps(
+                      decoration: InputDecoration(
+                        labelText: AppStrings.labelHCO,
+                      ),
+                    ),
+                    onChanged: (value) {
+                      final selected = _hcos.firstWhere(
+                        (hco) => hco['hcoName'] == value,
+                        orElse: () => {},
+                      );
+                      setState(() {
+                        _selectedHCOName = value;
+                        _selectedHCOId = selected['hcoId']?.toString();
+                        _selectedHCP = [];
+                        _hcps = List<Map<String, dynamic>>.from(
+                          selected['hcps'],
+                        );
+                      });
+                      // if (_selectedHCOId != null) {
+                      //   fetchHCPs(_selectedHCOId!);
+                      // }
+                    },
+                    validator: (value) => value == null || value.isEmpty
+                        ? AppStrings.selectHCO
+                        : null,
+                  ),
+                  const SizedBox(height: 10),
+
+                  /// Event Type Dropdown
+                  DropdownButtonFormField<String>(
+                    value: _selectedEventType,
+                    decoration: InputDecoration(
+                      labelText: AppStrings.labelEventType,
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: EventType.lunch,
+                        child: Text(EventType.lunch),
+                      ),
+                      DropdownMenuItem(
+                        value: EventType.dinner,
+                        child: Text(EventType.dinner),
+                      ),
+                    ],
+                    onChanged: (value) =>
+                        setState(() => _selectedEventType = value),
+                    validator: (value) => value == null || value.isEmpty
+                        ? AppStrings.selectEventType
+                        : null,
+                  ),
+                  const SizedBox(height: 10),
+
+                  /// Event Name TextField
                   TextFormField(
                     controller: NewEventTextControllers.eventNameController,
                     decoration: const InputDecoration(
@@ -120,8 +184,26 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         : null,
                   ),
                   const SizedBox(height: 10),
+
+                  /// Event Description TextField
+                  TextField(
+                    autocorrect: true,
+                    minLines: AppSizes().eventDescriptionMinLines,
+                    controller:
+                        NewEventTextControllers.eventDescriptionController,
+                    decoration: InputDecoration(
+                      labelText: AppStrings.labelEventDescription,
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                  ),
+                  SizedBox(height: 10),
+
+                  /// Multi-day Event Checkbox
                   CheckboxListTile(
-                    title: Text('Multi-day Event'),
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(AppStrings.multiDayEvent),
                     value: isMultiDay,
                     onChanged: (val) {
                       setState(() {
@@ -135,6 +217,8 @@ class _NewEventScreenState extends State<NewEventScreen> {
                   ),
 
                   const SizedBox(height: 10),
+
+                  /// Start Date TextField
                   TextFormField(
                     controller: NewEventTextControllers.startDateController,
                     readOnly: true,
@@ -161,6 +245,8 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         : null,
                   ),
                   const SizedBox(height: 10),
+
+                  /// Multi-day Event Start Date
                   if (isMultiDay)
                     TextFormField(
                       controller: NewEventTextControllers.endDateController,
@@ -185,6 +271,8 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           ? AppStrings.requiredField
                           : null,
                     ),
+
+                  /// Multi-day Event End Date
                   if (isMultiDay) const SizedBox(height: 10),
                   TextFormField(
                     controller: NewEventTextControllers.numberOfStaffController,
@@ -197,42 +285,41 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         : null,
                   ),
                   const SizedBox(height: 10),
-                  DropdownSearch<String>(
-                    items: (filter, loadProps) {
-                      debugPrint("HCOs: $_hcos");
-                      return _hcos
-                          .map((hco) => hco['hcoName'] as String)
-                          .toList();
+
+                  /// HCP Dropdown
+                  DropdownSearch<Map<String, dynamic>>.multiSelection(
+                    items: (filter, loadProps) => _hcps
+                        .map<Map<String, dynamic>>(
+                          (e) => {
+                            HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
+                                .toString(),
+                            HCPModalKeys.hcpName: e[HCPModalKeys.hcpName],
+                          },
+                        )
+                        .toList(),
+                    selectedItems: _selectedHCP
+                        .map<Map<String, dynamic>>(
+                          (e) => {
+                            HCPModalKeys.hcpId:
+                                (e[HCPModalKeys.hcpId] ??
+                                        e[HCPModalKeys.hcpId] ??
+                                        "")
+                                    .toString(),
+                            HCPModalKeys.hcpName:
+                                e[HCPModalKeys.hcpName] ??
+                                e[HCPModalKeys.hcpName] ??
+                                e.toString(),
+                          },
+                        )
+                        .toList(),
+                    itemAsString: (item) {
+                      return item[HCPModalKeys.hcpName] ??
+                          item[HCPModalKeys.hcpName] ??
+                          "";
                     },
-                    selectedItem: _selectedHCOName,
-                    decoratorProps: const DropDownDecoratorProps(
-                      decoration: InputDecoration(
-                        labelText: AppStrings.labelHCO,
-                      ),
-                    ),
-                    onChanged: (value) {
-                      final selected = _hcos.firstWhere(
-                        (hco) => hco['hcoName'] == value,
-                        orElse: () => {},
-                      );
-                      setState(() {
-                        _selectedHCOName = value;
-                        _selectedHCOId = selected['hcoId']?.toString();
-                        _selectedHCP = [];
-                        _hcps = List<String>.from(selected['hcps']);
-                      });
-                      // if (_selectedHCOId != null) {
-                      //   fetchHCPs(_selectedHCOId!);
-                      // }
-                    },
-                    validator: (value) => value == null || value.isEmpty
-                        ? AppStrings.selectHCO
-                        : null,
-                  ),
-                  const SizedBox(height: 10),
-                  DropdownSearch<String>.multiSelection(
-                    items: (filter, loadProps) => _hcps,
-                    selectedItems: _selectedHCP,
+                    compareFn: (item, selectedItem) =>
+                        item[HCPModalKeys.hcpId] ==
+                        selectedItem[HCPModalKeys.hcpId],
                     decoratorProps: const DropDownDecoratorProps(
                       decoration: InputDecoration(
                         labelText: AppStrings.labelHCP,
@@ -246,6 +333,8 @@ class _NewEventScreenState extends State<NewEventScreen> {
                   const SizedBox(height: 10),
                 ],
               ),
+
+              /// Create Event Button
               Button(onPressed: _submitForm, text: AppStrings.createEvent),
             ],
           ),

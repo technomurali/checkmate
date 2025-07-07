@@ -39,6 +39,9 @@ void main() {
     city: 'Mumbai',
     pharmaCompany: 'Pharma Inc',
     role: 'HCP',
+    hco: [],
+    profileUrl: 'https://example.com/profile.jpg',
+    modeOfAuthentication: 'email',
   );
 
   testWidgets('TC001: Valid email and valid password', (tester) async {
@@ -371,6 +374,9 @@ void main() {
       city: 'TimeoutCity',
       pharmaCompany: 'DelayPharma',
       role: 'HCP',
+      hco: [],
+      profileUrl: 'https://example.com/profile.jpg',
+      modeOfAuthentication: 'email',
     );
 
     when(
@@ -515,6 +521,9 @@ void main() {
           city: 'ResetCity',
           pharmaCompany: 'ResetPharma',
           role: 'HCP',
+          hco: [],
+          profileUrl: 'https://example.com/profile.jpg',
+          modeOfAuthentication: 'email',
         ),
       },
     );
@@ -684,6 +693,9 @@ void main() {
           city: 'Tapcity',
           pharmaCompany: 'TapPharma',
           role: 'HCP',
+          hco: [],
+          profileUrl: 'https://example.com/profile.jpg',
+          modeOfAuthentication: 'email',
         ),
       };
     });
@@ -730,6 +742,9 @@ void main() {
           city: 'NavCity',
           pharmaCompany: 'NavPharma',
           role: 'HCP',
+          hco: [],
+          profileUrl: 'https://example.com/profile.jpg',
+          modeOfAuthentication: 'email',
         ),
       },
     );
