@@ -10,6 +10,7 @@ class CustomTextField extends StatefulWidget {
   final String? Function(String)? validator;
   final void Function(String)? onChanged;
   final Widget? suffixIcon;
+  final bool readOnly;
   const CustomTextField({
     super.key,
     required this.controller,
@@ -20,6 +21,7 @@ class CustomTextField extends StatefulWidget {
     this.validator,
     this.onChanged,
     this.suffixIcon,
+    this.readOnly = false,
   });
 
   @override
@@ -72,6 +74,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      enabled: !widget.readOnly,
       onChanged: (value) {
         setState(() {
           hasUserInteracted = true;

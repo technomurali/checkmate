@@ -13,9 +13,11 @@ class UserModal {
     required this.hco,
     required this.profileUrl,
     required this.modeOfAuthentication,
+    this.npiNumber,
+    this.phoneNumber,
   });
 
-  final int? id;
+  final String? id;
   final String? email;
   final String? password;
   final String? firstName;
@@ -26,9 +28,11 @@ class UserModal {
   final List<dynamic>? hco;
   final String? profileUrl;
   final String? modeOfAuthentication;
+  final String? npiNumber;
+  final String? phoneNumber;
 
   UserModal copyWith({
-    int? id,
+    String? id,
     String? email,
     String? password,
     String? firstName,
@@ -39,6 +43,8 @@ class UserModal {
     List<dynamic>? hco,
     String? profileUrl,
     String? modeOfAuthentication,
+    String? npiNumber,
+    String? phoneNumber,
   }) {
     return UserModal(
       id: id ?? this.id,
@@ -52,6 +58,8 @@ class UserModal {
       hco: hco ?? this.hco,
       profileUrl: profileUrl ?? this.profileUrl,
       modeOfAuthentication: modeOfAuthentication ?? this.modeOfAuthentication,
+      npiNumber: npiNumber ?? this.npiNumber,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
     );
   }
 
@@ -68,6 +76,8 @@ class UserModal {
       hco: json[ModalKeys().userHco],
       profileUrl: json[ModalKeys().userProfileUrl],
       modeOfAuthentication: json[ModalKeys().userModeOfAuthentication],
+      npiNumber: json[ModalKeys().userNpiNumber],
+      phoneNumber: json[ModalKeys().userPhoneNumber],
     );
   }
 
@@ -83,10 +93,12 @@ class UserModal {
     ModalKeys().userHco: hco,
     ModalKeys().userProfileUrl: profileUrl,
     ModalKeys().userModeOfAuthentication: modeOfAuthentication,
+    ModalKeys().userNpiNumber: npiNumber,
+    ModalKeys().userPhoneNumber: phoneNumber,
   };
   factory UserModal.empty() {
     return UserModal(
-      id: 0,
+      id: "0",
       email: '',
       password: 'password',
       firstName: 'firstName',
@@ -97,6 +109,8 @@ class UserModal {
       hco: [],
       profileUrl: '',
       modeOfAuthentication: '',
+      npiNumber: '',
+      phoneNumber: '',
     );
   }
 }

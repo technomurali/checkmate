@@ -13,6 +13,7 @@ class AppApi {
   static const String newEvent = 'new-event';
   static const String hcoLists = 'hco-lists';
   static const String hcpLists = 'hcp-lists';
+  static const String disputes = 'disputes';
 }
 
 class AppApiStatusCodes {

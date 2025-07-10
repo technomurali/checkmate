@@ -51,3 +51,28 @@ class UserProfileTextControllers {
   static TextEditingController companyController = TextEditingController();
   static TextEditingController roleController = TextEditingController();
 }
+
+class DisputeFormTextControllers {
+  // 1. HCP Details
+  static TextEditingController fullNameController = TextEditingController();
+  static TextEditingController npiNumberController = TextEditingController();
+  static TextEditingController organizationNameController =
+      TextEditingController();
+  static TextEditingController emailController = TextEditingController();
+  static TextEditingController phoneController = TextEditingController();
+
+  // 2. Transaction Details
+  static TextEditingController pharmaCompanyController =
+      TextEditingController();
+  static TextEditingController eventInteractionController =
+      TextEditingController();
+  static TextEditingController paymentDateController = TextEditingController();
+  static TextEditingController paymentAmountController =
+      TextEditingController();
+  static TextEditingController paymentTypeController = TextEditingController();
+  static TextEditingController referenceNumberController =
+      TextEditingController();
+
+  // 3. Dispute Reason
+  static TextEditingController descriptionController = TextEditingController();
+}

@@ -3,6 +3,7 @@ import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
+import 'package:checkmate/features/auth/controllers/new_event_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/features/auth/model/hcp_modal.dart';
@@ -22,16 +23,21 @@ class EventDetailsScreen extends StatefulWidget {
 
 class _EventDetailsScreenState extends State<EventDetailsScreen> {
   final EventController _eventController = EventController();
+  final NewEventController _newEventController = NewEventController();
   EventModal event = EventModal.empty();
   bool isCheckedIn = false;
   String? _selectedSignInSheetFileName;
   String? _selectedReceiptFileName;
   DateTime? _checkInDateTime;
   List<Hcp> hcpList = [];
+  List<Hcp> hcpPractioners = [];
+  bool hcpInHcoSelected = true;
+  bool isEdit = false;
   @override
   void initState() {
     super.initState();
     fetchEvent();
+    fetchHcpPractionners();
     EventTextControllers.startDateController = TextEditingController(
       text: event.startDate,
     );
@@ -77,6 +83,22 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
         );
   }
 
+  fetchHcpPractionners() async {
+    final result = await _newEventController.getHCP();
+    if (result['success'] == true && result['data'] != null) {
+      print("hcp practionners: ${result['data'].runtimeType}");
+      var hcpPractionners = List<Hcp>.from(
+        List<Map<String, dynamic>>.from(
+          result['data'],
+        ).map((e) => Hcp.fromJson(e)),
+      );
+      print("hcp practionners: $hcpPractionners");
+      setState(() {
+        hcpPractioners = hcpPractionners;
+      });
+    }
+  }
+
   fetchHcp(String hcoId) {
     _eventController.fetchHcp(hcoId: hcoId).then((v) {
       setState(() {
@@ -103,6 +125,27 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            isEdit = !isEdit;
+                          });
+                        },
+                        child: Icon(
+                          Icons.edit,
+                          color: !isEdit ? AppColors.blue : AppColors.border,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      InkWell(
+                        onTap: () {},
+                        child: Icon(Icons.delete, color: AppColors.accentError),
+                      ),
+                    ],
+                  ),
                   SizedBox(height: 15),
                   for (var i = 0; i < event.hco.length; i++) ...{
                     TextFormField(
@@ -133,7 +176,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   SizedBox(height: 16),
                   TextFormField(
                     enabled:
-                        userModal.role == UserType.pharmaRep && isCheckedIn,
+                        (userModal.role == UserType.pharmaRep && isCheckedIn) ||
+                        isEdit,
                     controller: EventTextControllers.eventNameController,
                     decoration: InputDecoration(
                       labelText: AppStrings.labelEventName,
@@ -147,7 +191,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   Divider(),
                   TextField(
                     enabled:
-                        userModal.role == UserType.pharmaRep && isCheckedIn,
+                        (userModal.role == UserType.pharmaRep && isCheckedIn) ||
+                        isEdit,
                     autocorrect: true,
                     minLines: AppSizes().eventDescriptionMinLines,
                     controller: EventTextControllers.eventDescriptionController,
@@ -160,7 +205,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   ),
                   SizedBox(height: 16),
                   TextFormField(
-                    enabled: isCheckedIn,
+                    enabled: isCheckedIn || isEdit,
                     controller: EventTextControllers.startDateController,
                     readOnly: true,
                     decoration: InputDecoration(
@@ -191,7 +236,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   SizedBox(height: 16),
                   event.endDate != null
                       ? TextFormField(
-                          enabled: isCheckedIn,
+                          enabled: isCheckedIn || isEdit,
                           controller: EventTextControllers.endDateController,
                           readOnly: true,
                           decoration: InputDecoration(
@@ -222,7 +267,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   SizedBox(height: 16),
                   TextFormField(
                     enabled:
-                        userModal.role == UserType.pharmaRep && isCheckedIn,
+                        (userModal.role == UserType.pharmaRep && isCheckedIn) ||
+                        isEdit,
                     controller: EventTextControllers.numberOfStaffController,
                     decoration: InputDecoration(
                       labelText: AppStrings.labelNumberOfStaff,
@@ -237,48 +283,176 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   SizedBox(height: 16),
 
                   // Text(AppStrings.hcpInEvent),
-                  SizedBox(height: 10),
-                  DropdownSearch<Map<String, dynamic>>.multiSelection(
-                    enabled:
-                        userModal.role == UserType.pharmaRep && isCheckedIn,
-                    items: (filter, loadProps) => hcpList
-                        .map<Map<String, dynamic>>(
-                          (e) => {
-                            "hcpId": (e.hcpId).toString(),
-                            "hcpName": e.hcpName,
-                          },
-                        )
-                        .toList(),
-                    selectedItems: event.hcp
-                        .map<Map<String, dynamic>>(
-                          (e) => {
-                            "hcpId": (e["hcpId"] ?? e['id'] ?? "").toString(),
-                            "hcpName":
-                                e["hcpName"] ?? e['name'] ?? e.toString(),
-                          },
-                        )
-                        .toList(),
-                    itemAsString: (item) => item["hcpName"] ?? "",
-                    compareFn: (item, selectedItem) =>
-                        item["hcpId"] == selectedItem["hcpId"],
-                    decoratorProps: const DropDownDecoratorProps(
-                      decoration: InputDecoration(
-                        labelText: AppStrings.hcpInEvent,
+                  if (isEdit)
+                    Container(
+                      width: double.infinity,
+                      height: 40,
+                      // padding: EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            flex: 1,
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  hcpInHcoSelected = true;
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: hcpInHcoSelected
+                                      ? AppColors.primary
+                                      : AppColors.transparent,
+                                  border: Border.all(color: AppColors.border),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                width: double.infinity,
+                                height: 50,
+
+                                child: Center(
+                                  child: Text(
+                                    "HCP in HCO",
+                                    style: TextStyle(
+                                      color: hcpInHcoSelected
+                                          ? AppColors.background
+                                          : AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            flex: 1,
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  hcpInHcoSelected = false;
+                                });
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: hcpInHcoSelected
+                                      ? AppColors.transparent
+                                      : AppColors.primary,
+                                  border: Border.all(color: AppColors.border),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "HCP Practitioner",
+                                    style: TextStyle(
+                                      color: !hcpInHcoSelected
+                                          ? AppColors.background
+                                          : AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        event = event.copyWith(
-                          hcp: value
-                              .map<Map<String, dynamic>>((e) => e)
-                              .toList(),
-                        );
-                      });
-                    },
-                    validator: (value) => value == null || value.isEmpty
-                        ? AppStrings.selectHCP
-                        : null,
-                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
+                  if (hcpInHcoSelected)
+                    DropdownSearch<Map<String, dynamic>>.multiSelection(
+                      enabled:
+                          (userModal.role == UserType.pharmaRep &&
+                              isCheckedIn) ||
+                          isEdit,
+                      items: (filter, loadProps) => hcpList
+                          .map<Map<String, dynamic>>(
+                            (e) => {
+                              "hcpId": (e.hcpId).toString(),
+                              "hcpName": e.hcpName,
+                            },
+                          )
+                          .toList(),
+                      selectedItems: event.hcp
+                          .map<Map<String, dynamic>>(
+                            (e) => {
+                              "hcpId": (e["hcpId"] ?? e['id'] ?? "").toString(),
+                              "hcpName":
+                                  e["hcpName"] ?? e['name'] ?? e.toString(),
+                            },
+                          )
+                          .toList(),
+                      itemAsString: (item) => item["hcpName"] ?? "",
+                      compareFn: (item, selectedItem) =>
+                          item["hcpId"] == selectedItem["hcpId"],
+                      decoratorProps: const DropDownDecoratorProps(
+                        decoration: InputDecoration(
+                          labelText: AppStrings.hcpInEvent,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          event = event.copyWith(
+                            hcp: value
+                                .map<Map<String, dynamic>>((e) => e)
+                                .toList(),
+                          );
+                        });
+                      },
+                      validator: (value) => value == null || value.isEmpty
+                          ? AppStrings.selectHCP
+                          : null,
+                    ),
+
+                  if (!hcpInHcoSelected)
+                    DropdownSearch<Map<String, dynamic>>.multiSelection(
+                      enabled:
+                          (userModal.role == UserType.pharmaRep &&
+                              isCheckedIn) ||
+                          isEdit,
+                      items: (filter, loadProps) =>
+                          hcpPractioners.map<Map<String, dynamic>>((e) {
+                            print("hcp practionners name: ${e.hcpName}");
+                            return {
+                              "hcpId": (e.hcpId).toString(),
+                              "hcpName": e.hcpName,
+                            };
+                          }).toList(),
+                      selectedItems: event.hcp
+                          .map<Map<String, dynamic>>(
+                            (e) => {
+                              "hcpId": (e["hcpId"] ?? e['id'] ?? "").toString(),
+                              "hcpName":
+                                  e["hcpName"] ?? e['name'] ?? e.toString(),
+                            },
+                          )
+                          .toList(),
+                      itemAsString: (item) => item["hcpName"] ?? "",
+                      compareFn: (item, selectedItem) =>
+                          item["hcpId"] == selectedItem["hcpId"],
+                      decoratorProps: const DropDownDecoratorProps(
+                        decoration: InputDecoration(
+                          labelText: AppStrings.hcpInEvent,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          event = event.copyWith(
+                            hcp: value
+                                .map<Map<String, dynamic>>((e) => e)
+                                .toList(),
+                          );
+                        });
+                      },
+                      validator: (value) => value == null || value.isEmpty
+                          ? AppStrings.selectHCP
+                          : null,
+                    ),
+
                   SizedBox(height: 16),
                   if (isCheckedIn && _checkInDateTime != null)
                     Padding(
@@ -336,7 +510,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Selected: [32m[1m[4m$_selectedReceiptFileName[0m',
+                          'Selected:  [32m [1m [4m$_selectedReceiptFileName [0m',
                         ),
                       ),
                     SizedBox(height: 16),
@@ -370,21 +544,25 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Selected: [32m[1m[4m$_selectedSignInSheetFileName[0m',
+                          'Selected:  [32m [1m [4m$_selectedSignInSheetFileName [0m',
                         ),
                       ),
                     SizedBox(height: 16),
                   },
                 ],
               ),
-              if (userModal.role == UserType.pharmaRep) ...{
+              if (isEdit)
+                Button(text: AppStrings.updateEvent, onPressed: () {}),
+              if (userModal.role == UserType.pharmaRep &&
+                  event.eventStatus == EventStatus.upcoming &&
+                  !isEdit) ...{
                 Button(
                   isDisabled:
                       (_selectedReceiptFileName == null ||
                           EventTextControllers.amountController.text.isEmpty) &&
                       isCheckedIn,
                   text: isCheckedIn
-                      ? AppStrings.updateEvent
+                      ? AppStrings.submitCheckIn
                       : AppStrings.checkIn,
                   onPressed: () {
                     setState(() {

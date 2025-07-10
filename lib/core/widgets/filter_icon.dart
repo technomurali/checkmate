@@ -20,6 +20,10 @@ class FilterIcon extends StatelessWidget {
         return rejectedIcon();
       case "PENDING":
         return pendingIcon();
+      case "OPEN":
+        return openIcon();
+      case "CLOSED":
+        return closedIcon();
       default:
         return Icon(Icons.all_inclusive, color: AppColors.grey);
     }
@@ -38,6 +42,18 @@ Container upcomingIcon() {
   );
 }
 
+Container openIcon() {
+  return Container(
+    margin: EdgeInsets.only(right: 10),
+    padding: EdgeInsets.all(10),
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: AppColors.accentPending,
+    ),
+    child: Text("O"),
+  );
+}
+
 Container completedIcon() {
   return Container(
     margin: EdgeInsets.only(right: 10),
@@ -47,6 +63,18 @@ Container completedIcon() {
       color: AppColors.successGreen,
     ),
     child: Text("C"),
+  );
+}
+
+Container closedIcon() {
+  return Container(
+    margin: EdgeInsets.only(right: 10),
+    padding: EdgeInsets.all(10),
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: AppColors.accentError,
+    ),
+    child: Text("C", style: TextStyle(color: AppColors.background)),
   );
 }
 

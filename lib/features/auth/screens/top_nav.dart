@@ -2,7 +2,7 @@ import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/top_nav_tile.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
-import 'package:checkmate/features/auth/screens/file_dispute_screen.dart';
+import 'package:checkmate/features/auth/screens/dispute_form_screen.dart';
 import 'package:checkmate/features/auth/screens/dispute_history_screen.dart';
 import 'package:checkmate/features/auth/screens/new_event_screen.dart';
 import 'package:checkmate/features/auth/screens/profile_screen.dart';
@@ -110,7 +110,7 @@ class _TopNavState extends State<TopNav> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => FileDisputeScreen(),
+                            builder: (context) => DisputeFormScreen(),
                           ),
                         );
                       },

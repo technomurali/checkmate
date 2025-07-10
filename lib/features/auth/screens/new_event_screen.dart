@@ -1,3 +1,4 @@
+import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
@@ -27,11 +28,14 @@ class _NewEventScreenState extends State<NewEventScreen> {
   final NewEventController _newEventController = NewEventController();
   List<Map<String, dynamic>> _hcos = [];
   List<Map<String, dynamic>> _hcps = [];
+  List<Map<String, dynamic>> _hcpPractitioners = [];
+  bool hcpInHcoSelected = true;
 
   @override
   void initState() {
     super.initState();
     fetchHCOs();
+    fetchHCPs();
   }
 
   void fetchHCOs() async {
@@ -39,6 +43,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
     if (result['success'] == true && result['data'] != null) {
       setState(() {
         _hcos = List<Map<String, dynamic>>.from(result['data']);
+        print("hco hcps: ${_hcos}");
       });
     } else {
       setState(() {
@@ -47,24 +52,19 @@ class _NewEventScreenState extends State<NewEventScreen> {
     }
   }
 
-  // void fetchHCPs(String hcoId) async {
-  //   setState(() {
-  //     _hcps = [];
-  //     _selectedHCP = [];
-  //   });
-  //   final result = await _newEventController.getHCP(hcoId: hcoId);
-  //   if (result['success'] == true && result['data'] != null) {
-  //     setState(() {
-  //       _hcps = List<String>.from(result['data'].map((e) => e.toString()));
-
-  //     });
-  //   } else {
-  //     setState(() {
-  //       _hcps = [];
-
-  //     });
-  //   }
-  // }
+  void fetchHCPs() async {
+    final result = await _newEventController.getHCP();
+    if (result['success'] == true && result['data'] != null) {
+      setState(() {
+        _hcpPractitioners = List<Map<String, dynamic>>.from(result['data']);
+        print('pract hcps: $_hcpPractitioners');
+      });
+    } else {
+      setState(() {
+        _hcpPractitioners = [];
+      });
+    }
+  }
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
@@ -135,6 +135,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         _selectedHCOName = value;
                         _selectedHCOId = selected['hcoId']?.toString();
                         _selectedHCP = [];
+                        print("selected hcps: ${selected['hcps']}");
                         _hcps = List<Map<String, dynamic>>.from(
                           selected['hcps'],
                         );
@@ -285,51 +286,178 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         : null,
                   ),
                   const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        Flexible(
+                          flex: 1,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                hcpInHcoSelected = true;
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: hcpInHcoSelected
+                                    ? AppColors.primary
+                                    : AppColors.transparent,
+                                border: Border.all(color: AppColors.border),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              width: double.infinity,
+                              height: 50,
+
+                              child: Center(
+                                child: Text(
+                                  "HCP in HCO",
+                                  style: TextStyle(
+                                    color: hcpInHcoSelected
+                                        ? AppColors.background
+                                        : AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          flex: 1,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                hcpInHcoSelected = false;
+                              });
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: hcpInHcoSelected
+                                    ? AppColors.transparent
+                                    : AppColors.primary,
+                                border: Border.all(color: AppColors.border),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "HCP Practitioner",
+                                  style: TextStyle(
+                                    color: !hcpInHcoSelected
+                                        ? AppColors.background
+                                        : AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
 
                   /// HCP Dropdown
-                  DropdownSearch<Map<String, dynamic>>.multiSelection(
-                    items: (filter, loadProps) => _hcps
-                        .map<Map<String, dynamic>>(
-                          (e) => {
-                            HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
-                                .toString(),
-                            HCPModalKeys.hcpName: e[HCPModalKeys.hcpName],
-                          },
-                        )
-                        .toList(),
-                    selectedItems: _selectedHCP
-                        .map<Map<String, dynamic>>(
-                          (e) => {
-                            HCPModalKeys.hcpId:
-                                (e[HCPModalKeys.hcpId] ??
-                                        e[HCPModalKeys.hcpId] ??
-                                        "")
+                  if (hcpInHcoSelected)
+                    DropdownSearch<Map<String, dynamic>>.multiSelection(
+                      items: (filter, loadProps) {
+                        print("hcps: ${_hcps}");
+                        return _hcps
+                            .map<Map<String, dynamic>>(
+                              (e) => {
+                                HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
                                     .toString(),
-                            HCPModalKeys.hcpName:
-                                e[HCPModalKeys.hcpName] ??
-                                e[HCPModalKeys.hcpName] ??
-                                e.toString(),
-                          },
-                        )
-                        .toList(),
-                    itemAsString: (item) {
-                      return item[HCPModalKeys.hcpName] ??
-                          item[HCPModalKeys.hcpName] ??
-                          "";
-                    },
-                    compareFn: (item, selectedItem) =>
-                        item[HCPModalKeys.hcpId] ==
-                        selectedItem[HCPModalKeys.hcpId],
-                    decoratorProps: const DropDownDecoratorProps(
-                      decoration: InputDecoration(
-                        labelText: AppStrings.labelHCP,
+                                HCPModalKeys.hcpName: e[HCPModalKeys.hcpName],
+                              },
+                            )
+                            .toList();
+                      },
+                      selectedItems: _selectedHCP
+                          .map<Map<String, dynamic>>(
+                            (e) => {
+                              HCPModalKeys.hcpId:
+                                  (e[HCPModalKeys.hcpId] ??
+                                          e[HCPModalKeys.hcpId] ??
+                                          "")
+                                      .toString(),
+                              HCPModalKeys.hcpName:
+                                  e[HCPModalKeys.hcpName] ??
+                                  e[HCPModalKeys.hcpName] ??
+                                  e.toString(),
+                            },
+                          )
+                          .toList(),
+                      itemAsString: (item) {
+                        return item[HCPModalKeys.hcpName] ??
+                            item[HCPModalKeys.hcpName] ??
+                            "";
+                      },
+                      compareFn: (item, selectedItem) =>
+                          item[HCPModalKeys.hcpId] ==
+                          selectedItem[HCPModalKeys.hcpId],
+                      decoratorProps: const DropDownDecoratorProps(
+                        decoration: InputDecoration(labelText: "HCPs In HCO"),
                       ),
+                      onChanged: (value) =>
+                          setState(() => _selectedHCP = value),
+                      validator: (value) => value == null || value.isEmpty
+                          ? AppStrings.selectHCP
+                          : null,
                     ),
-                    onChanged: (value) => setState(() => _selectedHCP = value),
-                    validator: (value) => value == null || value.isEmpty
-                        ? AppStrings.selectHCP
-                        : null,
-                  ),
+
+                  if (!hcpInHcoSelected)
+                    DropdownSearch<Map<String, dynamic>>.multiSelection(
+                      items: (filter, loadProps) => _hcpPractitioners
+                          .map<Map<String, dynamic>>(
+                            (e) => {
+                              HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
+                                  .toString(),
+                              HCPModalKeys.hcpName: e[HCPModalKeys.hcpName],
+                            },
+                          )
+                          .toList(),
+                      selectedItems: _selectedHCP
+                          .map<Map<String, dynamic>>(
+                            (e) => {
+                              HCPModalKeys.hcpId:
+                                  (e[HCPModalKeys.hcpId] ??
+                                          e[HCPModalKeys.hcpId] ??
+                                          "")
+                                      .toString(),
+                              HCPModalKeys.hcpName:
+                                  e[HCPModalKeys.hcpName] ??
+                                  e[HCPModalKeys.hcpName] ??
+                                  e.toString(),
+                            },
+                          )
+                          .toList(),
+                      itemAsString: (item) {
+                        return item[HCPModalKeys.hcpName] ??
+                            item[HCPModalKeys.hcpName] ??
+                            "";
+                      },
+                      compareFn: (item, selectedItem) =>
+                          item[HCPModalKeys.hcpId] ==
+                          selectedItem[HCPModalKeys.hcpId],
+                      decoratorProps: const DropDownDecoratorProps(
+                        decoration: InputDecoration(
+                          labelText: "HCP Practitioners",
+                        ),
+                      ),
+                      onChanged: (value) =>
+                          setState(() => _selectedHCP = value),
+                      validator: (value) => value == null || value.isEmpty
+                          ? AppStrings.selectHCP
+                          : null,
+                    ),
+
                   const SizedBox(height: 10),
                 ],
               ),

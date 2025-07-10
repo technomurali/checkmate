@@ -39,6 +39,8 @@ class Hcp {
   String? specialty;
   String? contactEmail;
   List<Hco>? hco;
+  String? npiNumber;
+  String? phoneNumber;
 
   Hcp({
     required this.hcpId,
@@ -46,6 +48,8 @@ class Hcp {
     this.specialty,
     this.contactEmail,
     this.hco,
+    this.npiNumber,
+    this.phoneNumber,
   });
 
   Hcp copyWith({
@@ -54,12 +58,16 @@ class Hcp {
     String? specialty,
     String? contactEmail,
     List<Hco>? hco,
+    String? npiNumber,
+    String? phoneNumber,
   }) => Hcp(
     hcpId: hcpId ?? this.hcpId,
     hcpName: hcpName ?? this.hcpName,
     specialty: specialty ?? this.specialty,
     contactEmail: contactEmail ?? this.contactEmail,
     hco: hco ?? this.hco,
+    npiNumber: npiNumber ?? this.npiNumber,
+    phoneNumber: phoneNumber ?? this.phoneNumber,
   );
 
   factory Hcp.fromRawJson(String str) => Hcp.fromJson(json.decode(str));
@@ -72,6 +80,8 @@ class Hcp {
     specialty: json["specialty"],
     contactEmail: json["contactEmail"],
     hco: List<Hco>.from(json["hco"].map((x) => Hco.fromJson(x))),
+    npiNumber: json["npiNumber"],
+    phoneNumber: json["phoneNumber"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -80,6 +90,8 @@ class Hcp {
     "specialty": specialty,
     "contactEmail": contactEmail,
     "hco": List<dynamic>.from(hco?.map((x) => x.toJson()) ?? []),
+    "npiNumber": npiNumber,
+    "phoneNumber": phoneNumber,
   };
 }
 

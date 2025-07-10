@@ -31,7 +31,7 @@ void main() {
   });
 
   final validUser = UserModal(
-    id: 1,
+    id: "1",
     email: 'sreekar.k@navasoftware.com',
     password: 'P@ssw0rd123',
     firstName: 'John',
@@ -42,6 +42,8 @@ void main() {
     hco: [],
     profileUrl: 'https://example.com/profile.jpg',
     modeOfAuthentication: 'email',
+    npiNumber: '1234567890',
+    phoneNumber: '1234567890',
   );
 
   testWidgets('TC001: Valid email and valid password', (tester) async {
@@ -366,7 +368,7 @@ void main() {
     TextControllers.password.text = 'delayed123';
 
     final expectedUser = UserModal(
-      id: 12,
+      id: "12",
       email: 'slow@example.com',
       password: 'delayed123',
       firstName: 'Slow',
@@ -513,7 +515,7 @@ void main() {
       (_) async => {
         ModalKeys().signinSuccess: true,
         ModalKeys().signinUser: UserModal(
-          id: 4,
+          id: "4",
           email: 'reset@example.com',
           password: 'reset123',
           firstName: 'Reset',
@@ -685,7 +687,7 @@ void main() {
       return {
         SigninModalKeys.signinSuccess: true,
         SigninModalKeys.signinUser: UserModal(
-          id: 5,
+          id: "5",
           email: 'tap@twice.com',
           password: 'tapped',
           firstName: 'Tap',
@@ -734,7 +736,7 @@ void main() {
       (_) async => {
         SigninModalKeys.signinSuccess: true,
         SigninModalKeys.signinUser: UserModal(
-          id: 6,
+          id: "6",
           email: 'nav@user.com',
           password: 'password',
           firstName: 'Nav',

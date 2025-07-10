@@ -37,6 +37,8 @@ mixin UserModalKeys {
   final String userHco = 'hco';
   final String userProfileUrl = 'profileUrl';
   final String userModeOfAuthentication = 'modeOfAuthentication';
+  final String userNpiNumber = 'npiNumber';
+  final String userPhoneNumber = 'phoneNumber';
 }
 
 mixin PharmaModalKeys {

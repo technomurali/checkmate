@@ -29,7 +29,8 @@ class AppStrings {
   static const String upcomingEvents = "Upcoming Events";
   static const String pendingReceipts = "Pending Approval";
   static const String checkIn = "Check in";
-  static const String updateEvent = "Submit Check-in";
+  static const String updateEvent = "Update Event";
+  static const String submitCheckIn = "Submit Check-in";
   static const String seeAll = "See all";
   static const String eventHistory = "Event History";
   static const String receiptHistory = "Receipt History";
@@ -78,6 +79,30 @@ class AppStrings {
   static const String labelEventType = "Event Type";
   static const String selectEventType = "Please select event type";
   static const String multiDayEvent = "Multi-day Event";
+  static const String disputeCategory = "Dispute Category";
+  static const String disputeReasonSection = "Dispute Reason";
+  static const String supportingDocumentsSection = "Supporting Documents";
+  static const String hcpDetailsSection = "HCP Details";
+  static const String transactionDetailsSection = "Transaction Details";
+  static const String disputeReason = "Dispute Reason";
+  static const String fullName = "Full Name";
+  static const String npiNumber = "NPI Number";
+  static const String organizationName = "Organization Name";
+  static const String emailAddress = "Email Address";
+  static const String phoneNumber = "Phone Number";
+  static const String paymentDate = "Payment Date";
+  static const String paymentAmount = "Payment Amount";
+  static const String paymentType = "Payment Type";
+  static const String referenceNumber = "Reference Number";
+  static const String description = "Description";
+  static const String eventInteraction = "Event Interaction";
+  static const String uploadLabel = "Upload";
+  static const String declaration =
+      "I hereby declare that the information provided is accurate and I consent to the processing of this dispute.";
+  static const String completeFormMessage =
+      "Please complete all required fields and agree to the declaration.";
+  static const String submitDispute = "Submit Dispute";
+  static const String updateDispute = "Update Dispute";
 }
 
 class ErrorText {
@@ -119,6 +144,8 @@ class EventStatus {
 
 class SuccessStrings {
   static const String profileSaved = "Profile saved";
+  static const String disputeSubmittedSuccessfully =
+      "Dispute submitted successfully";
 }
 
 class EventType {
