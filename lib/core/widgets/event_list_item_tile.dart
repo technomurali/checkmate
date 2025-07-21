@@ -2,6 +2,7 @@ import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/filter_icon.dart';
 import 'package:checkmate/features/auth/screens/event_details_screen.dart';
+import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
 
 class EventListItemTile extends StatelessWidget {
@@ -12,6 +13,7 @@ class EventListItemTile extends StatelessWidget {
   final String id;
   final String status;
   final String approvalStatus;
+  final VoidCallback? onTap;
 
   const EventListItemTile({
     super.key,
@@ -22,6 +24,7 @@ class EventListItemTile extends StatelessWidget {
     required this.id,
     required this.status,
     required this.approvalStatus,
+    this.onTap,
   });
 
   @override
@@ -64,14 +67,15 @@ class EventListItemTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EventDetailsScreen(eventId: id),
-                    ),
-                  );
-                },
+                onTap:
+                    onTap ??
+                    () {
+                      Navigator.pushNamed(
+                        context,
+                        RouteName.eventDetails,
+                        arguments: id,
+                      );
+                    },
                 child: Text(
                   eventName,
                   style: const TextStyle(

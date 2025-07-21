@@ -7,6 +7,8 @@ import 'package:checkmate/features/auth/model/dispute_modal.dart';
 import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:provider/provider.dart';
+import 'package:checkmate/features/auth/top_nav_provider.dart';
 
 class DisputeHistoryScreen extends StatefulWidget {
   const DisputeHistoryScreen({super.key});
@@ -34,12 +36,10 @@ class _DisputeHistoryScreenState extends State<DisputeHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return TopNav(
-      body: Column(
-        children: [
-          for (var i = 0; i < disputes.length; i++) ...{historyItemBuilder(i)},
-        ],
-      ),
+    return Column(
+      children: [
+        for (var i = 0; i < disputes.length; i++) ...{historyItemBuilder(i)},
+      ],
     );
   }
 
@@ -79,6 +79,12 @@ class _DisputeHistoryScreenState extends State<DisputeHistoryScreen> {
         paymentType: dispute.transactionDetails?.paymentType ?? '',
         referenceNumber: dispute.transactionDetails?.referenceNumber ?? '',
         status: dispute.status ?? '',
+        onTap: () {
+          Provider.of<TopNavProvider>(context, listen: false).navigateTo(
+            TopNavScreen.disputeDetails,
+            argument: dispute.disputeId,
+          );
+        },
       ),
     );
   }

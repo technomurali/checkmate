@@ -1,4 +1,4 @@
-class AppSizes with AppLogoSize, AppTextLimiter {}
+class AppSizes with AppLogoSize, AppTextLimiter, HeaderSizes {}
 
 mixin AppLogoSize {
   final double height = 59;
@@ -8,4 +8,9 @@ mixin AppLogoSize {
 mixin AppTextLimiter {
   final double dashboardCardTextLimiter = 200;
   final int eventDescriptionMinLines = 3;
+}
+
+mixin HeaderSizes {
+  final double headerHeight = 90;
+  final double headerIconSize = 36;
 }

@@ -1,5 +1,6 @@
 import 'package:checkmate/features/auth/business_logic/password_reset_screen_logic.dart';
 import 'package:checkmate/features/auth/screens/password_reset_screen.dart';
+import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/controllers/verify_controller.dart';
@@ -56,17 +57,22 @@ class ForgotPasswordScreenLogic extends ChangeNotifier {
     if (result[ModalKeys().statusCode] == AppApiStatusCodes.success) {
       var email = TextControllers.email.text;
       resetForm();
-      Navigator.push(
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (_) => ChangeNotifierProvider(
+      //       create: (_) => PasswordResetScreenLogic(),
+      //       child: PasswordResetScreen(
+      //         message: result[ModalKeys().message],
+      //         email: email,
+      //       ),
+      //     ),
+      //   ),
+      // );
+      Navigator.pushReplacementNamed(
         context,
-        MaterialPageRoute(
-          builder: (_) => ChangeNotifierProvider(
-            create: (_) => PasswordResetScreenLogic(),
-            child: PasswordResetScreen(
-              message: result[ModalKeys().message],
-              email: email,
-            ),
-          ),
-        ),
+        RouteName.resetPassword,
+        arguments: email,
       );
     } else {
       wrongCodeEntered = true;

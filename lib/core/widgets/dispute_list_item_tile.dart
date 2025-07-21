@@ -1,6 +1,7 @@
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/widgets/filter_icon.dart';
 import 'package:checkmate/features/auth/screens/dispute_details_screen.dart';
+import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
 
 class DisputeListItemTile extends StatelessWidget {
@@ -14,6 +15,7 @@ class DisputeListItemTile extends StatelessWidget {
   final String paymentType;
   final String referenceNumber;
   final String status;
+  final VoidCallback? onTap;
   const DisputeListItemTile({
     super.key,
     required this.disputeId,
@@ -26,6 +28,7 @@ class DisputeListItemTile extends StatelessWidget {
     required this.paymentType,
     required this.referenceNumber,
     required this.status,
+    this.onTap,
   });
 
   @override
@@ -66,16 +69,15 @@ class DisputeListItemTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               InkWell(
-                onTap: () {
-                  print("disputeId : $disputeId");
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          DisputeDetailsScreen(disputeId: disputeId),
-                    ),
-                  );
-                },
+                onTap:
+                    onTap ??
+                    () {
+                      Navigator.pushNamed(
+                        context,
+                        RouteName.disputeDetails,
+                        arguments: disputeId,
+                      );
+                    },
                 child: Text(
                   disputeReason,
                   style: const TextStyle(

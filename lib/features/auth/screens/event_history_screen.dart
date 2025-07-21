@@ -8,6 +8,8 @@ import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:checkmate/core/widgets/confirm_alert_dialog.dart';
+import 'package:provider/provider.dart';
+import 'package:checkmate/features/auth/top_nav_provider.dart';
 
 class EventHistoryScreen extends StatefulWidget {
   final bool fromDashboard;
@@ -122,83 +124,81 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
 
   @override
   Widget build(BuildContext context) {
-    return TopNav(
-      body: Column(
-        children: [
-          Card(
-            color: AppColors.searchCard,
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: searchController,
-                      decoration: InputDecoration(
-                        hintText: AppStrings.searchEvents,
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: AppColors.background,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 0,
-                          horizontal: 16,
-                        ),
+    return Column(
+      children: [
+        Card(
+          color: AppColors.searchCard,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: AppStrings.searchEvents,
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide.none,
                       ),
-                      onChanged: (value) {
-                        _searchQuery = value;
-                        _filterEvents();
-                      },
+                      filled: true,
+                      fillColor: AppColors.background,
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 0,
+                        horizontal: 16,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  PopupMenuButton<String>(
-                    enabled: !widget.fromDashboard && !widget.isPending,
-                    icon: Icon(Icons.filter_list),
-                    tooltip: 'Filter',
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    onSelected: (value) {
-                      setState(() {
-                        _selectedStatus = value;
-                      });
+                    onChanged: (value) {
+                      _searchQuery = value;
                       _filterEvents();
                     },
-                    itemBuilder: (context) => _statusOptions
-                        .map(
-                          (status) => PopupMenuItem<String>(
-                            value: status,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                FilterIcon(status: status),
-                                Text(status),
-                              ],
-                            ),
-                          ),
-                        )
-                        .toList(),
                   ),
-                  const SizedBox(width: 12),
-                  FilterIcon(status: _selectedStatus!),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                PopupMenuButton<String>(
+                  enabled: !widget.fromDashboard && !widget.isPending,
+                  icon: Icon(Icons.filter_list),
+                  tooltip: 'Filter',
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  onSelected: (value) {
+                    setState(() {
+                      _selectedStatus = value;
+                    });
+                    _filterEvents();
+                  },
+                  itemBuilder: (context) => _statusOptions
+                      .map(
+                        (status) => PopupMenuItem<String>(
+                          value: status,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              FilterIcon(status: status),
+                              Text(status),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(width: 12),
+                FilterIcon(status: _selectedStatus!),
+              ],
             ),
           ),
-          const SizedBox(height: 10),
-          for (var i = 0; i < filteredEvents.length; i++) ...{
-            historyItemBuilder(i),
-          },
-        ],
-      ),
+        ),
+        const SizedBox(height: 10),
+        for (var i = 0; i < filteredEvents.length; i++) ...{
+          historyItemBuilder(i),
+        },
+      ],
     );
   }
 
@@ -241,6 +241,12 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
         id: event.eventId ?? '',
         status: event.eventStatus ?? '',
         approvalStatus: event.isApproved ?? '',
+        onTap: () {
+          Provider.of<TopNavProvider>(
+            context,
+            listen: false,
+          ).navigateTo(TopNavScreen.eventDetails, argument: event.eventId);
+        },
       ),
     );
   }

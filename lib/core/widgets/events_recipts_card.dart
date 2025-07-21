@@ -4,10 +4,11 @@ import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/features/auth/screens/event_details_screen.dart';
 import 'package:checkmate/features/auth/screens/event_history_screen.dart';
 import 'package:checkmate/features/auth/screens/pending_receipt_screen.dart';
+import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
 
 class EventsReciptsCard extends StatelessWidget {
-  final List<Map<String, String>> items;
+  final List<Map<String, dynamic>> items;
   final VoidCallback onSeeAll;
   final bool showCheckIn;
   final bool isPending;
@@ -45,27 +46,23 @@ class EventsReciptsCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       InkWell(
-                        onTap: () {
-                          if (isPending) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PendingReceiptScreen(
-                                  eventId: item["id"] ?? '',
-                                ),
-                              ),
-                            );
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EventDetailsScreen(
-                                  eventId: item["id"] ?? '',
-                                ),
-                              ),
-                            );
-                          }
-                        },
+                        onTap:
+                            item["onTap"] ??
+                            () {
+                              if (isPending) {
+                                Navigator.pushNamed(
+                                  context,
+                                  RouteName.pendingReceipt,
+                                  arguments: item["id"],
+                                );
+                              } else {
+                                Navigator.pushNamed(
+                                  context,
+                                  RouteName.eventDetails,
+                                  arguments: item["id"],
+                                );
+                              }
+                            },
                         child: Tooltip(
                           message: item["title"],
                           child: SizedBox(
@@ -78,22 +75,12 @@ class EventsReciptsCard extends StatelessWidget {
                               overflow: showCheckIn
                                   ? TextOverflow.ellipsis
                                   : null,
-
                               item["title"] ?? "",
                             ),
                           ),
                         ),
                       ),
                       Text(item["date"] ?? ""),
-
-                      // if (showCheckIn)
-                      //   InkWell(
-                      //     onTap: () {},
-                      //     child: const Text(
-                      //       AppStrings.checkIn,
-                      //       style: TextStyle(color: AppColors.primary),
-                      //     ),
-                      //   ),
                     ],
                   ),
                 ),
@@ -103,16 +90,7 @@ class EventsReciptsCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => showCheckIn
-                            ? EventHistoryScreen(fromDashboard: true)
-                            : EventHistoryScreen(isPending: true),
-                      ),
-                    );
-                  },
+                  onPressed: onSeeAll,
                   child: const Text(
                     "${AppStrings.seeAll} >",
                     style: TextStyle(color: AppColors.primary),

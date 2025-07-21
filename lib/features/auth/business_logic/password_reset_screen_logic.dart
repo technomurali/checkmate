@@ -3,6 +3,7 @@ import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/features/auth/controllers/reset_password_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/screens/signin_screen.dart';
+import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
 
 class PasswordResetScreenLogic extends ChangeNotifier {
@@ -54,10 +55,11 @@ class PasswordResetScreenLogic extends ChangeNotifier {
       if (result[ModalKeys().resetSuccess]) {
         TextControllers.password.clear();
         TextControllers.confirmPassword.clear();
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SigninScreen()),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => SigninScreen()),
+        // );
+        Navigator.pushReplacementNamed(context, RouteName.signIn);
       }
     }
   }

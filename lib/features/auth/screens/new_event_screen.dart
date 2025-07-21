@@ -103,8 +103,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return TopNav(
-      body: Padding(
+    return Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -467,7 +466,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

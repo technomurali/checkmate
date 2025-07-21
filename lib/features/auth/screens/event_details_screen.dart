@@ -110,8 +110,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return TopNav(
-      body: Container(
+    return Container(
         width: double.infinity,
         padding: EdgeInsets.all(15),
         child: SingleChildScrollView(
@@ -575,7 +574,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

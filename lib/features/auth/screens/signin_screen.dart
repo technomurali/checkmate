@@ -11,6 +11,7 @@ import 'package:checkmate/features/auth/screens/pharma_rep_dashboard.dart';
 import 'package:checkmate/features/auth/screens/forgot_password_screen.dart';
 import 'package:checkmate/features/auth/screens/signup_screen.dart';
 import 'package:checkmate/features/auth/widgets/social_buttons_row.dart';
+import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
@@ -58,15 +59,7 @@ class SigninScreen extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChangeNotifierProvider(
-                        create: (_) => ForgotPasswordScreenLogic(),
-                        child: const ForgotPasswordScreen(),
-                      ),
-                    ),
-                  );
+                  Navigator.pushNamed(context, RouteName.forgotPassword);
                 },
                 child: Text(
                   AppStrings.forgotPassword,
@@ -84,25 +77,19 @@ class SigninScreen extends StatelessWidget {
                 if (user != null) {
                   debugPrint("user: ${user.role}");
                   if (user.role == UserType.hcp) {
-                    Navigator.pushReplacement(
+                    Navigator.pushReplacementNamed(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => HCPDashboard(user: user),
-                      ),
+                      RouteName.hcpDashboard,
                     );
                   } else if (user.role == UserType.hco) {
-                    Navigator.pushReplacement(
+                    Navigator.pushReplacementNamed(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => OfficeUserDashboardScreen(user: user),
-                      ),
+                      RouteName.officeUserDashboard,
                     );
                   } else if (user.role == UserType.pharmaRep) {
-                    Navigator.pushReplacement(
+                    Navigator.pushReplacementNamed(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => PharmaRepDashboard(user: user),
-                      ),
+                      RouteName.pharmaRepDashboard,
                     );
                   }
                 }
@@ -117,15 +104,16 @@ class SigninScreen extends StatelessWidget {
                 Text(AppStrings.noAccount),
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ChangeNotifierProvider(
-                          create: (_) => SignupScreenLogic(),
-                          child: const SignupScreen(),
-                        ),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (_) => ChangeNotifierProvider(
+                    //       create: (_) => SignupScreenLogic(),
+                    //       child: const SignupScreen(),
+                    //     ),
+                    //   ),
+                    // );
+                    Navigator.pushNamed(context, RouteName.signup);
                   },
                   child: Text(
                     AppStrings.signup,

@@ -60,8 +60,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return TopNav(
-      body: SafeArea(
+    return SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Form(
@@ -169,8 +168,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   /// Builds a standard editable text field with validation.

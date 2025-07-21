@@ -10,6 +10,7 @@ import 'package:checkmate/features/auth/widgets/social_buttons_row.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/routes/route_name.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -243,12 +244,13 @@ class _SignupScreenState extends State<SignupScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Signup successful!')),
                       );
+                      Navigator.pushReplacementNamed(context, RouteName.signIn);
                     });
                   },
                 ),
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pushReplacementNamed(context, RouteName.signIn);
                   signupScreenLogic.clearAllTextControllers();
                 },
                 child: const Text(AppStrings.alreadyAccount),

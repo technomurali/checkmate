@@ -37,8 +37,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return TopNav(
-      body: Container(
+    return  Container(
         width: double.infinity,
         padding: EdgeInsets.all(15),
         child: Column(
@@ -110,7 +109,6 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
             Button(text: AppStrings.sendRequest, onPressed: () {}),
           ],
         ),
-      ),
-    );
+      );
   }
 }

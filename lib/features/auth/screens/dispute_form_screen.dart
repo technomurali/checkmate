@@ -138,8 +138,7 @@ class _DisputeFormScreenState extends State<DisputeFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return TopNav(
-      body: SingleChildScrollView(
+    return SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Form(
           key: _formKey,
@@ -341,7 +340,6 @@ class _DisputeFormScreenState extends State<DisputeFormScreen> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

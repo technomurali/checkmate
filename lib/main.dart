@@ -1,9 +1,12 @@
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/features/auth/business_logic/signin_screen_logic.dart';
+import 'package:checkmate/routes/route_name.dart';
+import 'package:checkmate/routes/router.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/constants/app_colors.dart';
 import 'features/auth/screens/signin_screen.dart';
+import 'package:checkmate/features/auth/top_nav_provider.dart';
 
 import 'dart:io';
 
@@ -19,8 +22,11 @@ class MyHttpOverrides extends HttpOverrides {
 void main() {
   HttpOverrides.global = MyHttpOverrides();
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => SigninScreenLogic(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SigninScreenLogic()),
+        ChangeNotifierProvider(create: (_) => TopNavProvider()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -110,7 +116,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const SigninScreen(),
+      // home: const SigninScreen(),
+      initialRoute: RouteName.signIn,
+      onGenerateRoute: AppRouter.generateRoute,
     );
   }
 }

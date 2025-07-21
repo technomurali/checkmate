@@ -1,7 +1,7 @@
 class AppApi {
   // static const String baseUrl = "http://10.0.2.2:3000/api/";
 
-  static const String baseUrl = "https://10.0.2.2:7103/api/";
+  static const String baseUrl = "https://172.32.32.100:7103/api/";
 
   static const String pharmaLists = "pharma-companies";
   static const String signup = "Auth/signup";
