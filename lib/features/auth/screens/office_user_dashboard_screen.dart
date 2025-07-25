@@ -7,7 +7,7 @@ import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:checkmate/features/auth/top_nav_provider.dart';
+import 'package:checkmate/core/utils/top_nav_provider.dart';
 
 class OfficeUserDashboardScreen extends StatefulWidget {
   final UserModal user;

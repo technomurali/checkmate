@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:checkmate/core/widgets/confirm_alert_dialog.dart';
 import 'package:provider/provider.dart';
-import 'package:checkmate/features/auth/top_nav_provider.dart';
+import 'package:checkmate/core/utils/top_nav_provider.dart';
 
 class EventHistoryScreen extends StatefulWidget {
   final bool fromDashboard;

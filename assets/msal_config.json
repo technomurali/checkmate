@@ -1,0 +1,13 @@
+{
+    "account_mode": "SINGLE",
+    "client_id": "45b0b48a-279d-4b11-b67d-00edd7b3997f",
+    "authorization_user_agent": "DEFAULT",
+    "redirect_uri": "msauth://com.example.test/%2FfO3mkii3j2rUJFDwJFffrXEURA%3D",
+    "authorities": [
+        {
+            "type": "B2C",
+            "authority_url": "https://dynamicconsultantsgroupb2c.b2clogin.com/dynamicconsultantsgroupb2c.onmicrosoft.com/B2C_1_signin_v2",
+            "default": true
+        }
+    ]
+}

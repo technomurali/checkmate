@@ -18,7 +18,7 @@ import 'package:checkmate/features/auth/screens/pending_receipt_screen.dart';
 import 'package:checkmate/features/auth/screens/receipt_history_screen.dart';
 import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
-import 'package:checkmate/features/auth/top_nav_provider.dart';
+import 'package:checkmate/core/utils/top_nav_provider.dart';
 import 'package:provider/provider.dart';
 
 class TopNav extends StatelessWidget {
