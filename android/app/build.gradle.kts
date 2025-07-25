@@ -37,6 +37,12 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+    // …
+packaging {
+    resources {
+        pickFirsts += "/META-INF/DEPENDENCIES"
+    }
+}
 }
 
 flutter {

@@ -30,27 +30,22 @@
             </intent-filter>
         </activity>
         <!--This is for the MSAL Authentication-->
-         <activity android:name="com.microsoft.identity.client.BrowserTabActivity">
+        <activity
+            android:name="com.microsoft.identity.client.BrowserTabActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
 
-	<intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-		<action android:name="android.intent.action.VIEW" />
-
-		<category android:name="android.intent.category.DEFAULT" />
-
-		<category android:name="android.intent.category.BROWSABLE" />
-
-		<data
-
-			android:host="com.example.checkmate"
-
-			android:path="//fO3mkii3j2rUJFDwJFffrXEURA="
-
-			android:scheme="msauth" />
-
-	</intent-filter>
-
-</activity>
+                <data
+                    android:scheme="msauth"
+                    android:host="com.example.checkmate"
+                    android:path="//fO3mkii3j2rUJFDwJFffrXEURA=" />
+            </intent-filter>
+        </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
