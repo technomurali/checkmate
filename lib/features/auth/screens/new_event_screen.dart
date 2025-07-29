@@ -263,7 +263,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                     );
                     if (pickedDate != null) {
                       NewEventTextControllers.startDateController.text =
-                          "${pickedDate.day}/${pickedDate.month}/${pickedDate.year} : ${pickedDate.hour}:${pickedDate.minute}";
+                          "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
                       startDatePicked = pickedDate;
                     }
                   },
