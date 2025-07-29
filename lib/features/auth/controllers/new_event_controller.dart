@@ -56,4 +56,21 @@ class NewEventController {
       return {'success': false, 'data': null, 'message': 'Error: $e'};
     }
   }
+
+  createEvent(Map<String, dynamic> data) async {
+    try {
+      final uri = Uri.parse("https://172.32.32.69:7133/api/Events");
+      var jsonWalaBody = json.encode(data);
+      dynamic g = json.decode(jsonWalaBody);
+      final response = await http.post(
+        uri,
+        body: jsonWalaBody,
+        headers: {'Content-Type': 'application/json'},
+      );
+      print("Response: ${response.body}");
+    } catch (e) {
+      print("Error: $e");
+      return {'success': false, 'data': null, 'message': 'Error: $e'};
+    }
+  }
 }
