@@ -5,18 +5,16 @@ import 'package:http/http.dart' as http;
 class NewEventController {
   Future<Map<String, dynamic>> getHCO() async {
     try {
-      final uri = Uri.parse("${AppApi.baseUrl}${AppApi.hcoLists}");
+      final uri = Uri.parse(
+        "https://172.32.32.69:7133/api/Accounts/accounts/hco-active",
+      );
 
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        return {
-          'success': true,
-          'data': data['hco'],
-          'message': data['message'],
-        };
+        return {'success': true, 'data': data};
       } else {
         final data = json.decode(response.body);
         return {
@@ -30,33 +28,46 @@ class NewEventController {
     }
   }
 
+  //physicians-active
   Future<Map<String, dynamic>> getHCP({String? hcoId}) async {
     try {
       final uri = Uri.parse(
-        "${AppApi.baseUrl}${AppApi.hcpLists}",
-      ).replace(queryParameters: hcoId != null ? {'hcoId': hcoId} : null);
+        "https://172.32.32.69:7133/api/Contact/physicians-active",
+      );
       final response = await http.get(uri);
 
       final data = json.decode(response.body);
 
       if (response.statusCode == 200) {
-        return {
-          'success': true,
-          'data': data['hcp'],
-          'message': data['message'],
-        };
+        return {'success': true, 'data': data};
       } else {
-        return {
-          'success': false,
-          'data': [],
-          'message': data['message'] ?? 'Failed to fetch HCP',
-        };
+        return {'success': false, 'data': []};
       }
     } catch (e) {
       return {'success': false, 'data': null, 'message': 'Error: $e'};
     }
   }
 
+  Future<Map<String, dynamic>> getHCPbyHCO(String hcoId) async {
+    try {
+      final uri = Uri.parse(
+        'https://172.32.32.69:7133/api/Contact/getHCPs/$hcoId',
+      );
+      final response = await http.get(uri);
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': data};
+      } else {
+        return {'success': false, 'data': []};
+      }
+    } catch (e) {
+      return {'success': false, 'data': null, 'message': 'Error: $e'};
+    }
+  }
+
+  //physicians-active
   createEvent(Map<String, dynamic> data) async {
     try {
       final uri = Uri.parse("https://172.32.32.69:7133/api/Events");
