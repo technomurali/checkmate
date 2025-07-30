@@ -81,6 +81,6 @@ mixin HCOModalKeys {
   static const String hcoName = "hcoName";
 }
 mixin HCPModalKeys {
-  static const String hcpId = "hcpId";
-  static const String hcpName = "hcpName";
+  static const String hcpId = "id";
+  static const String hcpName = "name";
 }

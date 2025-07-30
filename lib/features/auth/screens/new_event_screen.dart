@@ -47,7 +47,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
     if (result['success'] == true && result['data'] != null) {
       setState(() {
         _hcos = List<Map<String, dynamic>>.from(result['data']);
-        print("hco hcps: ${_hcos}");
+        print("hco hcps: $_hcos");
       });
     } else {
       setState(() {
@@ -56,21 +56,48 @@ class _NewEventScreenState extends State<NewEventScreen> {
     }
   }
 
-  void fetchHCPs() async {
-    final result = await _newEventController.getHCP();
-    if (result['success'] == true && result['data'] != null) {
-      setState(() {
-        _hcpPractitioners = List<Map<String, dynamic>>.from(result['data']);
-        print('pract hcps: $_hcpPractitioners');
-      });
-    } else {
-      setState(() {
-        _hcpPractitioners = [];
-      });
-    }
+  void fetchHCPbyHCO(id) {
+    _newEventController.getHCPbyHCO(id).then((result) {
+      if (result['success'] == true && result['data'] != null) {
+        setState(() {
+          _hcps = List<Map<String, dynamic>>.from(result['data']);
+          print('pract hcps: $_hcps');
+        });
+      } else {
+        setState(() {
+          _hcps = [];
+        });
+      }
+    });
   }
 
+  void fetchHCPs() async {
+    print("pract hcps fetch");
+    await _newEventController
+        .getHCP()
+        .then((value) {
+          print("pract hcps: $value");
+          if (value['success'] == true && value['data'] != null) {
+            setState(() {
+              _hcpPractitioners = List<Map<String, dynamic>>.from(
+                value['data'],
+              );
+              print("pract hcps: $_hcpPractitioners");
+            });
+          } else {
+            setState(() {
+              _hcpPractitioners = [];
+            });
+          }
+        })
+        .catchError((error) {
+          print("Error fetching HCPs: $error");
+        });
+  }
+
+  List<Map<String, dynamic>> hcpContactDto = [];
   void _submitForm() {
+    print(hcpContactDto);
     if (_formKey.currentState!.validate()) {
       final newEvent = {
         "userId": userModal.id,
@@ -90,7 +117,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
         "isMultiDay": isMultiDay,
       };
       var testData = {
-        "eventId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
         "eventName": NewEventTextControllers.eventNameController.text,
         "startDate": startDatePicked.toIso8601String(),
         "endDate": endDatePicked.toIso8601String(),
@@ -99,11 +125,8 @@ class _NewEventScreenState extends State<NewEventScreen> {
         ),
         "amount": 0,
         "eventCostByPerson": 0,
-        "hco": "/accounts(0200a49c-3617-ef11-9f8a-000d3a313e7f)",
-        "contactDtos": [
-          {"id": "af0119e5-c3fd-ee11-a1fe-000d3a313e7f"},
-          {"id": "b10119e5-c3fd-ee11-a1fe-000d3a313e7f"},
-        ],
+        "hco": "/accounts($_selectedHCOId)",
+        "contactDtos": hcpContactDto,
         "eventType": 546170000,
         "eventStatus": 1,
         "eventDescription":
@@ -158,7 +181,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
                   items: (filter, loadProps) {
                     return _hcos
-                        .map((hco) => hco['hcoName'] as String)
+                        .map((hco) => hco['accountName'] as String)
                         .toList();
                   },
                   selectedItem: _selectedHCOName,
@@ -167,19 +190,20 @@ class _NewEventScreenState extends State<NewEventScreen> {
                   ),
                   onChanged: (value) {
                     final selected = _hcos.firstWhere(
-                      (hco) => hco['hcoName'] == value,
+                      (hco) => hco['accountName'] == value,
                       orElse: () => {},
                     );
                     setState(() {
                       _selectedHCOName = value;
-                      _selectedHCOId = selected['hcoId']?.toString();
+                      _selectedHCOId = selected['id']?.toString();
                       _selectedHCP = [];
-                      print("selected hcps: ${selected['hcps']}");
-                      _hcps = List<Map<String, dynamic>>.from(selected['hcps']);
+                      // print("selected hcps: ${selected['hcps']}");
+                      if (_selectedHCOId != null) {
+                        _hcps = [];
+                        fetchHCPbyHCO(_selectedHCOId!);
+                      }
+                      // _hcps = List<Map<String, dynamic>>.from(selected['hcps']);
                     });
-                    // if (_selectedHCOId != null) {
-                    //   fetchHCPs(_selectedHCOId!);
-                    // }
                   },
                   validator: (value) => value == null || value.isEmpty
                       ? AppStrings.selectHCO
@@ -433,13 +457,13 @@ class _NewEventScreenState extends State<NewEventScreen> {
                       ),
                     ),
                     items: (filter, loadProps) {
-                      print("hcps: ${_hcps}");
+                      print("hcps: $_hcps");
                       return _hcps
                           .map<Map<String, dynamic>>(
                             (e) => {
-                              HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
-                                  .toString(),
-                              HCPModalKeys.hcpName: e[HCPModalKeys.hcpName],
+                              HCPModalKeys.hcpId: (e['id']).toString(),
+                              HCPModalKeys.hcpName:
+                                  e['firstName'] + " " + e['lastName'],
                             },
                           )
                           .toList();
@@ -447,15 +471,9 @@ class _NewEventScreenState extends State<NewEventScreen> {
                     selectedItems: _selectedHCP
                         .map<Map<String, dynamic>>(
                           (e) => {
-                            HCPModalKeys.hcpId:
-                                (e[HCPModalKeys.hcpId] ??
-                                        e[HCPModalKeys.hcpId] ??
-                                        "")
-                                    .toString(),
-                            HCPModalKeys.hcpName:
-                                e[HCPModalKeys.hcpName] ??
-                                e[HCPModalKeys.hcpName] ??
-                                e.toString(),
+                            HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
+                                .toString(),
+                            HCPModalKeys.hcpName: e[HCPModalKeys.hcpName],
                           },
                         )
                         .toList(),
@@ -470,7 +488,14 @@ class _NewEventScreenState extends State<NewEventScreen> {
                     decoratorProps: const DropDownDecoratorProps(
                       decoration: InputDecoration(labelText: "HCPs In HCO"),
                     ),
-                    onChanged: (value) => setState(() => _selectedHCP = value),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedHCP = value;
+                        hcpContactDto = value.map((e) {
+                          return {HCPModalKeys.hcpId: e[HCPModalKeys.hcpId]};
+                        }).toList();
+                      });
+                    },
                     validator: (value) => value == null || value.isEmpty
                         ? AppStrings.selectHCP
                         : null,
@@ -493,7 +518,8 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           (e) => {
                             HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
                                 .toString(),
-                            HCPModalKeys.hcpName: e[HCPModalKeys.hcpName],
+                            HCPModalKeys.hcpName:
+                                e['firstName'] + " " + e['lastName'],
                           },
                         )
                         .toList(),
@@ -525,7 +551,14 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         labelText: "HCP Practitioners",
                       ),
                     ),
-                    onChanged: (value) => setState(() => _selectedHCP = value),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedHCP = value;
+                        hcpContactDto = value.map((e) {
+                          return {HCPModalKeys.hcpId: e[HCPModalKeys.hcpId]};
+                        }).toList();
+                      });
+                    },
                     validator: (value) => value == null || value.isEmpty
                         ? AppStrings.selectHCP
                         : null,
