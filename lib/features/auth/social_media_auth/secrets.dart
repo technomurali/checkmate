@@ -1,8 +1,8 @@
 class Secrets {
   static const String googleServerClientIdIOS =
-      '974870769543-742qius2u9dsgccneir3k2file097e03.apps.googleusercontent.com';
+      '974870769543-iu7235em815ecagna7veoo7vpfiv854t.apps.googleusercontent.com';
   static const String googleServerClientIdAndroid =
-      '974870769543-oa26h6i2jcr4s8c686mmes15sieqvm12.apps.googleusercontent.com';
+      '974870769543-8i0dfphmbrav5lol2qmqkcn8k8gvgljv.apps.googleusercontent.com';
   static const String googleServerClientId =
       '974870769543-5c8fkftg3u89u18ta0hrm8ddvi2tn884.apps.googleusercontent.com';
 
@@ -15,5 +15,4 @@ class Secrets {
   static const String linkedinClientSecret =
       'WPL_AP1.YGiwhlfaob7BoPeu.I8Sypw==';
   // static const String linkedinRedirectUri = 'com.singular_approch://oauth2redirect';
-  static const String backendBase = 'https://auth.singular_approch.com';
 }
