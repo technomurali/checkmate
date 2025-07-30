@@ -364,6 +364,16 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   SizedBox(height: 10),
                   if (hcpInHcoSelected)
                     DropdownSearch<Map<String, dynamic>>.multiSelection(
+                      popupProps: const PopupPropsMultiSelection.menu(
+                        showSearchBox: true, // <- this brings the search field
+                        searchFieldProps: TextFieldProps(
+                          // customise it if you like
+                          decoration: InputDecoration(
+                            labelText: 'Search HCP',
+                            prefixIcon: Icon(Icons.search),
+                          ),
+                        ),
+                      ),
                       enabled:
                           (userModal.role == UserType.pharmaRep &&
                               isCheckedIn) ||
@@ -409,6 +419,16 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
                   if (!hcpInHcoSelected)
                     DropdownSearch<Map<String, dynamic>>.multiSelection(
+                      popupProps: const PopupPropsMultiSelection.menu(
+                        showSearchBox: true, // <- this brings the search field
+                        searchFieldProps: TextFieldProps(
+                          // customise it if you like
+                          decoration: InputDecoration(
+                            labelText: 'Search HCP Practitioners',
+                            prefixIcon: Icon(Icons.search),
+                          ),
+                        ),
+                      ),
                       enabled:
                           (userModal.role == UserType.pharmaRep &&
                               isCheckedIn) ||

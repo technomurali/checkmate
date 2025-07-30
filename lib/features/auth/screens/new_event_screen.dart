@@ -145,6 +145,17 @@ class _NewEventScreenState extends State<NewEventScreen> {
               children: [
                 /// HCO Dropdown
                 DropdownSearch<String>(
+                  popupProps: const PopupProps.menu(
+                    showSearchBox: true, // <- this brings the search field
+                    searchFieldProps: TextFieldProps(
+                      // customise it if you like
+                      decoration: InputDecoration(
+                        labelText: 'Search HCO',
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                    ),
+                  ),
+
                   items: (filter, loadProps) {
                     return _hcos
                         .map((hco) => hco['hcoName'] as String)
@@ -228,21 +239,38 @@ class _NewEventScreenState extends State<NewEventScreen> {
                 SizedBox(height: 10),
 
                 /// Multi-day Event Checkbox
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(AppStrings.multiDayEvent),
-                  value: isMultiDay,
-                  onChanged: (val) {
-                    setState(() {
-                      isMultiDay = val ?? false;
-                      if (!isMultiDay) {
-                        NewEventTextControllers.endDateController.clear();
-                      }
-                    });
-                  },
-                  controlAffinity: ListTileControlAffinity.leading,
+                // CheckboxListTile(
+                //   contentPadding: EdgeInsets.zero,
+                //   title: Text(AppStrings.multiDayEvent),
+                //   value: isMultiDay,
+                //   onChanged: (val) {
+                //     setState(() {
+                //       isMultiDay = val ?? false;
+                //       if (!isMultiDay) {
+                //         NewEventTextControllers.endDateController.clear();
+                //       }
+                //     });
+                //   },
+                //   controlAffinity: ListTileControlAffinity.leading,
+                // ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Switch(
+                      value: isMultiDay,
+                      onChanged: (v) {
+                        setState(() {
+                          isMultiDay = !isMultiDay;
+                          if (!isMultiDay) {
+                            NewEventTextControllers.endDateController.clear();
+                          }
+                        });
+                      },
+                    ),
+                    SizedBox(width: 10),
+                    Text(AppStrings.multiDayEvent),
+                  ],
                 ),
-
                 const SizedBox(height: 10),
 
                 /// Start Date TextField
@@ -394,6 +422,16 @@ class _NewEventScreenState extends State<NewEventScreen> {
                 /// HCP Dropdown
                 if (hcpInHcoSelected)
                   DropdownSearch<Map<String, dynamic>>.multiSelection(
+                    popupProps: const PopupPropsMultiSelection.menu(
+                      showSearchBox: true, // <- this brings the search field
+                      searchFieldProps: TextFieldProps(
+                        // customise it if you like
+                        decoration: InputDecoration(
+                          labelText: 'Search HCP',
+                          prefixIcon: Icon(Icons.search),
+                        ),
+                      ),
+                    ),
                     items: (filter, loadProps) {
                       print("hcps: ${_hcps}");
                       return _hcps
@@ -440,6 +478,16 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
                 if (!hcpInHcoSelected)
                   DropdownSearch<Map<String, dynamic>>.multiSelection(
+                    popupProps: const PopupPropsMultiSelection.menu(
+                      showSearchBox: true, // <- this brings the search field
+                      searchFieldProps: TextFieldProps(
+                        // customise it if you like
+                        decoration: InputDecoration(
+                          labelText: 'Search HCP Practitioners',
+                          prefixIcon: Icon(Icons.search),
+                        ),
+                      ),
+                    ),
                     items: (filter, loadProps) => _hcpPractitioners
                         .map<Map<String, dynamic>>(
                           (e) => {
