@@ -1,4 +1,3 @@
-import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
@@ -18,7 +17,6 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
   EventModal event = EventModal.empty();
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     fetchEvent();
   }

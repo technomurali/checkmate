@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:checkmate/core/constants/app_api.dart';
 import 'package:http/http.dart' as http;
 
 class NewEventController {
@@ -78,9 +77,7 @@ class NewEventController {
         body: jsonWalaBody,
         headers: {'Content-Type': 'application/json'},
       );
-      print("Response: ${response.body}");
     } catch (e) {
-      print("Error: $e");
       return {'success': false, 'data': null, 'message': 'Error: $e'};
     }
   }

@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
@@ -8,7 +7,6 @@ import 'package:checkmate/features/auth/controllers/pharma_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/dispute_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
-import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 
 class DisputeFormScreen extends StatefulWidget {
@@ -41,9 +39,9 @@ class _DisputeFormScreenState extends State<DisputeFormScreen> {
   ];
   String? selectedPharmaCompany;
 
+  @override
   initState() {
     super.initState();
-    print("userModal: ${jsonEncode(userModal.toJson())}");
     DisputeFormTextControllers.fullNameController.text =
         "${userModal.firstName!} ${userModal.lastName!}";
     DisputeFormTextControllers.npiNumberController.text = userModal.npiNumber!;
@@ -106,7 +104,6 @@ class _DisputeFormScreenState extends State<DisputeFormScreen> {
         )
         .then((value) {
           if (value) {
-            print("dispute submitted successfully");
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(SuccessStrings.disputeSubmittedSuccessfully),
@@ -128,7 +125,6 @@ class _DisputeFormScreenState extends State<DisputeFormScreen> {
             selectedPharmaCompany = null;
             isConfirmed = false;
           } else {
-            print("dispute submitted failed");
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(ErrorText.somethingWentWrong)),
             );

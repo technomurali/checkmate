@@ -4,7 +4,6 @@ import 'package:checkmate/core/widgets/event_list_item_tile.dart';
 import 'package:checkmate/core/widgets/filter_icon.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
-import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:checkmate/core/widgets/confirm_alert_dialog.dart';

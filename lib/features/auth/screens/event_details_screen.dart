@@ -8,7 +8,6 @@ import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/features/auth/model/hcp_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
-import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
@@ -86,13 +85,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   fetchHcpPractionners() async {
     final result = await _newEventController.getHCP();
     if (result['success'] == true && result['data'] != null) {
-      print("hcp practionners: ${result['data'].runtimeType}");
       var hcpPractionners = List<Hcp>.from(
         List<Map<String, dynamic>>.from(
           result['data'],
         ).map((e) => Hcp.fromJson(e)),
       );
-      print("hcp practionners: $hcpPractionners");
       setState(() {
         hcpPractioners = hcpPractionners;
       });
@@ -435,7 +432,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           isEdit,
                       items: (filter, loadProps) =>
                           hcpPractioners.map<Map<String, dynamic>>((e) {
-                            print("hcp practionners name: ${e.hcpName}");
                             return {
                               "hcpId": (e.hcpId).toString(),
                               "hcpName": e.hcpName,

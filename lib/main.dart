@@ -7,7 +7,6 @@ import 'package:checkmate/routes/router.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/constants/app_colors.dart';
-import 'features/auth/screens/signin_screen.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
 
 import 'dart:io';

@@ -1,15 +1,8 @@
 import 'package:checkmate/core/widgets/app_logo.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/core/widgets/custom_text_field.dart';
-import 'package:checkmate/features/auth/business_logic/forgot_password_screen_logic.dart';
-import 'package:checkmate/features/auth/business_logic/signup_screen_logic.dart';
 import 'package:checkmate/features/auth/business_logic/signin_screen_logic.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
-import 'package:checkmate/features/auth/screens/hcp_dashboard.dart';
-import 'package:checkmate/features/auth/screens/office_user_dashboard_screen.dart';
-import 'package:checkmate/features/auth/screens/pharma_rep_dashboard.dart';
-import 'package:checkmate/features/auth/screens/forgot_password_screen.dart';
-import 'package:checkmate/features/auth/screens/signup_screen.dart';
 import 'package:checkmate/features/auth/widgets/social_buttons_row.dart';
 import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';

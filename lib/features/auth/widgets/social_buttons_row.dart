@@ -69,7 +69,6 @@ class _SocialIconState extends State<_SocialIcon> {
    late SingleAccountPca pca;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _initPca();
   }
@@ -77,7 +76,7 @@ class _SocialIconState extends State<_SocialIcon> {
     try {
       pca = await MsalLogin().initializeMsal();
     } catch (e) {
-      print("Error initializing MSAL: $e");
+      debugPrint("Error initializing MSAL: $e");
     }
   }
   isAndroid() {}
@@ -90,16 +89,13 @@ class _SocialIconState extends State<_SocialIcon> {
               if (widget.onDisabledTap != null) widget.onDisabledTap!();
             }
           : () async{
-              // TODO: Implement actual social signin
               if (widget.icon == SocialSvg.windowsSvg) {
                 bool success = await MsalLogin().signIn(pca);
                 if (success) {
                   Navigator.popAndPushNamed(context, RouteName.pharmaRepDashboard);
                 } else {
-                  print("Windows sign-in failed");
                 }
                             } else {  
-                print("Social sign-in for ${widget.icon} is not implemented yet.");
               }
             },
       borderRadius: BorderRadius.circular(24),

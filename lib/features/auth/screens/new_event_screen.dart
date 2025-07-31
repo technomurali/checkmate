@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
@@ -6,8 +5,6 @@ import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
-import 'package:checkmate/features/auth/model/user_modal.dart';
-import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:checkmate/features/auth/controllers/new_event_controller.dart';
@@ -47,7 +44,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
     if (result['success'] == true && result['data'] != null) {
       setState(() {
         _hcos = List<Map<String, dynamic>>.from(result['data']);
-        print("hco hcps: $_hcos");
       });
     } else {
       setState(() {
@@ -61,7 +57,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
       if (result['success'] == true && result['data'] != null) {
         setState(() {
           _hcps = List<Map<String, dynamic>>.from(result['data']);
-          print('pract hcps: $_hcps');
         });
       } else {
         setState(() {
@@ -72,17 +67,14 @@ class _NewEventScreenState extends State<NewEventScreen> {
   }
 
   void fetchHCPs() async {
-    print("pract hcps fetch");
     await _newEventController
         .getHCP()
         .then((value) {
-          print("pract hcps: $value");
           if (value['success'] == true && value['data'] != null) {
             setState(() {
               _hcpPractitioners = List<Map<String, dynamic>>.from(
                 value['data'],
               );
-              print("pract hcps: $_hcpPractitioners");
             });
           } else {
             setState(() {
@@ -91,13 +83,11 @@ class _NewEventScreenState extends State<NewEventScreen> {
           }
         })
         .catchError((error) {
-          print("Error fetching HCPs: $error");
         });
   }
 
   List<Map<String, dynamic>> hcpContactDto = [];
   void _submitForm() {
-    print(hcpContactDto);
     if (_formKey.currentState!.validate()) {
       var testData = {
         "eventName": NewEventTextControllers.eventNameController.text,
@@ -439,13 +429,12 @@ class _NewEventScreenState extends State<NewEventScreen> {
                       ),
                     ),
                     items: (filter, loadProps) {
-                      print("hcps: $_hcps");
                       return _hcps
                           .map<Map<String, dynamic>>(
                             (e) => {
                               HCPModalKeys.hcpId: (e['id']).toString(),
                               HCPModalKeys.hcpName:
-                                  e['firstName'] + " " + e['lastName'],
+                                  "${e['firstName']}  ${e['lastName']}",
                             },
                           )
                           .toList();
@@ -501,7 +490,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                             HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
                                 .toString(),
                             HCPModalKeys.hcpName:
-                                e['firstName'] + " " + e['lastName'],
+                               "${e['firstName']}  ${e['lastName']}",
                           },
                         )
                         .toList(),

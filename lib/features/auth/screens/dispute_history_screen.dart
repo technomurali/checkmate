@@ -4,7 +4,6 @@ import 'package:checkmate/core/widgets/confirm_alert_dialog.dart';
 import 'package:checkmate/core/widgets/dispute_list_item_tile.dart';
 import 'package:checkmate/features/auth/controllers/dispute_controller.dart';
 import 'package:checkmate/features/auth/model/dispute_modal.dart';
-import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
@@ -45,7 +44,6 @@ class _DisputeHistoryScreenState extends State<DisputeHistoryScreen> {
 
   Widget historyItemBuilder(int i) {
     final dispute = disputes[i];
-    print("dispute : ${dispute.disputeId}");
     return Slidable(
       startActionPane: ActionPane(
         extentRatio: 0.2,
