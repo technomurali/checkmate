@@ -1,5 +1,7 @@
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/features/auth/business_logic/signin_screen_logic.dart';
+
+import 'package:checkmate/features/auth/business_logic/signup_screen_logic.dart';
 import 'package:checkmate/routes/route_name.dart';
 import 'package:checkmate/routes/router.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +28,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => SigninScreenLogic()),
         ChangeNotifierProvider(create: (_) => TopNavProvider()),
+         ChangeNotifierProvider(create: (_) => SignupScreenLogic()),
       ],
       child: const MyApp(),
     ),

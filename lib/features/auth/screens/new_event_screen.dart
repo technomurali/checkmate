@@ -99,23 +99,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
   void _submitForm() {
     print(hcpContactDto);
     if (_formKey.currentState!.validate()) {
-      final newEvent = {
-        "userId": userModal.id,
-        "userType": "1",
-        "userName": "${userModal.firstName} ${userModal.lastName!}",
-        "eventName": NewEventTextControllers.eventNameController.text,
-        "startDate": NewEventTextControllers.startDateController.text,
-        "endDate": NewEventTextControllers.endDateController.text,
-        "numberOfStaff": NewEventTextControllers.numberOfStaffController.text,
-        "amount": NewEventTextControllers.amountController.text,
-        "HCO": _selectedHCOName,
-        "HCP": _selectedHCP,
-        "eventType": _selectedEventType,
-        "eventStatus": "UPCOMING",
-        "eventDescription":
-            NewEventTextControllers.eventDescriptionController.text,
-        "isMultiDay": isMultiDay,
-      };
       var testData = {
         "eventName": NewEventTextControllers.eventNameController.text,
         "startDate": startDatePicked.toIso8601String(),
@@ -134,7 +117,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
         "eventApproval": 546170000,
         "userName": "/contacts(b10119e5-c3fd-ee11-a1fe-000d3a313e7f)",
       };
-      debugPrint("Creating Event: ${json.encode(newEvent)}");
       _newEventController.createEvent(testData);
       ScaffoldMessenger.of(
         context,
