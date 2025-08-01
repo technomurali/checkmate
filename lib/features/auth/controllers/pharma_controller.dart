@@ -9,7 +9,7 @@ class PharmaController {
     try {
       final response = await http.get(
         Uri.parse(
-          "${AppApi.baseUrl}${AppApi.pharmaLists}",
+          "https://172.32.32.69:7133/api/Accounts/accounts/pharmaCompanies-active",
         ), //?pharmaTerm=$query
       );
 

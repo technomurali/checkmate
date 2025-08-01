@@ -7,7 +7,8 @@ class SignupController {
   Future<Map<String, dynamic>> signupUser(SignUpModel user) async {
     try {
       final response = await http.post(
-        Uri.parse(AppApi.baseUrl + AppApi.signup),
+        // Uri.parse(AppApi.baseUrl + AppApi.signup),
+        Uri.parse('https://172.32.32.69:7133/api/ApplicationUser'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(user.toJson()),
       );

@@ -1,4 +1,3 @@
-
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
@@ -52,7 +51,7 @@ class _DisputeDetailsScreenState extends State<DisputeDetailsScreen> {
   getPharmaCompany() {
     pharmaCompanyController.fetchPharmaCompanies().then((value) {
       setState(() {
-        pharmaCompanies = value.pharmaCompanies;
+        // pharmaCompanies = value.pharmaCompanies;
       });
     });
   }

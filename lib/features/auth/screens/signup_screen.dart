@@ -193,7 +193,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   onTap: () => signupScreenLogic.selectCompany(
                                     entry.value,
                                   ),
-                                  child: Text(entry.value),
+                                  child: Text(entry.value['accountName']),
                                 ),
                                 if (entry.key !=
                                     signupScreenLogic.filteredCompanies.length -

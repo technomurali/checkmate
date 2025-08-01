@@ -12,8 +12,8 @@ class SignupScreenLogic extends ChangeNotifier {
   bool isSignUpDisabled = true;
   bool isOptedForSocialSignUp = false;
 
-  List<String> filteredCompanies = [];
-  List<String> allCompanies = [];
+  List<Map> filteredCompanies = [];
+  List<Map> allCompanies = [];
 
   final Map<String, bool> isValid = {
     "email": false,
@@ -86,23 +86,24 @@ class SignupScreenLogic extends ChangeNotifier {
   }
 
   void filterCompanies(String input) {
-    debugPrint(
-      "filterCompanies : $input , $allCompanies ,$filteredCompanies",
-    );
+    debugPrint("filterCompanies : $input , $allCompanies ,$filteredCompanies");
     if (input.isEmpty) {
       filteredCompanies.clear();
     } else {
       filteredCompanies = allCompanies
           .where(
-            (company) => company.toLowerCase().contains(input.toLowerCase()),
+            (company) => company['accountName'].toLowerCase().contains(
+              input.toLowerCase(),
+            ),
           )
           .toList();
     }
     notifyListeners();
   }
 
-  void selectCompany(String company) {
-    TextControllers.pharma.text = company;
+  void selectCompany(dynamic company) {
+    TextControllers.pharma.text = company['accountName'];
+    TextControllers.companyId.text = company['id'];
     filteredCompanies.clear();
     notifyListeners();
   }
@@ -115,6 +116,8 @@ class SignupScreenLogic extends ChangeNotifier {
       lastName: TextControllers.lastName.text,
       city: TextControllers.city.text,
       pharmaCompany: TextControllers.pharma.text,
+      userRoleId: "546170001",
+      companyId: TextControllers.companyId.text,
     );
 
     await _signupController.signupUser(data);
