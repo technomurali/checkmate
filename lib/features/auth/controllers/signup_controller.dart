@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/features/auth/model/signup_modal.dart';
 import 'package:http/http.dart' as http;
 

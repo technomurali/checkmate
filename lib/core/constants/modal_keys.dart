@@ -32,8 +32,8 @@ mixin UserModalKeys {
   final String userFirstName = 'firstName';
   final String userLastName = 'lastName';
   final String userCity = 'city';
-  final String userPharmaCompany = 'pharmaCompany';
-  final String userRole = 'user_role';
+  final String userPharmaCompany = 'companyId';
+  final String userRole = 'userRoleId';
   final String userHco = 'hco';
   final String userProfileUrl = 'profileUrl';
   final String userModeOfAuthentication = 'modeOfAuthentication';

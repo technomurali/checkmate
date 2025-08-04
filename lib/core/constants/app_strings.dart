@@ -128,7 +128,7 @@ class ErrorText {
 }
 
 class UserType {
-  static const String pharmaRep = "PHARMA_REP";
+  static const String pharmaRep = "546170002";
   static const String hco = "OFFICE_USER";
   static const String hcp = "HCP";
 }
