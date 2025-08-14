@@ -1,9 +1,11 @@
+import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/event_list_item_tile.dart';
 import 'package:checkmate/core/widgets/filter_icon.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
+import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:checkmate/core/widgets/confirm_alert_dialog.dart';
@@ -32,6 +34,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
   TextEditingController searchController = TextEditingController();
   String _searchQuery = '';
   String? _selectedStatus = 'All';
+  String selectedStatusId = '';
   final List<String> _statusOptions = [
     'All',
     'UPCOMING',
@@ -66,38 +69,117 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     });
   }
 
+  Map<String, String> statusCodeFor(String status) {
+    debugPrint("Here is The Status Filter $status");
+    switch (status) {
+      case 'APPROVED':
+        return {
+          'status': 'APPROVED',
+          'code': 'A',
+          'statusId': BasicCodesFromCrm.approval,
+        };
+      case 'UPCOMING':
+        return {
+          'status': 'UPCOMING',
+          'code': 'B',
+          'statusId': BasicCodesFromCrm.upcoming,
+        };
+      case 'COMPLETED':
+        return {
+          'status': 'COMPLETED',
+          'code': 'B',
+          'statusId': BasicCodesFromCrm.completed,
+        };
+      case 'TERMINATED':
+        return {
+          'status': 'TERMINATED',
+          'code': 'B',
+          'statusId': BasicCodesFromCrm.terminated,
+        };
+      case 'PENDING':
+        return {
+          'status': 'PENDING',
+          'code': 'A',
+          'statusId': BasicCodesFromCrm.pending,
+        };
+      case 'REJECTED':
+        return {
+          'status': 'REJECTED',
+          'code': 'A',
+          'statusId': BasicCodesFromCrm.rejected,
+        };
+      default:
+        return {
+          'status': 'UPCOMING',
+          'code': 'B',
+          'statusId': BasicCodesFromCrm.upcoming,
+        };
+    }
+  }
+
   void _filterEvents() {
     setState(() {
       filteredEvents = events.where((event) {
         final matchesQuery = event.eventName!.toLowerCase().contains(
           _searchQuery.toLowerCase(),
         );
-        Map<String, String> statusCodeFor(String status) {
-          switch (status) {
-            case 'APPROVED':
-              return {'status': 'APPROVED', 'code': 'A'};
-            case 'UPCOMING':
-              return {'status': 'UPCOMING', 'code': 'B'};
-            case 'COMPLETED':
-              return {'status': 'COMPLETED', 'code': 'B'};
-            case 'TERMINATED':
-              return {'status': 'TERMINATED', 'code': 'B'};
-            case 'PENDING':
-              return {'status': 'PENDING', 'code': 'A'};
-            case 'REJECTED':
-              return {'status': 'REJECTED', 'code': 'A'};
-            default:
-              return {'status': 'UPCOMING', 'code': 'B'};
-          }
-        }
+        // Map<String, String> statusCodeFor(String status) {
+        //   switch (status) {
+        //     case 'APPROVED':
+        //       return {
+        //         'status': 'APPROVED',
+        //         'code': 'A',
+        //         'statusId': "546170000",
+        //       };
+        //     case 'UPCOMING':
+        //       return {
+        //         'status': 'UPCOMING',
+        //         'code': 'B',
+        //         'statusId': "546170003",
+        //       };
+        //     case 'COMPLETED':
+        //       return {
+        //         'status': 'COMPLETED',
+        //         'code': 'B',
+        //         'statusId': "546170004",
+        //       };
+        //     case 'TERMINATED':
+        //       return {
+        //         'status': 'TERMINATED',
+        //         'code': 'B',
+        //         'statusId': "546170005",
+        //       };
+        //     case 'PENDING':
+        //       return {
+        //         'status': 'PENDING',
+        //         'code': 'A',
+        //         'statusId': "546170001",
+        //       };
+        //     case 'REJECTED':
+        //       return {
+        //         'status': 'REJECTED',
+        //         'code': 'A',
+        //         'statusId': "546170002",
+        //       };
+        //     default:
+        //       return {
+        //         'status': 'UPCOMING',
+        //         'code': 'B',
+        //         'statusId': "546170003",
+        //       };
+        //   }
+        // }
 
         // Debug print for status comparison
+        debugPrint('Selected status: ${userModal.id}');
         final matchesStatus =
             _selectedStatus == null || _selectedStatus == 'All'
             ? true
             : statusCodeFor(_selectedStatus!)['code'] == 'B'
-            ? event.eventStatus == statusCodeFor(_selectedStatus!)['status']
-            : event.isApproved == statusCodeFor(_selectedStatus!)['status'];
+            ? event.eventStatus.toString() ==
+                  statusCodeFor(_selectedStatus!)['statusId']
+            : event.eventApproval.toString() ==
+                  statusCodeFor(_selectedStatus!)['statusId'];
         // final matchesApproval =
         //     _selectedApproval == null || _selectedApproval == 'All'
         //     ? true
@@ -105,7 +187,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
 
         return matchesQuery && matchesStatus;
       }).toList();
-      debugPrint('Filtered events: $filteredEvents');
+      debugPrint('Filtered events: ${filteredEvents[0]}');
     });
   }
 
@@ -201,8 +283,15 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     );
   }
 
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
   Widget historyItemBuilder(int i) {
-    final event = filteredEvents[i];
+    final event = filteredEvents.isNotEmpty
+        ? filteredEvents[i]
+        : EventModal.empty();
 
     return Slidable(
       startActionPane: ActionPane(
@@ -234,12 +323,12 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
       key: ValueKey(event.eventId),
       child: EventListItemTile(
         eventName: event.eventName ?? '',
-        startDate: event.startDate ?? '',
-        endDate: event.endDate ?? '',
-        pharmaRep: event.pharmaRepName ?? '',
+        startDate: _formatDate(event.startDate),
+        endDate: _formatDate(event.endDate),
+        pharmaRep: event.userName ?? '',
         id: event.eventId ?? '',
-        status: event.eventStatus ?? '',
-        approvalStatus: event.isApproved ?? '',
+        status: statusCodeFor(event.eventStatus.toString()),
+        approvalStatus: event.eventApproval.toString(),
         onTap: () {
           Provider.of<TopNavProvider>(
             context,

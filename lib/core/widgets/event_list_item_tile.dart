@@ -10,7 +10,7 @@ class EventListItemTile extends StatelessWidget {
   final String endDate;
   final String pharmaRep;
   final String id;
-  final String status;
+  final Map<String, String> status;
   final String approvalStatus;
   final VoidCallback? onTap;
 
@@ -44,13 +44,14 @@ class EventListItemTile extends StatelessWidget {
             right: -1,
             top: 0,
             child: Tooltip(
-              message: status,
-              child: FilterIcon(status: status),
+              message: status['status'],
+              child: FilterIcon(status: status['status'] ?? ''),
             ),
           ),
 
-          if (status[0].toLowerCase() != "u") ...{
-            if (status[1].toLowerCase() == "o") ...{
+          if (status.isNotEmpty && status['status']?.toLowerCase() != "u") ...{
+            if (status.length > 1 &&
+                status['status']?.toLowerCase() == "o") ...{
               Positioned(
                 right: 50,
                 top: 0,

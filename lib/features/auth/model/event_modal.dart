@@ -1,129 +1,200 @@
-import 'package:checkmate/core/constants/modal_keys.dart';
+import 'package:flutter/material.dart';
 
-class EventModal with EventsModalKeys {
-  EventModal({
-    required this.eventId,
-    required this.pharmaRepId,
-    required this.pharmaRepName,
-    required this.eventName,
-    required this.startDate,
-    required this.endDate,
-    required this.numberOfStaff,
-    required this.hco,
-    required this.hcp,
-    required this.amount,
-    required this.eventStatus,
-    required this.isApproved,
-    required this.eventDescription,
-    required this.eventType,
-  });
-
+class EventModal {
   final String? eventId;
-  final String? pharmaRepId;
-  final String? pharmaRepName;
   final String? eventName;
-  final String? startDate;
-  final String? endDate;
-  final String? numberOfStaff;
-  final List<dynamic> hco;
-  final List<dynamic> hcp;
-  final String? amount;
-  final String? eventStatus;
-  final String? isApproved;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final int? numberOfStaff;
+  final double? amount;
+  final int? eventCostByPerson;
+  final String? hco;
+  final List<ContactDto>? contactDtos;
+  final int? eventType;
+  final int? eventStatus;
   final String? eventDescription;
-  final String? eventType;
+  final int? eventApproval;
+  final String? userName;
+
+  EventModal({
+    this.eventId,
+    this.eventName,
+    this.startDate,
+    this.endDate,
+    this.numberOfStaff,
+    this.amount,
+    this.eventCostByPerson,
+    this.hco,
+    this.contactDtos,
+    this.eventType,
+    this.eventStatus,
+    this.eventDescription,
+    this.eventApproval,
+    this.userName,
+  });
 
   EventModal copyWith({
     String? eventId,
-    String? pharmaRepId,
-    String? pharmaRepName,
     String? eventName,
-    String? startDate,
-    String? endDate,
-    String? numberOfStaff,
-    List<dynamic>? hco,
-    List<dynamic>? hcp,
-    String? amount,
-    String? eventStatus,
+    DateTime? startDate,
+    DateTime? endDate,
+    int? numberOfStaff,
+    double? amount,
+    int? eventCostByPerson,
+    String? hco,
+    List<ContactDto>? contactDtos,
+    int? eventType,
+    int? eventStatus,
     String? eventDescription,
-    String? eventType,
-  }) {
-    return EventModal(
-      eventId: eventId ?? this.eventId,
-      pharmaRepId: pharmaRepId ?? this.pharmaRepId,
-      pharmaRepName: pharmaRepName ?? this.pharmaRepName,
-      eventName: eventName ?? this.eventName,
-      startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
-      numberOfStaff: numberOfStaff ?? this.numberOfStaff,
-      hco: hco ?? this.hco,
-      hcp: hcp ?? this.hcp,
-      amount: amount ?? this.amount,
-      eventStatus: eventStatus ?? this.eventStatus,
-      isApproved: isApproved ?? isApproved,
-      eventDescription: eventDescription ?? this.eventDescription,
-      eventType: eventType ?? this.eventType,
-    );
-  }
+    int? eventApproval,
+    String? userName,
+  }) => EventModal(
+    eventId: eventId ?? this.eventId,
+    eventName: eventName ?? this.eventName,
+    startDate: startDate ?? this.startDate,
+    endDate: endDate ?? this.endDate,
+    numberOfStaff: numberOfStaff ?? this.numberOfStaff,
+    amount: amount ?? this.amount,
+    eventCostByPerson: eventCostByPerson ?? this.eventCostByPerson,
+    hco: hco ?? this.hco,
+    contactDtos: contactDtos ?? this.contactDtos,
+    eventType: eventType ?? this.eventType,
+    eventStatus: eventStatus ?? this.eventStatus,
+    eventDescription: eventDescription ?? this.eventDescription,
+    eventApproval: eventApproval ?? this.eventApproval,
+    userName: userName ?? this.userName,
+  );
 
   factory EventModal.fromJson(Map<String, dynamic> json) {
+    debugPrint("EventModal.fromJson: $json");
     return EventModal(
-      eventId: json[EventsModalKeys.eventIdKey],
-      pharmaRepId: json[EventsModalKeys.eventPharmaRepId],
-      pharmaRepName: json[EventsModalKeys.eventPharmaRepName],
-      eventName: json[EventsModalKeys.eventNameKey],
-      startDate: json[EventsModalKeys.eventStartDate],
-      endDate: json[EventsModalKeys.eventEndDate],
-      numberOfStaff: json[EventsModalKeys.eventNumberOfStaff],
-      hco: json[EventsModalKeys.eventHCO] == null
+      eventId: json["eventId"],
+      eventName: json["eventName"],
+      startDate: json["startDate"] == null
+          ? null
+          : _parseDateTime(json["startDate"]),
+      endDate: json["endDate"] == null ? null : _parseDateTime(json["endDate"]),
+      numberOfStaff: json["numberOfStaff"],
+      amount: double.parse(json["amount"].toString()),
+      eventCostByPerson: json["eventCostByPerson"],
+      hco: json["hco"],
+      contactDtos: json["contactDtos"] == null
           ? []
-          : List<dynamic>.from(json[EventsModalKeys.eventHCO].map((x) => x)),
-      hcp: json[EventsModalKeys.eventHCP] == null
-          ? []
-          : List<dynamic>.from(json[EventsModalKeys.eventHCP].map((x) => x)),
-      amount: json[EventsModalKeys.eventAmount],
-      eventStatus: json[EventsModalKeys.eventStatusKey],
-      isApproved: json[EventsModalKeys.eventApprovalStatus],
-      eventDescription: json[EventsModalKeys.eventDescription],
-      eventType: json[EventsModalKeys.eventType],
+          : List<ContactDto>.from(
+              json["contactDtos"]!.map((x) => ContactDto.fromJson(x)),
+            ),
+      eventType: json["eventType"],
+      eventStatus: json["eventStatus"],
+      eventDescription: json["eventDescription"],
+      eventApproval: json["eventApproval"],
+      userName: json["userName"],
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      EventsModalKeys.eventIdKey: eventId,
-      EventsModalKeys.eventPharmaRepId: pharmaRepId,
-      EventsModalKeys.eventPharmaRepName: pharmaRepName,
-      EventsModalKeys.eventNameKey: eventName,
-      EventsModalKeys.eventStartDate: startDate,
-      EventsModalKeys.eventEndDate: endDate,
-      EventsModalKeys.eventNumberOfStaff: numberOfStaff,
-      EventsModalKeys.eventHCO: hco,
-      EventsModalKeys.eventHCP: hcp,
-      EventsModalKeys.eventAmount: amount,
-      EventsModalKeys.eventStatusKey: eventStatus,
-      EventsModalKeys.eventApprovalStatus: isApproved,
-      EventsModalKeys.eventDescription: eventDescription,
-      EventsModalKeys.eventType: eventType,
-    };
+  static DateTime? _parseDateTime(dynamic dateValue) {
+    if (dateValue == null) return null;
+    if (dateValue is DateTime) return dateValue;
+    if (dateValue is String) {
+      try {
+        return DateTime.parse(dateValue);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
   }
 
-  static EventModal empty() {
-    return EventModal(
-      eventId: '',
-      pharmaRepId: '',
-      pharmaRepName: '',
-      eventName: 'Unknown Event',
-      startDate: '',
-      endDate: '',
-      numberOfStaff: '0',
-      hco: [],
-      hcp: [],
-      amount: '0',
-      eventStatus: 'UNKNOWN',
-      isApproved: '',
-      eventDescription: '',
-      eventType: '',
-    );
-  }
+  Map<String, dynamic> toJson() => {
+    "eventId": eventId,
+    "eventName": eventName,
+    "startDate": startDate?.toIso8601String(),
+    "endDate": endDate?.toIso8601String(),
+    "numberOfStaff": numberOfStaff,
+    "amount": amount,
+    "eventCostByPerson": eventCostByPerson,
+    "hco": hco,
+    "contactDtos": contactDtos == null
+        ? []
+        : List<dynamic>.from(contactDtos!.map((x) => x.toJson())),
+    "eventType": eventType,
+    "eventStatus": eventStatus,
+    "eventDescription": eventDescription,
+    "eventApproval": eventApproval,
+    "userName": userName,
+  };
+
+  factory EventModal.empty() => EventModal(
+    eventId: "",
+    eventName: "",
+    startDate: null,
+    endDate: null,
+    numberOfStaff: 0,
+    amount: 0,
+    eventCostByPerson: 0,
+    hco: "",
+    contactDtos: [],
+    eventType: 0,
+    eventStatus: 0,
+    eventDescription: "",
+    eventApproval: 0,
+    userName: "",
+  );
+}
+
+class ContactDto {
+  final String? id;
+  final String? firstName;
+  final String? lastName;
+  final String? email;
+  final String? phoneNumber;
+  final String? jobTitle;
+  final String? company;
+
+  ContactDto({
+    this.id,
+    this.firstName,
+    this.lastName,
+    this.email,
+    this.phoneNumber,
+    this.jobTitle,
+    this.company,
+  });
+
+  ContactDto copyWith({
+    String? id,
+    String? firstName,
+    String? lastName,
+    String? email,
+    String? phoneNumber,
+    String? jobTitle,
+    String? company,
+  }) => ContactDto(
+    id: id ?? this.id,
+    firstName: firstName ?? this.firstName,
+    lastName: lastName ?? this.lastName,
+    email: email ?? this.email,
+    phoneNumber: phoneNumber ?? this.phoneNumber,
+    jobTitle: jobTitle ?? this.jobTitle,
+    company: company ?? this.company,
+  );
+
+  factory ContactDto.fromJson(Map<String, dynamic> json) => ContactDto(
+    id: json["id"],
+    firstName: json["firstName"],
+    lastName: json["lastName"],
+    email: json["email"],
+    phoneNumber: json["phoneNumber"],
+    jobTitle: json["jobTitle"],
+    company: json["company"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "firstName": firstName,
+    "lastName": lastName,
+    "email": email,
+    "phoneNumber": phoneNumber,
+    "jobTitle": jobTitle,
+    "company": company,
+  };
 }

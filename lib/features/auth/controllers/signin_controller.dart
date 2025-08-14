@@ -18,6 +18,8 @@ class SigninController {
     final url = Uri.parse(AppApi.baseUrl1 + AppApi.signin);
 
     try {
+      BasicCodesFromCrm().getEventStatus();
+      BasicCodesFromCrm().getEventApprovals();
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -32,7 +34,7 @@ class SigninController {
       if (response.statusCode == 200) {
         // Parse user using your UserModal
         final user = UserModal(
-          id: data['id'].toString(),
+          id: data['kiosk'].toString(),
           email: data["email"],
           password: data["password"],
           firstName: data["firstName"],

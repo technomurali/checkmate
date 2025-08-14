@@ -2,7 +2,7 @@
     "account_mode": "SINGLE",
     "client_id": "45b0b48a-279d-4b11-b67d-00edd7b3997f",
     "authorization_user_agent": "DEFAULT",
-    "redirect_uri": "msauth://com.example.test/%2FfO3mkii3j2rUJFDwJFffrXEURA%3D",
+    "redirect_uri": "msauth://com.example.checkmate/%2FfO3mkii3j2rUJFDwJFffrXEURA%3D",
     "authorities": [
         {
             "type": "B2C",
