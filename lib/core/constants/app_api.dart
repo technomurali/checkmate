@@ -19,11 +19,12 @@ class AppApi {
   static const String event = 'event';
   static const String newEvent = 'new-event';
   static const String hcoLists = 'Accounts/accounts/hco-active';
-  static const String hcpLists = 'hcp-lists';
+  static const String hcpLists = 'Contact/physicians-active';
   static const String disputes = 'disputes';
   static const String getEventTypes = "getEventTypes";
   static const String getEventStatus = 'Events/getEventStatus';
   static const String getEventApprovals = 'Events/getEventApprovals';
+  static const String getHcpsWithHcoId = 'Contact/getHCPs/';
 }
 
 class AppApiStatusCodes {
