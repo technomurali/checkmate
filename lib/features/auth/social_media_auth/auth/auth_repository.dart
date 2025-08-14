@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/features/auth/controllers/signin_controller.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
@@ -6,9 +5,7 @@ import 'package:checkmate/features/auth/social_media_auth/services/apple_auth_se
 import 'package:checkmate/features/auth/social_media_auth/services/google_auth_service.dart';
 import 'package:checkmate/features/auth/social_media_auth/services/linkedin_auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
-import '../secrets.dart';
 import 'auth_payload.dart';
 
 enum SocialProvider { google, apple, linkedin }
@@ -34,14 +31,12 @@ class AuthRepository {
         break;
     }
     if (payload == null) return false;
-    print("Payload : ${payload.toJson()}");
     // send to backend -> receive your own JWT
     final response = await SigninController().signin(
       email: 'rep@abc.com',
       password: 'abcabc',
     );
     if (response[SigninModalKeys.signinSuccess] == true) {
-      print("Responce on login ${response['user']}");
       final user = response[SigninModalKeys.signinUser] as UserModal;
       userModal = user;
       userModal = UserModal(

@@ -13,7 +13,6 @@ class LinkedInAuthService {
           redirectUrl: 'https://example.com/oauth/linkedin',
           clientId: Secrets.linkedinClientId,
           onGetAuthCode: (s) {
-            print("LinkedIn Auth : ${s.codeResponse.accessToken}");
             return Navigator.pop(
               ctx,
               AuthPayload(

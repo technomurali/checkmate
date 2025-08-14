@@ -4,7 +4,6 @@ import 'package:checkmate/features/auth/social_media_auth/auth/auth_payload.dart
 import 'package:checkmate/features/auth/social_media_auth/secrets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-
 class GoogleAuthService {
   final _google = GoogleSignIn.instance;
 
@@ -14,13 +13,16 @@ class GoogleAuthService {
             clientId: Secrets.googleServerClientIdAndroid,
             serverClientId: Secrets.googleServerClientId,
           )
-        : _google.initialize(clientId: Secrets.googleServerClientIdIOS,serverClientId: Secrets.googleServerClientId,);
+        : _google.initialize(
+            clientId: Secrets.googleServerClientIdIOS,
+            serverClientId: Secrets.googleServerClientId,
+          );
     final account = await _google.authenticate(
       scopeHint: ['openid', 'email', 'profile'],
     );
     // if (account == null) return null;
+    // ignore: await_only_futures
     final auth = await account.authentication;
-    print("Auth Token : ${auth.idToken}");
     return AuthPayload(
       idToken: auth.idToken!,
       authCode: auth.idToken,

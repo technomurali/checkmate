@@ -102,7 +102,6 @@ class _SocialIconState extends State<_SocialIcon> {
                   );
                 }
               } else if (widget.icon == SocialSvg.appleSvg) {
-                print("Windows sign-in failed");
               } else if (widget.icon == SocialSvg.googleSvg) {
                 bool success = await AuthRepository().signIn(
                   SocialProvider.google,
@@ -113,9 +112,7 @@ class _SocialIconState extends State<_SocialIcon> {
                     context,
                     RouteName.pharmaRepDashboard,
                   );
-                } else {
-                  print("Google sign-in failed");
-                }
+                } else {}
               } else if (widget.icon == SocialSvg.linkedInSvg) {
                 bool success = await AuthRepository().signIn(
                   SocialProvider.linkedin,
@@ -126,14 +123,8 @@ class _SocialIconState extends State<_SocialIcon> {
                     context,
                     RouteName.pharmaRepDashboard,
                   );
-                } else {
-                  print("LinkedIn sign-in failed");
-                }
-              } else {
-                print(
-                  "Social sign-in for ${widget.icon} is not implemented yet.",
-                );
-              }
+                } else {}
+              } else {}
             },
       borderRadius: BorderRadius.circular(24),
       child: Opacity(
