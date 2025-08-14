@@ -53,6 +53,7 @@ class AppStrings {
   static const String selectHCO = "Please select HCO";
   static const String selectHCP = "Please select HCP";
   static const String eventCreated = "Event Created";
+  static const String eventCreatedFailed = "Event Creation Failed";
   static const String enterTheCompanyNameWarning =
       "Please choose or enter your company name to move forward.";
   static const String deleteEvent = 'Delete Event';
@@ -128,7 +129,7 @@ class ErrorText {
 }
 
 class UserType {
-  static const String pharmaRep = "PHARMA_REP";
+  static const String pharmaRep = "546170001";
   static const String hco = "OFFICE_USER";
   static const String hcp = "HCP";
 }

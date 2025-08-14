@@ -8,6 +8,10 @@ class SignUpModel {
     required this.lastName,
     required this.city,
     required this.pharmaCompany,
+    required this.companyId,
+    required this.userRoleId,
+    // "companyId": "string",
+    // "userRoleId": "string",
   });
 
   final String? email;
@@ -16,6 +20,8 @@ class SignUpModel {
   final String? lastName;
   final String? city;
   final String? pharmaCompany;
+  final String companyId;
+  final String userRoleId;
 
   SignUpModel copyWith({
     String? email,
@@ -24,6 +30,8 @@ class SignUpModel {
     String? lastName,
     String? city,
     String? pharmaCompany,
+    String? companyId,
+    String? userRoleId,
   }) {
     return SignUpModel(
       email: email ?? this.email,
@@ -32,6 +40,8 @@ class SignUpModel {
       lastName: lastName ?? this.lastName,
       city: city ?? this.city,
       pharmaCompany: pharmaCompany ?? this.pharmaCompany,
+      userRoleId: userRoleId ?? this.userRoleId,
+      companyId: companyId ?? this.companyId,
     );
   }
 
@@ -43,6 +53,8 @@ class SignUpModel {
       lastName: json[ModalKeys().lastName],
       city: json[ModalKeys().city],
       pharmaCompany: json[ModalKeys().pharmaCompany],
+      userRoleId: json['userRoleId'],
+      companyId: json['companyId'],
     );
   }
 
@@ -53,5 +65,7 @@ class SignUpModel {
     ModalKeys().lastName: lastName,
     ModalKeys().city: city,
     ModalKeys().pharmaCompany: pharmaCompany,
+    'userRoleId': userRoleId,
+    "companyId": companyId,
   };
 }

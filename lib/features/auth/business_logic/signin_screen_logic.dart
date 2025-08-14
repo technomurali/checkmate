@@ -6,6 +6,7 @@ import 'package:checkmate/core/constants/modal_keys.dart';
 
 class SigninScreenLogic extends ChangeNotifier {
   final SigninController _signinController;
+  bool isLoading = false;
   SigninScreenLogic([SigninController? controller])
     : _signinController = controller ?? SigninController() {
     TextControllers.email.addListener(updateButtonState);
@@ -29,6 +30,8 @@ class SigninScreenLogic extends ChangeNotifier {
 
   Future<UserModal?> signinUser(BuildContext context) async {
     try {
+      isLoading = true;
+      notifyListeners();
       final response = await _signinController.signin(
         email: TextControllers.email.text.trim(),
         password: TextControllers.password.text.trim(),
@@ -38,11 +41,14 @@ class SigninScreenLogic extends ChangeNotifier {
         final user = response[SigninModalKeys.signinUser] as UserModal;
         userModal = user;
         isButtonEnabled = false;
+        isLoading = false;
         notifyListeners();
         TextControllers.email.clear();
         TextControllers.password.clear();
         return user;
       } else {
+        isLoading = false;
+        notifyListeners();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

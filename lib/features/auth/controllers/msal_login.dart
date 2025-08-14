@@ -36,7 +36,6 @@ class MsalLogin {
         return false;
       }
     } catch (e) {
-      print("Sign-in failed: $e");
       return false;
     }
   }

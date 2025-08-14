@@ -1,8 +1,22 @@
 import 'dart:convert';
-import 'package:checkmate/core/constants/app_api.dart';
+import 'package:checkmate/core/constants/app_Api.dart';
 import 'package:http/http.dart' as http;
 
 class NewEventController {
+  Future<List<Map<String, dynamic>>> getEventTypes() async {
+    try {
+      final url = "${AppApi.baseUrl1}${AppApi.events}/${AppApi.getEventTypes}";
+      final responce = await http.get(Uri.parse(url));
+      if (responce.statusCode == AppApiStatusCodes.success) {
+        return List.from(json.decode(responce.body));
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
+    }
+  }
+
   Future<Map<String, dynamic>> getHCO() async {
     try {
       final uri = Uri.parse(
@@ -68,9 +82,9 @@ class NewEventController {
   }
 
   //physicians-active
-  createEvent(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> createEvent(Map<String, dynamic> data) async {
     try {
-      final uri = Uri.parse("https://172.32.32.69:7133/api/Events");
+      final uri = Uri.parse(AppApi.baseUrl1 + AppApi.events);
       var jsonWalaBody = json.encode(data);
       dynamic g = json.decode(jsonWalaBody);
       final response = await http.post(
@@ -78,9 +92,12 @@ class NewEventController {
         body: jsonWalaBody,
         headers: {'Content-Type': 'application/json'},
       );
-      print("Response: ${response.body}");
+      if (response.statusCode == AppApiStatusCodes.postSuccess) {
+        return {'success': true};
+      } else {
+        return {'success': false};
+      }
     } catch (e) {
-      print("Error: $e");
       return {'success': false, 'data': null, 'message': 'Error: $e'};
     }
   }

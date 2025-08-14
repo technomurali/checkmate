@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
@@ -9,7 +7,6 @@ import 'package:checkmate/features/auth/controllers/pharma_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/dispute_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
-import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 
 class DisputeDetailsScreen extends StatefulWidget {
@@ -43,9 +40,9 @@ class _DisputeDetailsScreenState extends State<DisputeDetailsScreen> {
   ];
   String? selectedPharmaCompany;
 
+  @override
   initState() {
     super.initState();
-    print("userModal: ${jsonEncode(userModal.toJson())}");
 
     getPharmaCompany();
     getDisputeDetails();
@@ -54,7 +51,7 @@ class _DisputeDetailsScreenState extends State<DisputeDetailsScreen> {
   getPharmaCompany() {
     pharmaCompanyController.fetchPharmaCompanies().then((value) {
       setState(() {
-        pharmaCompanies = value.pharmaCompanies;
+        // pharmaCompanies = value.pharmaCompanies;
       });
     });
   }
@@ -139,7 +136,6 @@ class _DisputeDetailsScreenState extends State<DisputeDetailsScreen> {
         )
         .then((value) {
           if (value) {
-            print("dispute submitted successfully");
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(SuccessStrings.disputeSubmittedSuccessfully),
@@ -160,7 +156,6 @@ class _DisputeDetailsScreenState extends State<DisputeDetailsScreen> {
             selectedDisputeCategory = null;
             selectedPharmaCompany = null;
           } else {
-            print("dispute submitted failed");
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(ErrorText.somethingWentWrong)),
             );

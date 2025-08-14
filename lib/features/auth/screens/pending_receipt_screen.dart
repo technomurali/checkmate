@@ -1,4 +1,3 @@
-import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
@@ -18,7 +17,6 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
   EventModal event = EventModal.empty();
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     fetchEvent();
   }
@@ -37,78 +35,86 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return  Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(15),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  "${event.eventName}",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(AppStrings.pharmaRep),
-                    Text("${event.pharmaRepName}"),
-                  ],
-                ),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(15),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "${event.eventName}",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(AppStrings.pharmaRep),
+                  Text("${event.userName}"),
+                ],
+              ),
+              Divider(),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(AppStrings.labelEventStartDate),
+                  Text("${event.startDate}"),
+                ],
+              ),
+              Divider(),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(AppStrings.labelEndDate),
+                  Text("${event.endDate}"),
+                ],
+              ),
+              Divider(),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(AppStrings.numberOfStaff),
+                  Text("${event.numberOfStaff}"),
+                ],
+              ),
+              Divider(),
+              SizedBox(height: 16),
+              Text(AppStrings.hcoInEvent),
+              SizedBox(height: 10),
+              if (event.hco != null) ...{
+                Row(children: [Text("${event.hco}")]),
                 Divider(),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(AppStrings.labelEventStartDate),
-                    Text("${event.startDate}"),
-                  ],
-                ),
-                Divider(),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(AppStrings.labelEndDate),
-                    Text("${event.endDate}"),
-                  ],
-                ),
-                Divider(),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(AppStrings.numberOfStaff),
-                    Text("${event.numberOfStaff}"),
-                  ],
-                ),
-                Divider(),
-                SizedBox(height: 16),
-                Text(AppStrings.hcoInEvent),
                 SizedBox(height: 10),
-                for (var i = 0; i < event.hco.length; i++) ...{
-                  Row(children: [Text("${i + 1}. ${event.hco[i]}")]),
-                  Divider(),
-                  SizedBox(height: 10),
+              },
+              SizedBox(height: 16),
+              Text(AppStrings.hcpInEvent),
+              SizedBox(height: 10),
+              if (event.contactDtos != null) ...{
+                for (var i = 0; i < event.contactDtos!.length; i++) ...{
+                  Row(
+                    children: [
+                      Text(
+                        "${i + 1}. ${event.contactDtos![i].firstName} ${event.contactDtos![i].lastName}",
+                      ),
+                    ],
+                  ),
                 },
-                SizedBox(height: 16),
-                Text(AppStrings.hcpInEvent),
+                Divider(),
                 SizedBox(height: 10),
-                for (var i = 0; i < event.hcp.length; i++) ...{
-                  Row(children: [Text("${i + 1}. ${event.hcp[i]["hcpName"]}")]),
-                  Divider(),
-                  SizedBox(height: 10),
-                },
-              ],
-            ),
-            Button(text: AppStrings.sendRequest, onPressed: () {}),
-          ],
-        ),
-      );
+              },
+            ],
+          ),
+          Button(text: AppStrings.sendRequest, onPressed: () {}),
+        ],
+      ),
+    );
   }
 }

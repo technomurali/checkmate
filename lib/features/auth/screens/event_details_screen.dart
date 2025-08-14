@@ -8,7 +8,6 @@ import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/features/auth/model/hcp_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
-import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
@@ -39,10 +38,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     fetchEvent();
     fetchHcpPractionners();
     EventTextControllers.startDateController = TextEditingController(
-      text: event.startDate,
+      text: event.startDate.toString(),
     );
     EventTextControllers.endDateController = TextEditingController(
-      text: event.endDate,
+      text: event.endDate.toString(),
     );
   }
 
@@ -58,26 +57,23 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
         .fetchEvent(eventId: widget.eventId)
         .then(
           (v) => {
-            v.hco[0]['hcoId'] != null ? fetchHcp(v.hco[0]['hcoId']) : null,
+            v.hco != null ? fetchHcp(v.hco!) : null,
             setState(() {
               event = v;
               EventTextControllers.eventNameController.text =
                   event.eventName ?? '';
               EventTextControllers.pharmaRepController.text =
-                  event.pharmaRepName ?? '';
-              EventTextControllers.startDateController.text =
-                  event.startDate ?? '';
-              EventTextControllers.endDateController.text = event.endDate ?? '';
-              EventTextControllers.numberOfStaffController.text =
-                  event.numberOfStaff ?? '';
-              if (event.hco.isNotEmpty) {
-                EventTextControllers.hcoController.text =
-                    event.hco[0]['hcoName'] ?? '';
-              }
+                  event.userName ?? '';
+              EventTextControllers.startDateController.text = event.startDate
+                  .toString();
+              EventTextControllers.endDateController.text = event.endDate
+                  .toString();
+              EventTextControllers.numberOfStaffController.text = event
+                  .numberOfStaff
+                  .toString();
+              EventTextControllers.hcoController.text = event.hco ?? '';
               EventTextControllers.eventDescriptionController.text =
                   event.eventDescription ?? '';
-              debugPrint('Fetched event.hco: \\${event.hco}');
-              debugPrint('Fetched event.hcp: \\${event.hcp}');
             }),
           },
         );
@@ -86,13 +82,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   fetchHcpPractionners() async {
     final result = await _newEventController.getHCP();
     if (result['success'] == true && result['data'] != null) {
-      print("hcp practionners: ${result['data'].runtimeType}");
       var hcpPractionners = List<Hcp>.from(
         List<Map<String, dynamic>>.from(
           result['data'],
         ).map((e) => Hcp.fromJson(e)),
       );
-      print("hcp practionners: $hcpPractionners");
       setState(() {
         hcpPractioners = hcpPractionners;
       });
@@ -111,489 +105,511 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(15),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              event.eventStatus != null
-                  ? Text("${event.eventStatus} EVENT")
-                  : SizedBox(),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            isEdit = !isEdit;
-                          });
-                        },
-                        child: Icon(
-                          Icons.edit,
-                          color: !isEdit ? AppColors.blue : AppColors.border,
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      InkWell(
-                        onTap: () {},
-                        child: Icon(Icons.delete, color: AppColors.accentError),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 15),
-                  for (var i = 0; i < event.hco.length; i++) ...{
-                    TextFormField(
-                      enabled: false,
-                      controller: EventTextControllers.hcoController,
-                      decoration: InputDecoration(
-                        labelText: AppStrings.labelHCO,
+      width: double.infinity,
+      padding: EdgeInsets.all(15),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            event.eventStatus != null
+                ? Text("${event.eventStatus} EVENT")
+                : SizedBox(),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          isEdit = !isEdit;
+                        });
+                      },
+                      child: Icon(
+                        Icons.edit,
+                        color: !isEdit ? AppColors.blue : AppColors.border,
                       ),
                     ),
-
-                    Divider(),
-                    SizedBox(height: 10),
-                  },
-                  SizedBox(height: 16),
+                    SizedBox(width: 10),
+                    InkWell(
+                      onTap: () {},
+                      child: Icon(Icons.delete, color: AppColors.accentError),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 15),
+                if (event.hco != null) ...{
                   TextFormField(
                     enabled: false,
-                    controller: EventTextControllers.pharmaRepController,
-                    decoration: InputDecoration(
-                      labelText: AppStrings.pharmaRep,
-                    ),
-                    onChanged: (val) {
-                      setState(() {
-                        event = event.copyWith(pharmaRepName: val);
-                      });
-                    },
+                    controller: EventTextControllers.hcoController,
+                    decoration: InputDecoration(labelText: AppStrings.labelHCO),
                   ),
-                  Divider(),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    enabled:
-                        (userModal.role == UserType.pharmaRep && isCheckedIn) ||
-                        isEdit,
-                    controller: EventTextControllers.eventNameController,
-                    decoration: InputDecoration(
-                      labelText: AppStrings.labelEventName,
-                    ),
-                    onChanged: (val) {
-                      setState(() {
-                        event = event.copyWith(eventName: val);
-                      });
-                    },
-                  ),
-                  Divider(),
-                  TextField(
-                    enabled:
-                        (userModal.role == UserType.pharmaRep && isCheckedIn) ||
-                        isEdit,
-                    autocorrect: true,
-                    minLines: AppSizes().eventDescriptionMinLines,
-                    controller: EventTextControllers.eventDescriptionController,
-                    decoration: InputDecoration(
-                      labelText: AppStrings.labelEventDescription,
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    enabled: isCheckedIn || isEdit,
-                    controller: EventTextControllers.startDateController,
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      labelText: event.endDate != null
-                          ? AppStrings.labelEventStartDate
-                          : AppStrings.labelStartDate,
-                    ),
-                    onTap: () async {
-                      final DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (pickedDate != null) {
-                        EventTextControllers.startDateController.text =
-                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                        setState(() {
-                          event = event.copyWith(
-                            startDate:
-                                EventTextControllers.startDateController.text,
-                          );
-                        });
-                      }
-                    },
-                  ),
-                  Divider(),
-                  SizedBox(height: 16),
-                  event.endDate != null
-                      ? TextFormField(
-                          enabled: isCheckedIn || isEdit,
-                          controller: EventTextControllers.endDateController,
-                          readOnly: true,
-                          decoration: InputDecoration(
-                            labelText: AppStrings.labelEndDate,
-                          ),
-                          onTap: () async {
-                            final DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (pickedDate != null) {
-                              EventTextControllers.endDateController.text =
-                                  "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                              setState(() {
-                                event = event.copyWith(
-                                  endDate: EventTextControllers
-                                      .endDateController
-                                      .text,
-                                );
-                              });
-                            }
-                          },
-                        )
-                      : SizedBox(),
-                  Divider(),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    enabled:
-                        (userModal.role == UserType.pharmaRep && isCheckedIn) ||
-                        isEdit,
-                    controller: EventTextControllers.numberOfStaffController,
-                    decoration: InputDecoration(
-                      labelText: AppStrings.labelNumberOfStaff,
-                    ),
-                    onChanged: (val) {
-                      setState(() {
-                        event = event.copyWith(numberOfStaff: val);
-                      });
-                    },
-                  ),
-                  Divider(),
-                  SizedBox(height: 16),
 
-                  // Text(AppStrings.hcpInEvent),
-                  if (isEdit)
-                    Container(
-                      width: double.infinity,
-                      height: 40,
-                      // padding: EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.border,
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          Flexible(
-                            flex: 1,
-                            child: InkWell(
-                              onTap: () {
-                                setState(() {
-                                  hcpInHcoSelected = true;
-                                });
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: hcpInHcoSelected
-                                      ? AppColors.primary
-                                      : AppColors.transparent,
-                                  border: Border.all(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                width: double.infinity,
-                                height: 50,
-
-                                child: Center(
-                                  child: Text(
-                                    "HCP in HCO",
-                                    style: TextStyle(
-                                      color: hcpInHcoSelected
-                                          ? AppColors.background
-                                          : AppColors.primary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            flex: 1,
-                            child: InkWell(
-                              onTap: () {
-                                setState(() {
-                                  hcpInHcoSelected = false;
-                                });
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: hcpInHcoSelected
-                                      ? AppColors.transparent
-                                      : AppColors.primary,
-                                  border: Border.all(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "HCP Practitioner",
-                                    style: TextStyle(
-                                      color: !hcpInHcoSelected
-                                          ? AppColors.background
-                                          : AppColors.primary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(height: 10),
+                  Divider(),
                   SizedBox(height: 10),
-                  if (hcpInHcoSelected)
-                    DropdownSearch<Map<String, dynamic>>.multiSelection(
-                      popupProps: const PopupPropsMultiSelection.menu(
-                        showSearchBox: true, // <- this brings the search field
-                        searchFieldProps: TextFieldProps(
-                          // customise it if you like
-                          decoration: InputDecoration(
-                            labelText: 'Search HCP',
-                            prefixIcon: Icon(Icons.search),
-                          ),
-                        ),
-                      ),
-                      enabled:
-                          (userModal.role == UserType.pharmaRep &&
-                              isCheckedIn) ||
-                          isEdit,
-                      items: (filter, loadProps) => hcpList
-                          .map<Map<String, dynamic>>(
-                            (e) => {
-                              "hcpId": (e.hcpId).toString(),
-                              "hcpName": e.hcpName,
-                            },
-                          )
-                          .toList(),
-                      selectedItems: event.hcp
-                          .map<Map<String, dynamic>>(
-                            (e) => {
-                              "hcpId": (e["hcpId"] ?? e['id'] ?? "").toString(),
-                              "hcpName":
-                                  e["hcpName"] ?? e['name'] ?? e.toString(),
-                            },
-                          )
-                          .toList(),
-                      itemAsString: (item) => item["hcpName"] ?? "",
-                      compareFn: (item, selectedItem) =>
-                          item["hcpId"] == selectedItem["hcpId"],
-                      decoratorProps: const DropDownDecoratorProps(
-                        decoration: InputDecoration(
-                          labelText: AppStrings.hcpInEvent,
-                        ),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          event = event.copyWith(
-                            hcp: value
-                                .map<Map<String, dynamic>>((e) => e)
-                                .toList(),
-                          );
-                        });
-                      },
-                      validator: (value) => value == null || value.isEmpty
-                          ? AppStrings.selectHCP
-                          : null,
-                    ),
-
-                  if (!hcpInHcoSelected)
-                    DropdownSearch<Map<String, dynamic>>.multiSelection(
-                      popupProps: const PopupPropsMultiSelection.menu(
-                        showSearchBox: true, // <- this brings the search field
-                        searchFieldProps: TextFieldProps(
-                          // customise it if you like
-                          decoration: InputDecoration(
-                            labelText: 'Search HCP Practitioners',
-                            prefixIcon: Icon(Icons.search),
-                          ),
-                        ),
-                      ),
-                      enabled:
-                          (userModal.role == UserType.pharmaRep &&
-                              isCheckedIn) ||
-                          isEdit,
-                      items: (filter, loadProps) =>
-                          hcpPractioners.map<Map<String, dynamic>>((e) {
-                            print("hcp practionners name: ${e.hcpName}");
-                            return {
-                              "hcpId": (e.hcpId).toString(),
-                              "hcpName": e.hcpName,
-                            };
-                          }).toList(),
-                      selectedItems: event.hcp
-                          .map<Map<String, dynamic>>(
-                            (e) => {
-                              "hcpId": (e["hcpId"] ?? e['id'] ?? "").toString(),
-                              "hcpName":
-                                  e["hcpName"] ?? e['name'] ?? e.toString(),
-                            },
-                          )
-                          .toList(),
-                      itemAsString: (item) => item["hcpName"] ?? "",
-                      compareFn: (item, selectedItem) =>
-                          item["hcpId"] == selectedItem["hcpId"],
-                      decoratorProps: const DropDownDecoratorProps(
-                        decoration: InputDecoration(
-                          labelText: AppStrings.hcpInEvent,
-                        ),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          event = event.copyWith(
-                            hcp: value
-                                .map<Map<String, dynamic>>((e) => e)
-                                .toList(),
-                          );
-                        });
-                      },
-                      validator: (value) => value == null || value.isEmpty
-                          ? AppStrings.selectHCP
-                          : null,
-                    ),
-
-                  SizedBox(height: 16),
-                  if (isCheckedIn && _checkInDateTime != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(
-                        'Checked in at: '
-                        '${_checkInDateTime!.day}/${_checkInDateTime!.month}/${_checkInDateTime!.year} '
-                        '${_checkInDateTime!.hour}:${_checkInDateTime!.minute.toString().padLeft(2, '0')}',
-                        style: TextStyle(
-                          color: AppColors.accentSuccess,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  if (isCheckedIn) ...{
-                    SizedBox(height: 16),
-                    TextFormField(
-                      controller: EventTextControllers.amountController,
-                      decoration: InputDecoration(labelText: 'Amount'),
-                      enabled: isCheckedIn,
-                      onChanged: (val) {
-                        setState(() {
-                          event = event.copyWith(amount: val);
-                        });
-                      },
-                    ),
-                    SizedBox(height: 16),
-                    // Receipt upload button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Upload Receipt'),
-                        ElevatedButton(
-                          onPressed: isCheckedIn
-                              ? () async {
-                                  FilePickerResult? result = await FilePicker
-                                      .platform
-                                      .pickFiles();
-                                  if (result != null &&
-                                      result.files.isNotEmpty) {
-                                    setState(() {
-                                      _selectedReceiptFileName =
-                                          result.files.single.name;
-                                    });
-                                  }
-                                }
-                              : () {
-                                  debugPrint('Not checked in');
-                                },
-                          child: Text('Choose File'),
-                        ),
-                      ],
-                    ),
-                    if (_selectedReceiptFileName != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          'Selected:  [32m [1m [4m$_selectedReceiptFileName [0m',
-                        ),
-                      ),
-                    SizedBox(height: 16),
-                    // Receipt upload button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Upload Sign-In Sheet'),
-                        ElevatedButton(
-                          onPressed: isCheckedIn
-                              ? () async {
-                                  FilePickerResult? result = await FilePicker
-                                      .platform
-                                      .pickFiles();
-                                  if (result != null &&
-                                      result.files.isNotEmpty) {
-                                    setState(() {
-                                      _selectedSignInSheetFileName =
-                                          result.files.single.name;
-                                    });
-                                  }
-                                }
-                              : () {
-                                  debugPrint('Not checked in');
-                                },
-                          child: Text('Choose File'),
-                        ),
-                      ],
-                    ),
-                    if (_selectedSignInSheetFileName != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          'Selected:  [32m [1m [4m$_selectedSignInSheetFileName [0m',
-                        ),
-                      ),
-                    SizedBox(height: 16),
-                  },
-                ],
-              ),
-              if (isEdit)
-                Button(text: AppStrings.updateEvent, onPressed: () {}),
-              if (userModal.role == UserType.pharmaRep &&
-                  event.eventStatus == EventStatus.upcoming &&
-                  !isEdit) ...{
-                Button(
-                  isDisabled:
-                      (_selectedReceiptFileName == null ||
-                          EventTextControllers.amountController.text.isEmpty) &&
-                      isCheckedIn,
-                  text: isCheckedIn
-                      ? AppStrings.submitCheckIn
-                      : AppStrings.checkIn,
-                  onPressed: () {
+                },
+                SizedBox(height: 16),
+                TextFormField(
+                  enabled: false,
+                  controller: EventTextControllers.pharmaRepController,
+                  decoration: InputDecoration(labelText: AppStrings.pharmaRep),
+                  onChanged: (val) {
                     setState(() {
-                      isCheckedIn = true;
-                      _checkInDateTime = DateTime.now();
+                      event = event.copyWith(userName: val);
                     });
                   },
                 ),
-              },
-            ],
-          ),
+                Divider(),
+                SizedBox(height: 16),
+                TextFormField(
+                  enabled:
+                      (userModal.role == UserType.pharmaRep && isCheckedIn) ||
+                      isEdit,
+                  controller: EventTextControllers.eventNameController,
+                  decoration: InputDecoration(
+                    labelText: AppStrings.labelEventName,
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      event = event.copyWith(eventName: val);
+                    });
+                  },
+                ),
+                Divider(),
+                TextField(
+                  enabled:
+                      (userModal.role == UserType.pharmaRep && isCheckedIn) ||
+                      isEdit,
+                  autocorrect: true,
+                  minLines: AppSizes().eventDescriptionMinLines,
+                  controller: EventTextControllers.eventDescriptionController,
+                  decoration: InputDecoration(
+                    labelText: AppStrings.labelEventDescription,
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  enabled: isCheckedIn || isEdit,
+                  controller: EventTextControllers.startDateController,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: event.endDate != null
+                        ? AppStrings.labelEventStartDate
+                        : AppStrings.labelStartDate,
+                  ),
+                  onTap: () async {
+                    final DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (pickedDate != null) {
+                      EventTextControllers.startDateController.text =
+                          "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                      setState(() {
+                        event = event.copyWith(
+                          startDate: DateTime.parse(
+                            EventTextControllers.startDateController.text,
+                          ),
+                        );
+                      });
+                    }
+                  },
+                ),
+                Divider(),
+                SizedBox(height: 16),
+                event.endDate != null
+                    ? TextFormField(
+                        enabled: isCheckedIn || isEdit,
+                        controller: EventTextControllers.endDateController,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: AppStrings.labelEndDate,
+                        ),
+                        onTap: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (pickedDate != null) {
+                            EventTextControllers.endDateController.text =
+                                "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                            setState(() {
+                              event = event.copyWith(
+                                endDate: DateTime.parse(
+                                  EventTextControllers.endDateController.text,
+                                ),
+                              );
+                            });
+                          }
+                        },
+                      )
+                    : SizedBox(),
+                Divider(),
+                SizedBox(height: 16),
+                TextFormField(
+                  enabled:
+                      (userModal.role == UserType.pharmaRep && isCheckedIn) ||
+                      isEdit,
+                  controller: EventTextControllers.numberOfStaffController,
+                  decoration: InputDecoration(
+                    labelText: AppStrings.labelNumberOfStaff,
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      event = event.copyWith(numberOfStaff: int.parse(val));
+                    });
+                  },
+                ),
+                Divider(),
+                SizedBox(height: 16),
+
+                // Text(AppStrings.hcpInEvent),
+                if (isEdit)
+                  Container(
+                    width: double.infinity,
+                    height: 40,
+                    // padding: EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        Flexible(
+                          flex: 1,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                hcpInHcoSelected = true;
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: hcpInHcoSelected
+                                    ? AppColors.primary
+                                    : AppColors.transparent,
+                                border: Border.all(color: AppColors.border),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              width: double.infinity,
+                              height: 50,
+
+                              child: Center(
+                                child: Text(
+                                  "HCP in HCO",
+                                  style: TextStyle(
+                                    color: hcpInHcoSelected
+                                        ? AppColors.background
+                                        : AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          flex: 1,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                hcpInHcoSelected = false;
+                              });
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: hcpInHcoSelected
+                                    ? AppColors.transparent
+                                    : AppColors.primary,
+                                border: Border.all(color: AppColors.border),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "HCP Practitioner",
+                                  style: TextStyle(
+                                    color: !hcpInHcoSelected
+                                        ? AppColors.background
+                                        : AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 10),
+                SizedBox(height: 10),
+                if (hcpInHcoSelected)
+                  DropdownSearch<Map<String, dynamic>>.multiSelection(
+                    popupProps: const PopupPropsMultiSelection.menu(
+                      showSearchBox: true, // <- this brings the search field
+                      searchFieldProps: TextFieldProps(
+                        // customise it if you like
+                        decoration: InputDecoration(
+                          labelText: 'Search HCP',
+                          prefixIcon: Icon(Icons.search),
+                        ),
+                      ),
+                    ),
+                    enabled:
+                        (userModal.role == UserType.pharmaRep && isCheckedIn) ||
+                        isEdit,
+                    items: (filter, loadProps) => hcpList
+                        .map<Map<String, dynamic>>(
+                          (e) => {
+                            "hcpId": (e.hcpId).toString(),
+                            "hcpName": e.hcpName,
+                          },
+                        )
+                        .toList(),
+                    selectedItems: (event.contactDtos ?? [])
+                        .map<Map<String, dynamic>>(
+                          (e) => {
+                            "hcpId": (e.id ?? "").toString(),
+                            "hcpName": "${e.firstName} ${e.lastName}",
+                          },
+                        )
+                        .toList(),
+                    itemAsString: (item) => item["hcpName"] ?? "",
+                    compareFn: (item, selectedItem) =>
+                        item["hcpId"] == selectedItem["hcpId"],
+                    decoratorProps: const DropDownDecoratorProps(
+                      decoration: InputDecoration(
+                        labelText: AppStrings.hcpInEvent,
+                      ),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        event = event.copyWith(
+                          contactDtos: value
+                              .map(
+                                (e) => ContactDto(
+                                  id: int.tryParse(
+                                    e["hcpId"] ?? "0",
+                                  ).toString(),
+                                  firstName: (e["hcpName"] ?? "")
+                                      .split(" ")
+                                      .first,
+                                  lastName:
+                                      (e["hcpName"] ?? "").split(" ").length > 1
+                                      ? (e["hcpName"] ?? "")
+                                            .split(" ")
+                                            .sublist(1)
+                                            .join(" ")
+                                      : "",
+                                ),
+                              )
+                              .toList(),
+                        );
+                      });
+                    },
+                    validator: (value) => value == null || value.isEmpty
+                        ? AppStrings.selectHCP
+                        : null,
+                  ),
+
+                if (!hcpInHcoSelected)
+                  DropdownSearch<Map<String, dynamic>>.multiSelection(
+                    popupProps: const PopupPropsMultiSelection.menu(
+                      showSearchBox: true, // <- this brings the search field
+                      searchFieldProps: TextFieldProps(
+                        // customise it if you like
+                        decoration: InputDecoration(
+                          labelText: 'Search HCP Practitioners',
+                          prefixIcon: Icon(Icons.search),
+                        ),
+                      ),
+                    ),
+                    enabled:
+                        (userModal.role == UserType.pharmaRep && isCheckedIn) ||
+                        isEdit,
+                    items: (filter, loadProps) =>
+                        hcpPractioners.map<Map<String, dynamic>>((e) {
+                          return {
+                            "hcpId": (e.hcpId).toString(),
+                            "hcpName": e.hcpName,
+                          };
+                        }).toList(),
+                    selectedItems: (event.contactDtos ?? [])
+                        .map<Map<String, dynamic>>(
+                          (e) => {
+                            "hcpId": (e.id ?? "").toString(),
+                            "hcpName": "${e.firstName} ${e.lastName}",
+                          },
+                        )
+                        .toList(),
+                    itemAsString: (item) => item["hcpName"] ?? "",
+                    compareFn: (item, selectedItem) =>
+                        item["hcpId"] == selectedItem["hcpId"],
+                    decoratorProps: const DropDownDecoratorProps(
+                      decoration: InputDecoration(
+                        labelText: AppStrings.hcpInEvent,
+                      ),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        event = event.copyWith(
+                          contactDtos: value
+                              .map(
+                                (e) => ContactDto(
+                                  id: int.tryParse(
+                                    e["hcpId"] ?? "0",
+                                  ).toString(),
+                                  firstName: (e["hcpName"] ?? "")
+                                      .split(" ")
+                                      .first,
+                                  lastName:
+                                      (e["hcpName"] ?? "").split(" ").length > 1
+                                      ? (e["hcpName"] ?? "")
+                                            .split(" ")
+                                            .sublist(1)
+                                            .join(" ")
+                                      : "",
+                                ),
+                              )
+                              .toList(),
+                        );
+                      });
+                    },
+                    validator: (value) => value == null || value.isEmpty
+                        ? AppStrings.selectHCP
+                        : null,
+                  ),
+
+                SizedBox(height: 16),
+                if (isCheckedIn && _checkInDateTime != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Checked in at: '
+                      '${_checkInDateTime!.day}/${_checkInDateTime!.month}/${_checkInDateTime!.year} '
+                      '${_checkInDateTime!.hour}:${_checkInDateTime!.minute.toString().padLeft(2, '0')}',
+                      style: TextStyle(
+                        color: AppColors.accentSuccess,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                if (isCheckedIn) ...{
+                  SizedBox(height: 16),
+                  TextFormField(
+                    controller: EventTextControllers.amountController,
+                    decoration: InputDecoration(labelText: 'Amount'),
+                    enabled: isCheckedIn,
+                    onChanged: (val) {
+                      setState(() {
+                        event = event.copyWith(amount: double.parse(val));
+                      });
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  // Receipt upload button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Upload Receipt'),
+                      ElevatedButton(
+                        onPressed: isCheckedIn
+                            ? () async {
+                                FilePickerResult? result = await FilePicker
+                                    .platform
+                                    .pickFiles();
+                                if (result != null && result.files.isNotEmpty) {
+                                  setState(() {
+                                    _selectedReceiptFileName =
+                                        result.files.single.name;
+                                  });
+                                }
+                              }
+                            : () {
+                                debugPrint('Not checked in');
+                              },
+                        child: Text('Choose File'),
+                      ),
+                    ],
+                  ),
+                  if (_selectedReceiptFileName != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'Selected:  [32m [1m [4m$_selectedReceiptFileName [0m',
+                      ),
+                    ),
+                  SizedBox(height: 16),
+                  // Receipt upload button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Upload Sign-In Sheet'),
+                      ElevatedButton(
+                        onPressed: isCheckedIn
+                            ? () async {
+                                FilePickerResult? result = await FilePicker
+                                    .platform
+                                    .pickFiles();
+                                if (result != null && result.files.isNotEmpty) {
+                                  setState(() {
+                                    _selectedSignInSheetFileName =
+                                        result.files.single.name;
+                                  });
+                                }
+                              }
+                            : () {
+                                debugPrint('Not checked in');
+                              },
+                        child: Text('Choose File'),
+                      ),
+                    ],
+                  ),
+                  if (_selectedSignInSheetFileName != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'Selected:  [32m [1m [4m$_selectedSignInSheetFileName [0m',
+                      ),
+                    ),
+                  SizedBox(height: 16),
+                },
+              ],
+            ),
+            if (isEdit) Button(text: AppStrings.updateEvent, onPressed: () {}),
+            if (userModal.role == UserType.pharmaRep &&
+                // ignore: unrelated_type_equality_checks
+                event.eventStatus == EventStatus.upcoming &&
+                !isEdit) ...{
+              Button(
+                isDisabled:
+                    (_selectedReceiptFileName == null ||
+                        EventTextControllers.amountController.text.isEmpty) &&
+                    isCheckedIn,
+                text: isCheckedIn
+                    ? AppStrings.submitCheckIn
+                    : AppStrings.checkIn,
+                onPressed: () {
+                  setState(() {
+                    isCheckedIn = true;
+                    _checkInDateTime = DateTime.now();
+                  });
+                },
+              ),
+            },
+          ],
         ),
-      );
+      ),
+    );
   }
 }

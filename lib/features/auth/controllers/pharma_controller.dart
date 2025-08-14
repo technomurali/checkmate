@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/features/auth/model/pharma_modal.dart';
 import 'package:http/http.dart' as http;
@@ -9,7 +8,7 @@ class PharmaController {
     try {
       final response = await http.get(
         Uri.parse(
-          "${AppApi.baseUrl}${AppApi.pharmaLists}",
+          "https://172.32.32.69:7133/api/Accounts/accounts/pharmaCompanies-active",
         ), //?pharmaTerm=$query
       );
 

@@ -177,7 +177,7 @@ class TransactionDetails {
       TransactionDetails(
         pharmaCompany: json["pharmaCompany"],
         eventInteraction: json["eventInteraction"],
-        paymentDate: json["paymentDate"] == null ? null : json["paymentDate"],
+        paymentDate: json["paymentDate"],
         paymentAmount: json["paymentAmount"],
         paymentType: json["paymentType"],
         referenceNumber: json["referenceNumber"],

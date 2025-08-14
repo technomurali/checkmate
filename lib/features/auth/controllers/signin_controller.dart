@@ -15,9 +15,11 @@ class SigninController {
     debugPrint(
       "sigin /////// ${jsonEncode({SigninModalKeys.signinEmail: email, SigninModalKeys.signinPassword: password})}",
     );
-    final url = Uri.parse(AppApi.baseUrl + AppApi.signin);
+    final url = Uri.parse(AppApi.baseUrl1 + AppApi.signin);
 
     try {
+      BasicCodesFromCrm().getEventStatus();
+      BasicCodesFromCrm().getEventApprovals();
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -31,7 +33,16 @@ class SigninController {
       debugPrint("signin data /////// $data");
       if (response.statusCode == 200) {
         // Parse user using your UserModal
-        final user = UserModal.fromJson(data[SigninModalKeys.signinUser]);
+        final user = UserModal(
+          id: data['kiosk'].toString(),
+          email: data["email"],
+          password: data["password"],
+          firstName: data["firstName"],
+          lastName: data["lastName"],
+          city: data['city'],
+          pharmaCompany: data["companyId"],
+          role: data["userRoleId"],
+        );
         return {
           SigninModalKeys.signinSuccess: true,
           SigninModalKeys.signinMessage: data[SigninModalKeys.signinMessage],

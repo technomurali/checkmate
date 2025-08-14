@@ -70,7 +70,6 @@ class _SocialIconState extends State<_SocialIcon> {
   late SingleAccountPca pca;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _initPca();
   }
@@ -79,7 +78,7 @@ class _SocialIconState extends State<_SocialIcon> {
     try {
       pca = await MsalLogin().initializeMsal();
     } catch (e) {
-      print("Error initializing MSAL: $e");
+      debugPrint("Error initializing MSAL: $e");
     }
   }
 

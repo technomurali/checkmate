@@ -10,9 +10,9 @@ class UserModal {
     required this.city,
     required this.pharmaCompany,
     required this.role,
-    required this.hco,
-    required this.profileUrl,
-    required this.modeOfAuthentication,
+    this.hco,
+    this.profileUrl,
+    this.modeOfAuthentication,
     this.npiNumber,
     this.phoneNumber,
   });

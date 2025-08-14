@@ -3,7 +3,6 @@ import 'package:checkmate/core/widgets/events_recipts_card.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
-import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
@@ -30,6 +29,7 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
               events = v.take(3).toList();
 
               upcomingEvents = v
+                  // ignore: unrelated_type_equality_checks
                   .where((e) => e.eventStatus == EventStatus.upcoming)
                   .take(3)
                   .toList();
@@ -45,7 +45,9 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
           (v) => {
             setState(() {
               pendingEvents = v
-                  .where((e) => e.isApproved == EventStatus.pending)
+                  .where(
+                    (e) => e.eventApproval.toString() == EventStatus.pending,
+                  )
                   .toList();
             }),
           },
@@ -67,7 +69,7 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
         children: [
           /// Welcome Text
           Text(
-            "${AppStrings.helloUser} ${widget.user.firstName}",
+            "${AppStrings.helloUser} ${widget.user.firstName ?? ''}",
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),

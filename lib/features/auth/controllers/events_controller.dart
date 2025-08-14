@@ -3,6 +3,7 @@ import 'package:checkmate/core/constants/app_Api.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/features/auth/model/hcp_modal.dart';
+import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -13,7 +14,7 @@ class EventController {
   Future<List<EventModal>> fetchEvents({String? status}) async {
     try {
       final uri = Uri.parse(
-        "${AppApi.baseUrl}${AppApi.events}${status != null ? '?status=$status' : ''}",
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRep/${userModal.id}${status != null ? '?status=$status' : ''}",
       );
 
       final response = await http.get(uri);
@@ -22,7 +23,7 @@ class EventController {
         final jsonBody = json.decode(response.body);
         debugPrint("Events TRL 1 ::: $jsonBody");
 
-        final List<dynamic> eventsJson = jsonBody[EventsModalKeys.events];
+        final List<dynamic> eventsJson = jsonBody;
         debugPrint("Events TRL 2 ::: ${eventsJson.runtimeType}");
         return eventsJson.map((e) => EventModal.fromJson(e)).toList();
       } else {

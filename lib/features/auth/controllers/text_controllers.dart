@@ -9,6 +9,8 @@ class TextControllers {
   static TextEditingController city = TextEditingController();
   static TextEditingController pharma = TextEditingController();
   static TextEditingController verificationCode = TextEditingController();
+  static TextEditingController companyId = TextEditingController();
+  static TextEditingController userRoleId = TextEditingController();
 }
 
 class EventTextControllers {
