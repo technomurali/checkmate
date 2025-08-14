@@ -19,9 +19,7 @@ class NewEventController {
 
   Future<Map<String, dynamic>> getHCO() async {
     try {
-      final uri = Uri.parse(
-        "https://172.32.32.69:7133/api/Accounts/accounts/hco-active",
-      );
+      final uri = Uri.parse("${AppApi.baseUrl1}${AppApi.hcoLists}");
 
       final response = await http.get(uri);
 

@@ -18,7 +18,7 @@ class AppApi {
   static const String events = 'events';
   static const String event = 'event';
   static const String newEvent = 'new-event';
-  static const String hcoLists = 'hco-lists';
+  static const String hcoLists = 'Accounts/accounts/hco-active';
   static const String hcpLists = 'hcp-lists';
   static const String disputes = 'disputes';
   static const String getEventTypes = "getEventTypes";
