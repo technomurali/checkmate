@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 class EventModal {
@@ -7,7 +9,7 @@ class EventModal {
   final DateTime? endDate;
   final int? numberOfStaff;
   final double? amount;
-  final int? eventCostByPerson;
+  final double? eventCostByPerson;
   final String? hco;
   final List<ContactDto>? contactDtos;
   final int? eventType;
@@ -15,6 +17,7 @@ class EventModal {
   final String? eventDescription;
   final int? eventApproval;
   final String? userName;
+  final bool isMultiDay;
 
   EventModal({
     this.eventId,
@@ -31,6 +34,7 @@ class EventModal {
     this.eventDescription,
     this.eventApproval,
     this.userName,
+    this.isMultiDay = false,
   });
 
   EventModal copyWith({
@@ -40,7 +44,7 @@ class EventModal {
     DateTime? endDate,
     int? numberOfStaff,
     double? amount,
-    int? eventCostByPerson,
+    double? eventCostByPerson,
     String? hco,
     List<ContactDto>? contactDtos,
     int? eventType,
@@ -48,6 +52,7 @@ class EventModal {
     String? eventDescription,
     int? eventApproval,
     String? userName,
+    bool? isMultiDay,
   }) => EventModal(
     eventId: eventId ?? this.eventId,
     eventName: eventName ?? this.eventName,
@@ -63,10 +68,11 @@ class EventModal {
     eventDescription: eventDescription ?? this.eventDescription,
     eventApproval: eventApproval ?? this.eventApproval,
     userName: userName ?? this.userName,
+    isMultiDay: isMultiDay ?? false,
   );
 
   factory EventModal.fromJson(Map<String, dynamic> json) {
-    debugPrint("EventModal.fromJson: $json");
+    debugPrint("EventModal.fromJson: ${jsonEncode(json)}");
     return EventModal(
       eventId: json["eventId"],
       eventName: json["eventName"],
@@ -76,7 +82,7 @@ class EventModal {
       endDate: json["endDate"] == null ? null : _parseDateTime(json["endDate"]),
       numberOfStaff: json["numberOfStaff"],
       amount: double.parse(json["amount"].toString()),
-      eventCostByPerson: json["eventCostByPerson"],
+      eventCostByPerson: double.parse(json["eventCostByPerson"].toString()),
       hco: json["hco"],
       contactDtos: json["contactDtos"] == null
           ? []
@@ -88,6 +94,7 @@ class EventModal {
       eventDescription: json["eventDescription"],
       eventApproval: json["eventApproval"],
       userName: json["userName"],
+      isMultiDay: json['isMultiDay'] ?? false,
     );
   }
 
@@ -121,6 +128,7 @@ class EventModal {
     "eventDescription": eventDescription,
     "eventApproval": eventApproval,
     "userName": userName,
+    "isMultiDay": isMultiDay,
   };
 
   factory EventModal.empty() => EventModal(
@@ -138,6 +146,7 @@ class EventModal {
     eventDescription: "",
     eventApproval: 0,
     userName: "",
+    isMultiDay: false,
   );
 }
 

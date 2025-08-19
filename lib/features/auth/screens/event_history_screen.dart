@@ -9,6 +9,7 @@ import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:checkmate/core/widgets/confirm_alert_dialog.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
 
@@ -28,6 +29,7 @@ class EventHistoryScreen extends StatefulWidget {
 class _EventHistoryScreenState extends State<EventHistoryScreen>
     with SingleTickerProviderStateMixin {
   final EventController _eventController = EventController();
+  bool isLoading = false;
   List<EventModal> events = [];
   List<EventModal> filteredEvents = [];
   SlidableController? _slidableController;
@@ -37,6 +39,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
   String selectedStatusId = '';
   final List<String> _statusOptions = [
     'All',
+    "DISPUTED",
     'UPCOMING',
     'COMPLETED',
     'TERMINATED',
@@ -70,7 +73,6 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
   }
 
   Map<String, String> statusCodeFor(String status) {
-    debugPrint("Here is The Status Filter $status");
     switch (status) {
       case 'APPROVED':
         return {
@@ -108,6 +110,12 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
           'code': 'A',
           'statusId': BasicCodesFromCrm.rejected,
         };
+      case 'DISPUTED':
+        return {
+          'status': 'DISPUTED',
+          'code': 'B',
+          'statusId': BasicCodesFromCrm.disputed,
+        };
       default:
         return {
           'status': 'UPCOMING',
@@ -119,6 +127,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
 
   void _filterEvents() {
     setState(() {
+      isLoading = true;
       filteredEvents = events.where((event) {
         final matchesQuery = event.eventName!.toLowerCase().contains(
           _searchQuery.toLowerCase(),
@@ -187,25 +196,53 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
 
         return matchesQuery && matchesStatus;
       }).toList();
-      debugPrint('Filtered events: ${filteredEvents[0]}');
+      debugPrint('Filtered events: $filteredEvents');
+      isLoading = false;
     });
   }
 
   fetchAllEvents() {
+    setState(() {
+      isLoading = true;
+    });
     _eventController.fetchEvents().then(
       (v) => {
         setState(() {
           events = v;
           filteredEvents = v;
+          isLoading = false;
         }),
+
         _filterEvents(),
       },
     );
   }
 
+  deleteEvent(String eventId) {
+    setState(() {
+      isLoading = true;
+    });
+    _eventController.deleteEvent(eventId).then((value) {
+      if (value == AppApiStatusCodes.deleteSuccess) {
+        fetchAllEvents();
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(AppStrings.eventDeletefailed)),
+        );
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Card(
           color: AppColors.searchCard,
@@ -276,8 +313,16 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
           ),
         ),
         const SizedBox(height: 10),
-        for (var i = 0; i < filteredEvents.length; i++) ...{
-          historyItemBuilder(i),
+        if (!isLoading) ...{
+          if (filteredEvents.isNotEmpty) ...{
+            for (var i = 0; i < filteredEvents.length; i++) ...{
+              historyItemBuilder(i),
+            },
+          } else ...{
+            Center(child: Text("NO Events With the Selected Filter")),
+          },
+        } else ...{
+          CircularProgressIndicator(),
         },
       ],
     );
@@ -306,10 +351,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
                   title: AppStrings.deleteEvent,
                   content: AppStrings.deleteEventContent,
                   onConfirm: () {
-                    setState(() {
-                      events.removeWhere((e) => e.eventId == event.eventId);
-                      filteredEvents.removeAt(i);
-                    });
+                    deleteEvent(event.eventId!);
                   },
                 ),
               );
@@ -322,13 +364,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
       ),
       key: ValueKey(event.eventId),
       child: EventListItemTile(
-        eventName: event.eventName ?? '',
-        startDate: _formatDate(event.startDate),
-        endDate: _formatDate(event.endDate),
-        pharmaRep: event.userName ?? '',
-        id: event.eventId ?? '',
-        status: statusCodeFor(event.eventStatus.toString()),
-        approvalStatus: event.eventApproval.toString(),
+        event: event,
         onTap: () {
           Provider.of<TopNavProvider>(
             context,

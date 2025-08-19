@@ -1,5 +1,7 @@
 class AppStrings {
   static const String appName = "CHECKMATE";
+  static const String welcome =
+      'Welcome to Checkmate create an event to get started';
   static const String email = "Email";
   static const String password = "Password";
   static const String newPassword = "New Password";
@@ -53,6 +55,7 @@ class AppStrings {
   static const String selectHCO = "Please select HCO";
   static const String selectHCP = "Please select HCP";
   static const String eventCreated = "Event Created";
+  static const String eventDeletefailed = "Event Deletion Failed";
   static const String eventCreatedFailed = "Event Creation Failed";
   static const String enterTheCompanyNameWarning =
       "Please choose or enter your company name to move forward.";

@@ -24,6 +24,8 @@ class FilterIcon extends StatelessWidget {
         return openIcon();
       case "CLOSED":
         return closedIcon();
+      case "DISPUTED":
+        return disputedIcon();
       default:
         return Icon(Icons.all_inclusive, color: AppColors.grey);
     }
@@ -75,6 +77,18 @@ Container closedIcon() {
       color: AppColors.accentError,
     ),
     child: Text("C", style: TextStyle(color: AppColors.background)),
+  );
+}
+
+Container disputedIcon() {
+  return Container(
+    margin: EdgeInsets.only(right: 10),
+    padding: EdgeInsets.all(10),
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: AppColors.accentError,
+    ),
+    child: Text("D", style: TextStyle(color: AppColors.background)),
   );
 }
 

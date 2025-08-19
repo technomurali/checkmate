@@ -32,6 +32,7 @@ class AppApiStatusCodes {
   static const int postSuccess = 201;
   static const int error = 400;
   static const int notFound = 404;
+  static const int deleteSuccess = 204;
 }
 
 class BasicCodesFromCrm {
@@ -39,10 +40,11 @@ class BasicCodesFromCrm {
   static String upcoming = '2';
   static String completed = '3';
   static String terminated = '4';
+  static String disputed = '1';
   // Event Approvals
-  static String approval = '1';
-  static String rejected = '2';
-  static String pending = '3';
+  static String approval = '10';
+  static String rejected = '21';
+  static String pending = '22';
 
   void getEventStatus() async {
     try {
@@ -53,6 +55,7 @@ class BasicCodesFromCrm {
       upcoming = res['upcoming'].toString();
       completed = res['completed'].toString();
       terminated = res["terminated"].toString();
+      disputed = res['disputed'].toString();
       // ignore: empty_catches
     } catch (e) {}
   }

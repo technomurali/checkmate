@@ -1,3 +1,5 @@
+import 'package:checkmate/features/auth/controllers/text_controllers.dart';
+import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
@@ -15,6 +17,7 @@ class PendingReceiptScreen extends StatefulWidget {
 class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
   final EventController _eventController = EventController();
   EventModal event = EventModal.empty();
+  bool isLoading = false;
   @override
   void initState() {
     super.initState();
@@ -22,19 +25,48 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
   }
 
   fetchEvent() {
+    setState(() {
+      isLoading = true;
+    });
     _eventController
         .fetchEvent(eventId: widget.eventId)
         .then(
           (v) => {
+            v.hco != null ? fetchHcoName(v.hco.toString()) : null,
             setState(() {
               event = v;
+              isLoading = false;
             }),
           },
         );
   }
 
+  fetchHcoName(String hcoId) {
+    setState(() {
+      isLoading = true;
+    });
+    _eventController.getHcoName(hcoId).then((value) {
+      setState(() {
+        EventTextControllers.hcoController.text = value;
+        isLoading = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final DateTime? start = event.startDate;
+    final DateTime? end = event.endDate;
+    final String startDateStr = start != null
+        ? start.toLocal().toString().split(' ').first
+        : '';
+    final String endDateStr = end != null
+        ? end.toLocal().toString().split(' ').first
+        : '';
+    final bool hasValidRange =
+        start != null &&
+        end != null &&
+        (end.isAfter(start) || end.isAtSameMomentAs(start));
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(15),
@@ -55,29 +87,45 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(AppStrings.pharmaRep),
-                  Text("${event.userName}"),
+                  Text("${userModal.firstName} ${userModal.lastName}"),
                 ],
               ),
               Divider(),
               SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(AppStrings.labelEventStartDate),
-                  Text("${event.startDate}"),
-                ],
-              ),
-              Divider(),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(AppStrings.labelEndDate),
-                  Text("${event.endDate}"),
-                ],
-              ),
-              Divider(),
-              SizedBox(height: 16),
+              if (hasValidRange) ...{
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(AppStrings.labelEventStartDate),
+                    Text(
+                      event.startDate!.toLocal().toString().split(' ').first,
+                    ),
+                  ],
+                ),
+                Divider(),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(AppStrings.labelEndDate),
+                    Text(event.endDate!.toLocal().toString().split(' ').first),
+                  ],
+                ),
+                Divider(),
+                SizedBox(height: 16),
+              } else ...{
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(AppStrings.labelStartDate),
+                    Text(
+                      event.startDate!.toLocal().toString().split(' ').first,
+                    ),
+                  ],
+                ),
+                Divider(),
+                SizedBox(height: 16),
+              },
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -90,7 +138,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
               Text(AppStrings.hcoInEvent),
               SizedBox(height: 10),
               if (event.hco != null) ...{
-                Row(children: [Text("${event.hco}")]),
+                Row(children: [Text(EventTextControllers.hcoController.text)]),
                 Divider(),
                 SizedBox(height: 10),
               },
