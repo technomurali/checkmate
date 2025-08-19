@@ -75,20 +75,23 @@ class Hcp {
   String toRawJson() => json.encode(toJson());
 
   factory Hcp.fromJson(Map<String, dynamic> json) => Hcp(
-    hcpId: json["hcpId"],
-    hcpName: json["hcpName"],
-    specialty: json["specialty"],
-    contactEmail: json["contactEmail"],
-    hco: List<Hco>.from(json["hco"].map((x) => Hco.fromJson(x))),
-    npiNumber: json["npiNumber"],
-    phoneNumber: json["phoneNumber"],
+    hcpId: json["id"],
+    hcpName: json["firstName"] + json['lastName'],
+    specialty: json["specialty"] ?? '',
+    contactEmail: json["email"],
+    hco: json['hco'] != null
+        ? List<Hco>.from(json["hco"].map((x) => Hco.fromJson(x)))
+        : [],
+    npiNumber: json["npiNumber"] ?? "",
+    phoneNumber: json["phoneNumber"] ?? '',
   );
 
   Map<String, dynamic> toJson() => {
-    "hcpId": hcpId,
-    "hcpName": hcpName,
+    "id": hcpId,
+    "firstName": hcpName.split(' ')[0],
+    "lastName": hcpName.split(' ')[1],
     "specialty": specialty,
-    "contactEmail": contactEmail,
+    "email": contactEmail,
     "hco": List<dynamic>.from(hco?.map((x) => x.toJson()) ?? []),
     "npiNumber": npiNumber,
     "phoneNumber": phoneNumber,

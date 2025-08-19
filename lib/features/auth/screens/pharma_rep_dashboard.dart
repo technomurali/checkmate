@@ -1,3 +1,4 @@
+import 'package:checkmate/core/constants/app_Api.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/events_recipts_card.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
@@ -20,9 +21,13 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
   List<EventModal> events = [];
   List<EventModal> pendingEvents = [];
   List<EventModal> upcomingEvents = [];
+  bool isLoading = false;
   fetchUpcomingEvents() async {
+    setState(() {
+      isLoading = true;
+    });
     _eventController
-        .fetchEvents(status: "UPCOMING")
+        .fetchEventsWithStatus(status: BasicCodesFromCrm.upcoming)
         .then(
           (v) => {
             setState(() {
@@ -30,25 +35,34 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
 
               upcomingEvents = v
                   // ignore: unrelated_type_equality_checks
-                  .where((e) => e.eventStatus == EventStatus.upcoming)
+                  .where(
+                    (e) =>
+                        e.eventStatus == int.parse(BasicCodesFromCrm.upcoming),
+                  )
                   .take(3)
                   .toList();
+              isLoading = false;
             }),
           },
         );
   }
 
   fetchPendingEvents() async {
+    setState(() {
+      isLoading = true;
+    });
     _eventController
-        .fetchEvents(status: EventStatus.completed)
+        .fetchEventsWithPending(status: BasicCodesFromCrm.pending)
         .then(
           (v) => {
             setState(() {
               pendingEvents = v
                   .where(
-                    (e) => e.eventApproval.toString() == EventStatus.pending,
+                    (e) =>
+                        e.eventApproval == int.parse(BasicCodesFromCrm.pending),
                   )
                   .toList();
+              isLoading = false;
             }),
           },
         );
@@ -64,89 +78,126 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Welcome Text
-          Text(
-            "${AppStrings.helloUser} ${widget.user.firstName ?? ''}",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
+      child: Container(
+        width: isLoading ? double.infinity : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// Welcome Text
+            Text(
+              " ${AppStrings.helloUser} ${widget.user.firstName ?? ''}",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
 
-          /// User Role Text
-          const Text(
-            " ${AppStrings.pharmaRep}",
-            style: TextStyle(fontSize: 16),
-          ),
+            /// User Role Text
+            const Text(
+              " ${AppStrings.pharmaRep}",
+              style: TextStyle(fontSize: 16),
+            ),
 
-          const SizedBox(height: 20),
+            if (isLoading) ...{
+              CircularProgressIndicator(),
+            } else ...{
+              const SizedBox(height: 20),
+              if (upcomingEvents.isEmpty || pendingEvents.isEmpty) ...{
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  alignment: Alignment.bottomCenter,
+                  child: Text(AppStrings.welcome, textAlign: TextAlign.center),
+                ),
+              } else ...{
+                /// Upcoming Events
+                Text(
+                  " ${AppStrings.upcomingEvents}",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
 
-          /// Upcoming Events
-          Text(
-            " ${AppStrings.upcomingEvents}",
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
+                /// Upcoming Events Card
+                EventsReciptsCard(
+                  items: [
+                    if (upcomingEvents.isNotEmpty) ...{
+                      for (var i = 0; i < upcomingEvents.length; i++) ...{
+                        {
+                          "title": upcomingEvents[i].eventName!,
+                          "date": upcomingEvents[i].startDate!
+                              .toLocal()
+                              .toString()
+                              .split(' ')
+                              .first,
+                          "id": upcomingEvents[i].eventId!,
+                          "onTap": () {
+                            Provider.of<TopNavProvider>(
+                              context,
+                              listen: false,
+                            ).navigateTo(
+                              TopNavScreen.eventDetails,
+                              argument: upcomingEvents[i].eventId!,
+                            );
+                          },
+                        },
+                      },
+                    } else
+                      ...{},
+                  ],
+                  showCheckIn: true,
+                  onSeeAll: () {
+                    Provider.of<TopNavProvider>(
+                      context,
+                      listen: false,
+                    ).navigateTo(TopNavScreen.eventHistory);
+                  },
+                ),
 
-          /// Upcoming Events Card
-          EventsReciptsCard(
-            items: [
-              if (upcomingEvents.isNotEmpty) ...{
-                for (var i = 0; i < upcomingEvents.length; i++) ...{
-                  {
-                    "title": upcomingEvents[i].eventName!,
-                    "date": upcomingEvents[i].startDate!,
-                    "id": upcomingEvents[i].eventId!,
-                    "onTap": () {
-                      Provider.of<TopNavProvider>(
-                        context,
-                        listen: false,
-                      ).navigateTo(
-                        TopNavScreen.eventDetails,
-                        argument: upcomingEvents[i].eventId!,
-                      );
+                const SizedBox(height: 16),
+
+                /// Pending Receipts Text
+                Text(
+                  " ${AppStrings.pendingReceipts}",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                /// Pending Receipts Card
+                EventsReciptsCard(
+                  isPending: true,
+                  items: [
+                    if (pendingEvents.isNotEmpty) ...{
+                      for (var i = 0; i < 3; i++) ...{
+                        {
+                          "title": pendingEvents[i].eventName!,
+                          "date": pendingEvents[i].startDate!
+                              .toLocal()
+                              .toString()
+                              .split(' ')
+                              .first,
+                          "id": pendingEvents[i].eventId!,
+                          "onTap": () {
+                            Provider.of<TopNavProvider>(
+                              context,
+                              listen: false,
+                            ).navigateTo(
+                              TopNavScreen.pendingReceipt,
+                              argument: pendingEvents[i].eventId!,
+                            );
+                          },
+                        },
+                      },
                     },
-                  },
-                },
-              } else
-                ...{},
-            ],
-            showCheckIn: true,
-            onSeeAll: () {
-              Provider.of<TopNavProvider>(
-                context,
-                listen: false,
-              ).navigateTo(TopNavScreen.eventHistory);
-            },
-          ),
-
-          const SizedBox(height: 16),
-
-          /// Pending Receipts Text
-          Text(
-            " ${AppStrings.pendingReceipts}",
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-
-          /// Pending Receipts Card
-          EventsReciptsCard(
-            isPending: true,
-            items: [
-              if (pendingEvents.isNotEmpty) ...{
-                for (var i = 0; i < 3; i++) ...{
-                  {
-                    "title": pendingEvents[i].eventName!,
-                    "date": pendingEvents[i].startDate!,
-                    "id": pendingEvents[i].eventId!,
-                  },
-                },
+                  ],
+                  onSeeAll: () {},
+                ),
               },
-            ],
-            onSeeAll: () {},
-          ),
-        ],
+            },
+          ],
+        ),
       ),
     );
   }

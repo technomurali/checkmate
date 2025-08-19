@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/features/auth/model/pharma_modal.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:checkmate/core/constants/app_api.dart';
 class PharmaController {
   Future<PharmaModel> fetchPharmaCompanies() async {
     try {
       final response = await http.get(
         Uri.parse(
-          "https://172.32.32.69:7133/api/Accounts/accounts/pharmaCompanies-active",
+          "${AppApi.baseUrl1}${AppApi.pharmaLists}",
         ), //?pharmaTerm=$query
       );
 

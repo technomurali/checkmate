@@ -1,6 +1,7 @@
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/utils/social_svg.dart';
 import 'package:checkmate/features/auth/controllers/msal_login.dart';
+import 'package:checkmate/features/auth/social_media_auth/auth/auth_repository.dart';
 import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -66,12 +67,13 @@ class _SocialIcon extends StatefulWidget {
 }
 
 class _SocialIconState extends State<_SocialIcon> {
-   late SingleAccountPca pca;
+  late SingleAccountPca pca;
   @override
   void initState() {
     super.initState();
     _initPca();
   }
+
   _initPca() async {
     try {
       pca = await MsalLogin().initializeMsal();
@@ -79,6 +81,7 @@ class _SocialIconState extends State<_SocialIcon> {
       debugPrint("Error initializing MSAL: $e");
     }
   }
+
   isAndroid() {}
 
   @override
@@ -88,15 +91,40 @@ class _SocialIconState extends State<_SocialIcon> {
           ? () {
               if (widget.onDisabledTap != null) widget.onDisabledTap!();
             }
-          : () async{
+          : () async {
+              // TODO: Implement actual social signin
               if (widget.icon == SocialSvg.windowsSvg) {
                 bool success = await MsalLogin().signIn(pca);
                 if (success) {
-                  Navigator.popAndPushNamed(context, RouteName.pharmaRepDashboard);
-                } else {
+                  Navigator.popAndPushNamed(
+                    context,
+                    RouteName.pharmaRepDashboard,
+                  );
                 }
-                            } else {  
-              }
+              } else if (widget.icon == SocialSvg.appleSvg) {
+              } else if (widget.icon == SocialSvg.googleSvg) {
+                bool success = await AuthRepository().signIn(
+                  SocialProvider.google,
+                  ctx: context,
+                );
+                if (success) {
+                  Navigator.popAndPushNamed(
+                    context,
+                    RouteName.pharmaRepDashboard,
+                  );
+                } else {}
+              } else if (widget.icon == SocialSvg.linkedInSvg) {
+                bool success = await AuthRepository().signIn(
+                  SocialProvider.linkedin,
+                  ctx: context,
+                );
+                if (success) {
+                  Navigator.popAndPushNamed(
+                    context,
+                    RouteName.pharmaRepDashboard,
+                  );
+                } else {}
+              } else {}
             },
       borderRadius: BorderRadius.circular(24),
       child: Opacity(
@@ -108,7 +136,11 @@ class _SocialIconState extends State<_SocialIcon> {
             border: Border.all(color: AppColors.border),
           ),
           child: Center(
-            child: SvgPicture.string(widget.icon, height: widget.size, width: 24),
+            child: SvgPicture.string(
+              widget.icon,
+              height: widget.size,
+              width: 24,
+            ),
           ),
         ),
       ),

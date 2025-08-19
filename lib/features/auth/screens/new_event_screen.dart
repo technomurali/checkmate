@@ -4,13 +4,16 @@ import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
+import 'package:checkmate/core/utils/top_nav_provider.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
+import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:checkmate/features/auth/controllers/new_event_controller.dart';
 import 'package:checkmate/core/constants/app_Api.dart';
+import 'package:provider/provider.dart';
 
 class NewEventScreen extends StatefulWidget {
   const NewEventScreen({super.key});
@@ -156,6 +159,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
             NewEventTextControllers.eventDescriptionController.text,
         "eventApproval": int.parse(BasicCodesFromCrm.pending),
         "userName": "/contacts(${userModal.id})",
+        "isMultiDay": isMultiDay,
       };
       _newEventController.createEvent(testData).then((value) {
         if (value['success']) {
@@ -177,6 +181,10 @@ class _NewEventScreenState extends State<NewEventScreen> {
             _selectedHCP = [];
             _isLoading = false;
           });
+          Provider.of<TopNavProvider>(
+            context,
+            listen: false,
+          ).navigateTo(TopNavScreen.dashboard);
         } else {
           setState(() {
             _isLoading = false;
