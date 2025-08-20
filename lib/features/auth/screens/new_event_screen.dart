@@ -144,7 +144,9 @@ class _NewEventScreenState extends State<NewEventScreen> {
       var testData = {
         "eventName": NewEventTextControllers.eventNameController.text,
         "startDate": startDatePicked.toIso8601String(),
-        "endDate": endDatePicked.toIso8601String(),
+        "endDate": isMultiDay
+            ? endDatePicked.toIso8601String()
+            : startDatePicked.toIso8601String(),
         "numberOfStaff": int.parse(
           NewEventTextControllers.numberOfStaffController.text,
         ),
@@ -192,6 +194,10 @@ class _NewEventScreenState extends State<NewEventScreen> {
             const SnackBar(content: Text(AppStrings.eventCreatedFailed)),
           );
         }
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
       });
     }
   }

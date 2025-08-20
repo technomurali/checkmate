@@ -41,16 +41,17 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
                   )
                   .take(3)
                   .toList();
-              isLoading = false;
+              // isLoading = false;
             }),
+            fetchPendingEvents(),
           },
         );
   }
 
   fetchPendingEvents() async {
-    setState(() {
-      isLoading = true;
-    });
+    // setState(() {
+    //   isLoading = true;
+    // });
     _eventController
         .fetchEventsWithPending(status: BasicCodesFromCrm.pending)
         .then(
@@ -68,11 +69,23 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
         );
   }
 
+  fetchDetails() {
+    setState(() {
+      isLoading = true;
+    });
+    fetchPendingEvents();
+    fetchUpcomingEvents();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     fetchUpcomingEvents();
-    fetchPendingEvents();
+    // fetchPendingEvents();
+    // fetchDetails();
   }
 
   @override
@@ -170,7 +183,7 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
                   isPending: true,
                   items: [
                     if (pendingEvents.isNotEmpty) ...{
-                      for (var i = 0; i < 3; i++) ...{
+                      for (var i = 0; i < pendingEvents.length; i++) ...{
                         {
                           "title": pendingEvents[i].eventName!,
                           "date": pendingEvents[i].startDate!

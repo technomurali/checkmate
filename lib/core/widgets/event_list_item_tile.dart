@@ -67,18 +67,6 @@ class EventListItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DateTime? start = event.startDate;
-    final DateTime? end = event.endDate;
-    final String startDateStr = start != null
-        ? start.toLocal().toString().split(' ').first
-        : '';
-    final String endDateStr = end != null
-        ? end.toLocal().toString().split(' ').first
-        : '';
-    final bool hasValidRange =
-        start != null &&
-        end != null &&
-        (end.isAfter(start) || end.isAtSameMomentAs(start));
     return InkWell(
       onTap:
           onTap ??
@@ -151,10 +139,16 @@ class EventListItemTile extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 16),
-                if (start != null)
-                  Text("${AppStrings.labelStartDate}: $startDateStr"),
-                if (hasValidRange)
-                  Text("From : $startDateStr       To : $endDateStr"),
+
+                if (event.isMultiDay) ...{
+                  Text(
+                    "From : ${event.startDate!.toLocal().toString().split(' ').first}       To : ${event.endDate!.toLocal().toString().split(' ').first}",
+                  ),
+                } else ...{
+                  Text(
+                    "${AppStrings.labelStartDate}: ${event.startDate!.toLocal().toString().split(' ').first}",
+                  ),
+                },
                 //Text("Pharma Rep:  $pharmaRep"),
               ],
             ),
