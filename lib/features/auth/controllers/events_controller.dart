@@ -46,9 +46,6 @@ class EventController {
         uri,
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
       );
-      print(
-        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRepAndStatus/${userModal.id}/$status",
-      );
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
         debugPrint("Events TRL 1 ::: $jsonBody");
@@ -75,9 +72,6 @@ class EventController {
       final response = await http.get(
         uri,
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      );
-      print(
-        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRepAndStatus/${userModal.id}/$status",
       );
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);

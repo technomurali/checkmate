@@ -9,7 +9,6 @@ import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:checkmate/core/widgets/confirm_alert_dialog.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
 
@@ -326,11 +325,6 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
         },
       ],
     );
-  }
-
-  String _formatDate(DateTime? date) {
-    if (date == null) return '';
-    return '${date.day}/${date.month}/${date.year}';
   }
 
   Widget historyItemBuilder(int i) {

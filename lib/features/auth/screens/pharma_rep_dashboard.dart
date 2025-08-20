@@ -78,7 +78,7 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Container(
+      child: SizedBox(
         width: isLoading ? double.infinity : null,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
