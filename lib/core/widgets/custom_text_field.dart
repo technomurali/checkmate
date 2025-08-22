@@ -10,6 +10,7 @@ class CustomTextField extends StatefulWidget {
   final String? Function(String)? validator;
   final void Function(String)? onChanged;
   final Widget? suffixIcon;
+  final Widget? prefixIcon;
   final bool readOnly;
   const CustomTextField({
     super.key,
@@ -22,6 +23,7 @@ class CustomTextField extends StatefulWidget {
     this.onChanged,
     this.suffixIcon,
     this.readOnly = false,
+    this.prefixIcon,
   });
 
   @override
@@ -130,6 +132,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 },
               )
             : widget.suffixIcon,
+        prefixIcon: widget.prefixIcon,
       ),
     );
   }

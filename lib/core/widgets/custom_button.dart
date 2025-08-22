@@ -6,12 +6,14 @@ class Button extends StatelessWidget {
   final bool isDisabled;
   final Function()? onPressed;
   final double height;
+  final Color color;
   const Button({
     super.key,
     required this.text,
     required this.onPressed,
     this.isDisabled = false,
     this.height = 48,
+    this.color = AppColors.primary,
   });
 
   @override
@@ -22,9 +24,7 @@ class Button extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isDisabled ? () {} : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isDisabled
-              ? AppColors.textSecondary
-              : AppColors.primary,
+          backgroundColor: isDisabled ? AppColors.textSecondary : color,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

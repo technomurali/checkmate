@@ -704,6 +704,19 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         });
                       },
                     ),
+                    SizedBox(height: 12),
+                    if (isCheckedIn)
+                      Button(
+                        color: AppColors.accentError,
+                        isDisabled: !isCheckedIn,
+                        text: AppStrings.cancelCheckIn,
+                        onPressed: () {
+                          setState(() {
+                            isCheckedIn = !isCheckedIn;
+                            _checkInDateTime = null;
+                          });
+                        },
+                      ),
                   },
                 ],
               ),

@@ -21,7 +21,6 @@ class SignupScreenLogic extends ChangeNotifier {
     "confirmPassword": false,
     "firstName": false,
     "lastname": false,
-    "city": false,
     "selectYourCompany": false,
   };
 
@@ -55,10 +54,10 @@ class SignupScreenLogic extends ChangeNotifier {
       isValid['lastname'] = TextControllers.lastName.text.isNotEmpty;
       _checkFormValidity();
     });
-    TextControllers.city.addListener(() {
-      isValid['city'] = TextControllers.city.text.isNotEmpty;
-      _checkFormValidity();
-    });
+    // TextControllers.city.addListener(() {
+    //   isValid['city'] = TextControllers.city.text.isNotEmpty;
+    //   _checkFormValidity();
+    // });
     TextControllers.pharma.addListener(() {
       isValid['selectYourCompany'] =
           TextControllers.pharma.text != AppStrings.selectThePharma;
@@ -68,7 +67,7 @@ class SignupScreenLogic extends ChangeNotifier {
 
   void _checkFormValidity() {
     final allValid = isValid.values.every((e) => e);
-    isSignUpDisabled = !(allValid && !isOptedForSocialSignUp);
+    isSignUpDisabled = !((allValid || true) && !isOptedForSocialSignUp);
     notifyListeners();
   }
 

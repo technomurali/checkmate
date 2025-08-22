@@ -40,10 +40,10 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     'All',
     "DISPUTED",
     'UPCOMING',
-    'COMPLETED',
+    'PAST',
     'TERMINATED',
     'APPROVED',
-    'PENDING',
+    'IN REVIEW',
     'REJECTED',
   ];
 
@@ -85,9 +85,9 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
           'code': 'B',
           'statusId': BasicCodesFromCrm.upcoming,
         };
-      case 'COMPLETED':
+      case 'PAST':
         return {
-          'status': 'COMPLETED',
+          'status': 'PAST',
           'code': 'B',
           'statusId': BasicCodesFromCrm.completed,
         };
@@ -97,9 +97,9 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
           'code': 'B',
           'statusId': BasicCodesFromCrm.terminated,
         };
-      case 'PENDING':
+      case 'IN REVIEW':
         return {
-          'status': 'PENDING',
+          'status': 'IN REVIEW',
           'code': 'A',
           'statusId': BasicCodesFromCrm.pending,
         };
@@ -195,6 +195,9 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
 
         return matchesQuery && matchesStatus;
       }).toList();
+      if (_selectedStatus == "UPCOMING") {
+        filteredEvents = filteredEvents.reversed.toList();
+      }
       debugPrint('Filtered events: $filteredEvents');
       isLoading = false;
     });
@@ -243,72 +246,137 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Card(
-          color: AppColors.searchCard,
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      hintText: AppStrings.searchEvents,
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: AppColors.background,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 0,
-                        horizontal: 16,
-                      ),
-                    ),
-                    onChanged: (value) {
-                      _searchQuery = value;
-                      _filterEvents();
-                    },
+                Icon(
+                  Icons.event,
+                  size: 24,
+                  color: AppColors.eventTitleIconColor,
+                ),
+                SizedBox(width: 10),
+                Text(
+                  "Events",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.eventTitleTextColor,
                   ),
                 ),
-                const SizedBox(width: 12),
-                PopupMenuButton<String>(
-                  enabled: !widget.fromDashboard && !widget.isPending,
-                  icon: Icon(Icons.filter_list),
-                  tooltip: 'Filter',
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  onSelected: (value) {
-                    setState(() {
-                      _selectedStatus = value;
-                    });
-                    _filterEvents();
-                  },
-                  itemBuilder: (context) => _statusOptions
-                      .map(
-                        (status) => PopupMenuItem<String>(
-                          value: status,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              FilterIcon(status: status),
-                              Text(status),
-                            ],
-                          ),
-                        ),
-                      )
-                      .toList(),
-                ),
-                const SizedBox(width: 12),
-                FilterIcon(status: _selectedStatus!),
               ],
             ),
+            Row(
+              children: [
+                Icon(Icons.add, size: 24, color: AppColors.eventTitleIconColor),
+                SizedBox(width: 10),
+                Icon(
+                  Icons.bar_chart,
+                  size: 24,
+                  color: AppColors.eventTitleIconColor,
+                ),
+                SizedBox(width: 10),
+                Icon(
+                  Icons.access_time,
+                  size: 24,
+                  color: AppColors.eventTitleIconColor,
+                ),
+              ],
+            ),
+          ],
+        ),
+        SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: AppStrings.searchEvents,
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      // borderSide: BorderSide.none,
+                      borderSide: BorderSide(color: Color(0xFFE9EEF2)),
+                    ),
+                    suffixIcon: PopupMenuButton<String>(
+                      enabled: !widget.fromDashboard && !widget.isPending,
+                      icon: FilterIcon(status: _selectedStatus!),
+                      tooltip: 'Filter',
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: Color(0xFFE9EEF2)),
+                      ),
+                      onSelected: (value) {
+                        setState(() {
+                          _selectedStatus = value;
+                        });
+                        _filterEvents();
+                      },
+                      itemBuilder: (context) => _statusOptions
+                          .map(
+                            (status) => PopupMenuItem<String>(
+                              value: status,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  FilterIcon(status: status),
+                                  Text(status),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+
+                    filled: true,
+                    fillColor: AppColors.background,
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 0,
+                      horizontal: 16,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    _searchQuery = value;
+                    _filterEvents();
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // PopupMenuButton<String>(
+              //   enabled: !widget.fromDashboard && !widget.isPending,
+              //   icon: FilterIcon(status: _selectedStatus!),
+              //   tooltip: 'Filter',
+              //   shape: RoundedRectangleBorder(
+              //     borderRadius: BorderRadius.circular(16),
+              //   ),
+              //   onSelected: (value) {
+              //     setState(() {
+              //       _selectedStatus = value;
+              //     });
+              //     _filterEvents();
+              //   },
+              //   itemBuilder: (context) => _statusOptions
+              //       .map(
+              //         (status) => PopupMenuItem<String>(
+              //           value: status,
+              //           child: Row(
+              //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //             children: [
+              //               FilterIcon(status: status),
+              //               Text(status),
+              //             ],
+              //           ),
+              //         ),
+              //       )
+              //       .toList(),
+              // ),
+            ],
           ),
         ),
         const SizedBox(height: 10),

@@ -16,6 +16,8 @@ class AppStrings {
   static const String sendVerificationCode = "Send verification code";
   static const String backToSignin = "Back to Sign in";
   static const String signupTerms = "By signing up, you agree to our";
+  static const String secureCompliance =
+      "Secure compliance. Effortless onboarding";
   static const String firstName = "First Name";
   static const String lastName = "Last Name";
   static const String alreadyAccount = "Have an account? Sign in";
@@ -33,6 +35,7 @@ class AppStrings {
   static const String checkIn = "Check in";
   static const String updateEvent = "Update Event";
   static const String submitCheckIn = "Submit Check-in";
+  static const String cancelCheckIn = "Cancel Check-in";
   static const String seeAll = "See all";
   static const String eventHistory = "Event History";
   static const String receiptHistory = "Receipt History";
@@ -69,7 +72,7 @@ class AppStrings {
   static const String labelEventStartDate = "Event Start Date";
   static const String accept = "Accept";
   static const String deny = "Deny";
-  static const String termsAndConditions = "Please accept terms and conditions";
+  static const String termsAndConditions = "Terms and conditions";
   static const String dashboard = "Dashboard";
   static const String signOut = "Sign out";
   static const String labelEventDescription = "Event Details";
@@ -134,7 +137,7 @@ class ErrorText {
 class UserType {
   static const String pharmaRep = "546170001";
   static const String hco = "OFFICE_USER";
-  static const String hcp = "HCP";
+  static const String hcp = "546170000";
 }
 
 class EventStatus {

@@ -9,130 +9,51 @@ class FilterIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (status) {
       case "UPCOMING":
-        return upcomingIcon();
-      case "COMPLETED":
-        return completedIcon();
-      case "TERMINATED":
-        return terminatedIcon();
-      case "APPROVED":
-        return approvedIcon();
-      case "REJECTED":
-        return rejectedIcon();
-      case "PENDING":
-        return pendingIcon();
-      case "OPEN":
-        return openIcon();
-      case "CLOSED":
-        return closedIcon();
-      case "DISPUTED":
-        return disputedIcon();
+        return container(
+          color: AppColors.upcomingStatusBadge,
+          textColor: AppColors.upcomingStatusBadgeTextColor,
+        );
+      case "PAST" || "APPROVED":
+        return container(
+          color: AppColors.pastStatusBadge,
+          textColor: AppColors.pastStatusBadgeTextColor,
+        );
+
+      case "IN REVIEW" || "DISPUTED" || "TERMINATED" || "REJECTED":
+        return container(
+          color: AppColors.inReviewStatusBadge,
+          textColor: AppColors.inReviewStatusBadgeTextColor,
+        );
+      // case "OPEN":
+      //   return openIcon();
+      // case "CLOSED":
+      //   return closedIcon();
+      // case "DISPUTED":
+      //   return container(color: AppColors.accentError);
       default:
-        return Icon(Icons.all_inclusive, color: AppColors.grey);
+        return container(
+          color: AppColors.filterStatusBadge,
+          textColor: AppColors.filterStatusBadgeTextColor,
+        );
     }
   }
-}
 
-Container upcomingIcon() {
-  return Container(
-    margin: EdgeInsets.only(right: 10),
-    padding: EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: AppColors.accentPending,
-    ),
-    child: Text("U"),
-  );
-}
-
-Container openIcon() {
-  return Container(
-    margin: EdgeInsets.only(right: 10),
-    padding: EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: AppColors.accentPending,
-    ),
-    child: Text("O"),
-  );
-}
-
-Container completedIcon() {
-  return Container(
-    margin: EdgeInsets.only(right: 10),
-    padding: EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: AppColors.successGreen,
-    ),
-    child: Text("C"),
-  );
-}
-
-Container closedIcon() {
-  return Container(
-    margin: EdgeInsets.only(right: 10),
-    padding: EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: AppColors.accentError,
-    ),
-    child: Text("C", style: TextStyle(color: AppColors.background)),
-  );
-}
-
-Container disputedIcon() {
-  return Container(
-    margin: EdgeInsets.only(right: 10),
-    padding: EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: AppColors.accentError,
-    ),
-    child: Text("D", style: TextStyle(color: AppColors.background)),
-  );
-}
-
-Container terminatedIcon() {
-  return Container(
-    margin: EdgeInsets.only(right: 10),
-    padding: EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: AppColors.accentError,
-    ),
-    child: Text("T", style: TextStyle(color: AppColors.background)),
-  );
-}
-
-Container approvedIcon() {
-  return Container(
-    margin: EdgeInsets.only(right: 10),
-    padding: EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: AppColors.successGreen,
-    ),
-    child: Text("A"),
-  );
-}
-
-Container rejectedIcon() {
-  return Container(
-    margin: EdgeInsets.only(right: 10),
-    padding: EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: AppColors.accentError,
-    ),
-    child: Text("R", style: TextStyle(color: AppColors.background)),
-  );
-}
-
-Container pendingIcon() {
-  return Container(
-    margin: EdgeInsets.only(right: 10),
-    padding: EdgeInsets.all(10),
-    decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.pending),
-    child: Text("P", style: TextStyle(color: AppColors.background)),
-  );
+  Container container({
+    required Color color,
+    Color textColor = AppColors.upcomingStatusBadgeTextColor,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(right: 10),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.horizontal(
+          left: Radius.circular(13),
+          right: Radius.circular(13),
+        ),
+        //shape: BoxShape.circle,
+        color: color,
+      ),
+      child: Text(status, style: TextStyle(color: textColor)),
+    );
+  }
 }

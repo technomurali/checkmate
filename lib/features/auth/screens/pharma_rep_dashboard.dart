@@ -62,6 +62,7 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
                     (e) =>
                         e.eventApproval == int.parse(BasicCodesFromCrm.pending),
                   )
+                  .take(3)
                   .toList();
               isLoading = false;
             }),

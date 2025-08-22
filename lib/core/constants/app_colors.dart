@@ -98,7 +98,7 @@ class AppColors {
   static const Color pendingCardColor = Color(0xFFFFF2CC);
   static const Color upcomingCardColor = Color(0xFFE1F5FE);
   static const Color topNavColor = Color(0xFF388E3C);
-  static const Color primary = Color(0xFF4CAF50);
+  static const Color primary = Color(0xFF3C8AD0);
   static const Color accentSuccess = Color(0xFF2E7D32);
   static const Color accentError = Color(0xFFC62828);
   static const Color background = Color(0xFFF9FBFC);
@@ -113,6 +113,23 @@ class AppColors {
   static const Color topNavTileColor = Color(0xFFE8F5E9);
   static const Color profileIconbgColor = Color(0xFF0052CC);
   static const Color profileEditIconColor = Color(0xFFFFFFFF);
+  static const Color upcomingStatusBadge = Color(0xFFFFE5A1);
+  static const Color upcomingStatusBadgeTextColor = Color.fromRGBO(
+    202,
+    138,
+    4,
+    1,
+  );
+  //FED1C7
+  static const Color inReviewStatusBadge = Color(0xFFFFD1C7);
+  static const Color inReviewStatusBadgeTextColor = Color(0xFF8B0000);
+  static const Color pastStatusBadge = Color(0xFFB6EBDA);
+  static const Color pastStatusBadgeTextColor = Color(0xFF39737A);
+  static const Color filterStatusBadge = Color(0xFFE9F0FB);
+  static const Color filterStatusBadgeTextColor = Color(0xFF05085C);
+  static const Color eventTitleIconColor = Color(0xFF0153AF);
+  static const Color eventTitleTextColor = Color(0xFF041F3E);
+  static const Color termsColor = Color(0xFF3C8AD0);
 
   /// Windows Blue Harmon
   // static const Color rejectedRed = Color(0xFFDC3545);

@@ -5,6 +5,7 @@ import 'package:checkmate/core/widgets/filter_icon.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class EventListItemTile extends StatelessWidget {
   final EventModal event;
@@ -28,7 +29,7 @@ class EventListItemTile extends StatelessWidget {
       };
     } else if (status == BasicCodesFromCrm.completed) {
       return {
-        'status': 'COMPLETED',
+        'status': 'PAST',
         'code': 'B',
         'statusId': BasicCodesFromCrm.completed,
       };
@@ -40,7 +41,7 @@ class EventListItemTile extends StatelessWidget {
       };
     } else if (status == BasicCodesFromCrm.pending) {
       return {
-        'status': 'PENDING',
+        'status': 'IN REVIEW',
         'code': 'A',
         'statusId': BasicCodesFromCrm.pending,
       };
@@ -106,27 +107,25 @@ class EventListItemTile extends StatelessWidget {
               ),
             ),
 
-            if (event.eventStatus.toString().isNotEmpty &&
-                codeForTextOutput(
-                      event.eventStatus.toString(),
-                    )['status']?.toLowerCase() !=
-                    "u") ...{
-              //  if (status['status']?.toLowerCase() == "o") ...{
-              Positioned(
-                right: 50,
-                top: 0,
-                child: Tooltip(
-                  message: codeForTextOutput(
-                    event.eventApproval.toString(),
-                  )['status'],
-                  child: FilterIcon(
-                    status: codeForTextOutput(
-                      event.eventApproval.toString(),
-                    )['status']!,
-                  ),
-                ),
-              ),
-            },
+            // if (event.eventStatus.toString().isNotEmpty &&
+            //     codeForTextOutput(event.eventStatus.toString())['statusId'] !=
+            //         BasicCodesFromCrm.upcoming) ...{
+            //   //  if (status['status']?.toLowerCase() == "o") ...{
+            //   Positioned(
+            //     right: 50,
+            //     top: 0,
+            //     child: Tooltip(
+            //       message: codeForTextOutput(
+            //         event.eventApproval.toString(),
+            //       )['status'],
+            //       child: FilterIcon(
+            //         status: codeForTextOutput(
+            //           event.eventApproval.toString(),
+            //         )['status']!,
+            //       ),
+            //     ),
+            //   ),
+            // },
             Column(
               // mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,15 +139,30 @@ class EventListItemTile extends StatelessWidget {
                 ),
                 SizedBox(height: 16),
 
-                if (event.isMultiDay) ...{
-                  Text(
-                    "From : ${event.startDate!.toLocal().toString().split(' ').first}       To : ${event.endDate!.toLocal().toString().split(' ').first}",
-                  ),
-                } else ...{
-                  Text(
-                    "${AppStrings.labelStartDate}: ${event.startDate!.toLocal().toString().split(' ').first}",
-                  ),
-                },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today, size: 15),
+
+                        SizedBox(width: 5),
+                        if (event.isMultiDay) ...{
+                          Text(
+                            "${DateFormat("dd MMM").format(event.startDate!.toLocal())} - ${DateFormat("dd MMM yyyy").format(event.endDate!.toLocal())}",
+                          ),
+                        } else ...{
+                          Text(
+                            DateFormat(
+                              "dd MMM yyyy",
+                            ).format(event.startDate!.toLocal()),
+                          ),
+                        },
+                      ],
+                    ),
+                    Icon(Icons.more_horiz),
+                  ],
+                ),
                 //Text("Pharma Rep:  $pharmaRep"),
               ],
             ),

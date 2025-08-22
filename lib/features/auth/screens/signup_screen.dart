@@ -57,7 +57,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              Text(AppStrings.signupTerms),
+              Text(AppStrings.secureCompliance),
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -84,6 +84,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ] else ...[
                 CustomTextField(
+                  prefixIcon: Icon(Icons.email_outlined),
                   isRequired: true,
                   controller: TextControllers.email,
                   label: AppStrings.email,
@@ -100,6 +101,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
+                  prefixIcon: Icon(Icons.lock_outline),
                   isRequired: true,
                   controller: TextControllers.password,
                   label: AppStrings.newPassword,
@@ -111,6 +113,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
+                  prefixIcon: Icon(Icons.lock_outline),
                   isRequired: true,
                   controller: TextControllers.confirmPassword,
                   label: AppStrings.confirmPassword,
@@ -124,38 +127,46 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                CustomTextField(
-                  isRequired: true,
-                  controller: TextControllers.firstName,
-                  label: AppStrings.firstName,
-                  validator: (val) {
-                    if (val.isEmpty) return ErrorText.nameRequired;
-                    if (val.length < 2) return ErrorText.shortName;
-                    return null;
-                  },
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        isRequired: true,
+                        controller: TextControllers.firstName,
+                        label: AppStrings.firstName,
+                        validator: (val) {
+                          if (val.isEmpty) return ErrorText.nameRequired;
+                          if (val.length < 2) return ErrorText.shortName;
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: CustomTextField(
+                        isRequired: true,
+                        controller: TextControllers.lastName,
+                        label: AppStrings.lastName,
+                        validator: (val) {
+                          if (val.isEmpty) return ErrorText.nameRequired;
+                          if (val.length < 2) return ErrorText.shortName;
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  isRequired: true,
-                  controller: TextControllers.lastName,
-                  label: AppStrings.lastName,
-                  validator: (val) {
-                    if (val.isEmpty) return ErrorText.nameRequired;
-                    if (val.length < 2) return ErrorText.shortName;
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  isRequired: true,
-                  controller: TextControllers.city,
-                  label: AppStrings.city,
-                  validator: (val) {
-                    if (val.isEmpty) return ErrorText.cityRequired;
-                    if (val.length < 2) return ErrorText.smallCity;
-                    return null;
-                  },
-                ),
+                //const SizedBox(height: 16),
+                // CustomTextField(
+                //   isRequired: true,
+                //   controller: TextControllers.city,
+                //   label: AppStrings.city,
+                //   validator: (val) {
+                //     if (val.isEmpty) return ErrorText.cityRequired;
+                //     if (val.length < 2) return ErrorText.smallCity;
+                //     return null;
+                //   },
+                // ),
               ],
 
               const SizedBox(height: 16),
@@ -211,7 +222,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
               ///Terms and Conditions button
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.center,
                 child: TextButton(
                   onPressed: () async {
                     final accepted = await Navigator.push(
@@ -230,12 +241,32 @@ class _SignupScreenState extends State<SignupScreen> {
                       });
                     }
                   },
-                  child: Text(AppStrings.termsAndConditions),
+                  // child: Text(
+                  //   "${AppStrings.signupTerms} ${AppStrings.termsAndConditions}",
+                  // ),
+                  child: RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "${AppStrings.signupTerms} ",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        TextSpan(
+                          text: AppStrings.termsAndConditions,
+                          style: TextStyle(
+                            color: AppColors.termsColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
               if (!signupScreenLogic.isOptedForSocialSignUp)
                 Button(
+                  // color: Color(0xFF3C8AD0),
                   text: AppStrings.signup,
                   isDisabled:
                       signupScreenLogic.isSignUpDisabled || !_acceptedTerms,
