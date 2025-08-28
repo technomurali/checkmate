@@ -2,9 +2,11 @@ import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_paths.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
+import 'package:checkmate/features/auth/controllers/profile_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 /// A fully-featured profile editing page with Save and Cancel buttons.
 class UserProfileScreen extends StatefulWidget {
@@ -17,7 +19,8 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   bool isEnabled = false;
-
+  bool isLoading = false;
+  ProfileController _profileController = ProfileController();
   @override
   void initState() {
     super.initState();
@@ -32,6 +35,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         userModal.firstName ?? '';
     UserProfileTextControllers.lastNameController.text =
         userModal.lastName ?? '';
+    fetchHcoName();
+  }
+
+  fetchHcoName() {
+    setState(() {
+      isLoading = true;
+    });
+    _profileController.getCompanyName(userModal.pharmaCompany ?? '').then((
+      value,
+    ) {
+      setState(() {
+        UserProfileTextControllers.companyController.text = value;
+        isLoading = false;
+      });
+    });
   }
 
   @override
@@ -60,114 +78,138 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Stack(
-                    children: [
-                      ///Profile Picture
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: userModal.profileUrl != null
-                            ? NetworkImage(userModal.profileUrl!)
-                                  as ImageProvider
-                            : const AssetImage(AppPaths.logoPath),
-                      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Stack(
+                  children: [
+                    ///Profile Picture
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage:
+                          (userModal.profileUrl != null &&
+                              userModal.profileUrl!.isNotEmpty)
+                          ? NetworkImage(userModal.profileUrl!)
+                          : null,
+                      child:
+                          (userModal.profileUrl == null ||
+                              userModal.profileUrl!.isEmpty)
+                          ? ClipOval(
+                              // child: SvgPicture.string(
+                              //   AppPaths.logoPath,
+                              //   fit: BoxFit.cover,
+                              //   width: 100,
+                              //   height: 100,
+                              // ),
+                              child: Icon(
+                                Icons.person,
+                                size: 50,
+                                color: AppColors.pastStatusBadgeTextColor,
+                              ),
+                            )
+                          : null,
+                    ),
 
-                      ///Edit icon on the profile picture
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: InkWell(
-                          onTap: !isEnabled ? () {} : null,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isEnabled
-                                  ? AppColors.profileIconbgColor
-                                  : AppColors.border,
-                            ),
-                            padding: const EdgeInsets.all(6),
-                            child: Icon(
-                              Icons.edit,
-                              size: 18,
-                              color: AppColors.profileEditIconColor,
-                            ),
+                    ///Edit icon on the profile picture
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: InkWell(
+                        onTap: !isEnabled ? () {} : null,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isEnabled
+                                ? AppColors.profileIconbgColor
+                                : AppColors.border,
+                          ),
+                          padding: const EdgeInsets.all(6),
+                          child: Icon(
+                            Icons.edit,
+                            size: 18,
+                            color: AppColors.profileEditIconColor,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
+              ),
+              const SizedBox(height: 24),
 
-                ///Email TextField
+              ///Email TextField
+              _buildTextField(
+                enabled: isEnabled,
+                controller: UserProfileTextControllers.emailController,
+                label: AppStrings.email,
+                keyboardType: TextInputType.emailAddress,
+                validator: (v) {
+                  if (v == null || v.isEmpty) {
+                    return ErrorText.emailReq;
+                  }
+                  final emailReg = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+                  if (!emailReg.hasMatch(v)) return ErrorText.emailError;
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+
+              ///First Name TextField
+              _buildTextField(
+                enabled: isEnabled,
+                controller: UserProfileTextControllers.firstNameController,
+                label: AppStrings.firstName,
+              ),
+              const SizedBox(height: 12),
+
+              ///Last Name TextField
+              _buildTextField(
+                enabled: isEnabled,
+                controller: UserProfileTextControllers.lastNameController,
+                label: AppStrings.lastName,
+              ),
+              const SizedBox(height: 12),
+
+              ///City TextField
+              _buildTextField(
+                enabled: isEnabled,
+                controller: UserProfileTextControllers.cityController,
+                label: AppStrings.city,
+              ),
+              const SizedBox(height: 12),
+
+              ///Pharma Company TextField
+              if (userModal.role == UserType.pharmaRep)
                 _buildTextField(
                   enabled: isEnabled,
-                  controller: UserProfileTextControllers.emailController,
-                  label: AppStrings.email,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) {
-                    if (v == null || v.isEmpty) {
-                      return ErrorText.emailReq;
-                    }
-                    final emailReg = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+\$');
-                    if (!emailReg.hasMatch(v)) return ErrorText.emailError;
-                    return null;
-                  },
+                  controller: UserProfileTextControllers.companyController,
+                  label: AppStrings.pharmaCompany,
                 ),
-                const SizedBox(height: 12),
-
-                ///First Name TextField
+              if (userModal.role == UserType.hcp)
                 _buildTextField(
-                  enabled: isEnabled,
-                  controller: UserProfileTextControllers.firstNameController,
-                  label: AppStrings.firstName,
+                  enabled: false,
+                  controller: UserProfileTextControllers.companyController,
+                  label: AppStrings.company,
                 ),
-                const SizedBox(height: 12),
-
-                ///Last Name TextField
-                _buildTextField(
-                  enabled: isEnabled,
-                  controller: UserProfileTextControllers.lastNameController,
-                  label: AppStrings.lastName,
-                ),
-                const SizedBox(height: 12),
-
-                ///City TextField
-                _buildTextField(
-                  enabled: isEnabled,
-                  controller: UserProfileTextControllers.cityController,
-                  label: AppStrings.city,
-                ),
-                const SizedBox(height: 12),
-
-                ///Pharma Company TextField
-                if (userModal.role == UserType.pharmaRep)
-                  _buildTextField(
-                    enabled: isEnabled,
-                    controller: UserProfileTextControllers.companyController,
-                    label: AppStrings.pharmaCompany,
-                  ),
-                const SizedBox(height: 12),
-                Button(
-                  text: isEnabled ? AppStrings.save : AppStrings.edit,
-                  onPressed: () {
-                    setState(() {
-                      isEnabled = !isEnabled;
-                    });
-                  },
-                ),
-              ],
-            ),
+              const SizedBox(height: 12),
+              Button(
+                text: isEnabled ? AppStrings.save : AppStrings.edit,
+                onPressed: () {
+                  setState(() {
+                    isEnabled = !isEnabled;
+                  });
+                },
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
   }
 
   /// Builds a standard editable text field with validation.

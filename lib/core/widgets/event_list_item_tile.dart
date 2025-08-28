@@ -156,6 +156,7 @@ class EventListItemTile extends StatelessWidget {
                             DateFormat(
                               "dd MMM yyyy",
                             ).format(event.startDate!.toLocal()),
+                            style: TextStyle(fontWeight: FontWeight.normal),
                           ),
                         },
                       ],

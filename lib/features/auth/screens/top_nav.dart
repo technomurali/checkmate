@@ -28,8 +28,20 @@ class TopNav extends StatelessWidget {
     final navProvider = Provider.of<TopNavProvider>(context);
     final TopNavScreen currentScreen = navProvider.currentScreen;
     final Object? argument = navProvider.argument;
-    return Scaffold(
-      body: Column(
+    // ignore: deprecated_member_use
+    return WillPopScope(
+      onWillPop: () async {
+        final navProvider = Provider.of<TopNavProvider>(context, listen: false);
+        // Try to pop in-app history first
+        final handled = navProvider.goBack();
+        if (handled) {
+          return false; // consumed by in-app back
+        }
+        // No history left; allow the framework to pop the route (may exit screen/app)
+        return true;
+      },
+      child: Scaffold(
+        body: Column(
         children: [
           Container(
             height:
@@ -138,7 +150,8 @@ class TopNav extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 
   Widget _getScreen(TopNavScreen screen, Object? argument) {

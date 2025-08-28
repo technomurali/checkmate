@@ -29,9 +29,9 @@ class SigninController {
         }),
       );
 
-      final data = jsonDecode(response.body);
-      debugPrint("signin data /////// $data");
       if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        debugPrint("signin data /////// $data");
         // Parse user using your UserModal
         final user = UserModal(
           id: data['kiosk'].toString(),
@@ -51,7 +51,7 @@ class SigninController {
       } else {
         return {
           SigninModalKeys.signinSuccess: false,
-          SigninModalKeys.signinMessage: data[SigninModalKeys.signinMessage],
+          SigninModalKeys.signinMessage: response.body,
         };
       }
     } catch (e) {

@@ -83,6 +83,7 @@ class AppStrings {
   static const String save = "Save";
   static const String edit = "Edit";
   static const String pharmaCompany = "Pharma Company";
+  static const String company = "Hco";
   static const String labelEventType = "Event Type";
   static const String selectEventType = "Please select event type";
   static const String multiDayEvent = "Multi-day Event";

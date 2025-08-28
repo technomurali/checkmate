@@ -53,7 +53,7 @@ class FilterIcon extends StatelessWidget {
         //shape: BoxShape.circle,
         color: color,
       ),
-      child: Text(status, style: TextStyle(color: textColor)),
+      child: Text(status, style: TextStyle(color: textColor, fontSize: 12)),
     );
   }
 }

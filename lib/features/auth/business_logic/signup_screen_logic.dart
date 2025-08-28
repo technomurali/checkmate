@@ -11,6 +11,7 @@ class SignupScreenLogic extends ChangeNotifier {
 
   bool isSignUpDisabled = true;
   bool isOptedForSocialSignUp = false;
+  bool isLoading = false;
 
   List<Map> filteredCompanies = [];
   List<Map> allCompanies = [];
@@ -78,9 +79,12 @@ class SignupScreenLogic extends ChangeNotifier {
   }
 
   void getPharmaList() async {
+    isLoading = true;
+    notifyListeners();
     final result = await _pharmaController.fetchPharmaCompanies();
     debugPrint("fetchPharmaCompanies : $result");
     allCompanies = result.pharmaCompanies;
+    isLoading = false;
     notifyListeners();
   }
 
@@ -108,6 +112,8 @@ class SignupScreenLogic extends ChangeNotifier {
   }
 
   void signupUser(VoidCallback onSuccess) async {
+    isLoading = true;
+    notifyListeners();
     final data = SignUpModel(
       email: TextControllers.email.text,
       password: TextControllers.password.text,
@@ -123,7 +129,7 @@ class SignupScreenLogic extends ChangeNotifier {
 
     // Clear controllers
     clearAllTextControllers();
-
+    isLoading = false;
     notifyListeners();
     onSuccess();
   }

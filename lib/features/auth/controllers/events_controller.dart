@@ -17,7 +17,7 @@ class EventController {
         "${AppApi.baseUrl1}${AppApi.events}/getEventsByRep/${userModal.id}${status != null ? '?status=$status' : ''}",
       );
 
-      final response = await http.get(uri);
+      final response  = await http.get(uri);
 
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);

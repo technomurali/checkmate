@@ -43,7 +43,8 @@ class _DisputeFormScreenState extends State<DisputeFormScreen> {
     super.initState();
     DisputeFormTextControllers.fullNameController.text =
         "${userModal.firstName!} ${userModal.lastName!}";
-    DisputeFormTextControllers.npiNumberController.text = userModal.npiNumber!;
+    DisputeFormTextControllers.npiNumberController.text =
+        userModal.npiNumber ?? '';
     DisputeFormTextControllers.organizationNameController.text =
         userModal.hco![0][HCOModalKeys.hcoName];
     DisputeFormTextControllers.emailController.text = userModal.email!;

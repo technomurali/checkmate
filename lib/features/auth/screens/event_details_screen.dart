@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
@@ -175,7 +177,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                     children: [
                       if (event.eventStatus.toString() ==
                               BasicCodesFromCrm.upcoming &&
-                          !isCheckedIn) ...{
+                          !isCheckedIn &&
+                          userModal.role == UserType.pharmaRep) ...{
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -680,7 +683,12 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                     ],
                   ),
                   if (isEdit)
-                    Button(text: AppStrings.updateEvent, onPressed: () {}),
+                    Button(
+                      text: AppStrings.updateEvent,
+                      onPressed: () {
+                        debugPrint("Update Event ${json.encode(event)}");
+                      },
+                    ),
                   if (userModal.role == UserType.pharmaRep &&
                       // ignore: unrelated_type_equality_checks
                       event.eventStatus ==

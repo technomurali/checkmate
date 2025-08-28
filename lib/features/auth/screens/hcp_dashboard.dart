@@ -1,3 +1,4 @@
+import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/events_recipts_card.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
@@ -18,14 +19,29 @@ class HCPDashboard extends StatefulWidget {
 class _HCPDashboardState extends State<HCPDashboard> {
   final EventController _eventController = EventController();
   List<EventModal> events = [];
+  List<EventModal> pendingEvents = [];
   fetchUpcomingEvents() async {
     _eventController
-        .fetchEvents(status: "UPCOMING")
+        .fetchEventsWithStatus(status: BasicCodesFromCrm.upcoming)
         .then(
           (v) => {
             setState(() {
               events = v.take(3).toList();
               debugPrint("Events ::: $events");
+            }),
+          },
+        );
+    fetchPENDINGEvents();
+  }
+
+  fetchPENDINGEvents() async {
+    _eventController
+        .fetchEventsWithStatus(status: BasicCodesFromCrm.pending)
+        .then(
+          (v) => {
+            setState(() {
+              pendingEvents = v.take(3).toList();
+              debugPrint("Events ::: $pendingEvents");
             }),
           },
         );
@@ -67,10 +83,14 @@ class _HCPDashboardState extends State<HCPDashboard> {
           EventsReciptsCard(
             items: [
               if (events.isNotEmpty) ...{
-                for (var i = 0; i < 3; i++) ...{
+                for (var i = 0; i < events.length; i++) ...{
                   {
                     "title": events[i].eventName!,
-                    "date": events[i].startDate!,
+                    "date": events[i].startDate!
+                        .toLocal()
+                        .toString()
+                        .split(' ')
+                        .first,
                     "id": events[i].eventId!,
                     "onTap": () {
                       Provider.of<TopNavProvider>(
@@ -106,11 +126,32 @@ class _HCPDashboardState extends State<HCPDashboard> {
 
           /// Receipts for Approval Card
           EventsReciptsCard(
-            items: const [
-              {"title": "diabetesCareSolutions", "date": "26/JUNE/2024"},
-              {"title": "diabetesCareSolutions", "date": "26/JUNE/2024"},
-              {"title": "respiratoryTherapy", "date": "26/JUNE/2024"},
+            items: [
+              if (pendingEvents.isNotEmpty) ...{
+                for (var i = 0; i < pendingEvents.length; i++) ...{
+                  {
+                    "title": pendingEvents[i].eventName!,
+                    "date": pendingEvents[i].startDate!
+                        .toLocal()
+                        .toString()
+                        .split(' ')
+                        .first,
+                    "id": pendingEvents[i].eventId!,
+                    "onTap": () {
+                      Provider.of<TopNavProvider>(
+                        context,
+                        listen: false,
+                      ).navigateTo(
+                        TopNavScreen.pendingReceipt,
+                        argument: pendingEvents[i].eventId!,
+                      );
+                    },
+                  },
+                },
+              } else
+                ...{},
             ],
+
             onSeeAll: () {},
           ),
         ],

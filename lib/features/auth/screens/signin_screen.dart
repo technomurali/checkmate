@@ -37,6 +37,13 @@ class SigninScreen extends StatelessWidget {
                     color: AppColors.textPrimary,
                   ),
                 ),
+                if (logic.showError) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    logic.errorMessage,
+                    style: const TextStyle(color: AppColors.accentError),
+                  ),
+                ],
                 const SizedBox(height: 32),
                 CustomTextField(
                   label: AppStrings.email,
