@@ -34,7 +34,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
   List<Map<String, dynamic>> _selectedHCP = [];
   bool isMultiDay = false;
   String? _selectedEventType;
-
+  int remainingStaff = 0;
   final NewEventController _newEventController = NewEventController();
   List<Map<String, dynamic>> _hcos = [];
   List<Map<String, dynamic>> _hcps = [];
@@ -457,6 +457,10 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           : null,
                     ),
                     const SizedBox(height: 10),
+                    if (_selectedHCP.isNotEmpty) ...{
+                      Text("Total HCP's in Event: ${_selectedHCP.length}"),
+                      const SizedBox(height: 10),
+                    },
                     Container(
                       width: double.infinity,
                       height: 40,
@@ -708,14 +712,37 @@ class _NewEventScreenState extends State<NewEventScreen> {
                             if (a != null) {
                               a.unfocus();
                             }
-                            setState(() {
-                              _selectedHCP = value;
-                              hcpContactDto = value.map((e) {
-                                return {
-                                  HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
-                                };
-                              }).toList();
-                            });
+                            int noOfselecteHcps = value.length;
+                            int noOfStaff = int.parse(
+                              NewEventTextControllers
+                                      .numberOfStaffController
+                                      .text
+                                      .isNotEmpty
+                                  ? NewEventTextControllers
+                                        .numberOfStaffController
+                                        .text
+                                  : '0',
+                            );
+                            if (noOfselecteHcps > noOfStaff) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'You can select only $noOfStaff HCPs as per number of staff entered',
+                                  ),
+                                ),
+                              );
+                              return;
+                            } else {
+                              setState(() {
+                                _selectedHCP = value;
+
+                                hcpContactDto = value.map((e) {
+                                  return {
+                                    HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
+                                  };
+                                }).toList();
+                              });
+                            }
                           },
                           validator: (value) => value == null || value.isEmpty
                               ? AppStrings.selectHCP
@@ -785,14 +812,36 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           if (a != null) {
                             a.unfocus();
                           }
-                          setState(() {
-                            _selectedHCP = value;
-                            hcpContactDto = value.map((e) {
-                              return {
-                                HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
-                              };
-                            }).toList();
-                          });
+                          int noOfselecteHcps = value.length;
+                          int noOfStaff = int.parse(
+                            NewEventTextControllers
+                                    .numberOfStaffController
+                                    .text
+                                    .isNotEmpty
+                                ? NewEventTextControllers
+                                      .numberOfStaffController
+                                      .text
+                                : '0',
+                          );
+                          if (noOfselecteHcps > noOfStaff) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'You can select only $noOfStaff HCPs as per number of staff entered',
+                                ),
+                              ),
+                            );
+                            return;
+                          } else {
+                            setState(() {
+                              _selectedHCP = value;
+                              hcpContactDto = value.map((e) {
+                                return {
+                                  HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
+                                };
+                              }).toList();
+                            });
+                          }
                         },
                         validator: (value) => value == null || value.isEmpty
                             ? AppStrings.selectHCP

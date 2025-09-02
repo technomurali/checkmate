@@ -114,11 +114,15 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
               CircularProgressIndicator(),
             } else ...{
               const SizedBox(height: 20),
-              if (upcomingEvents.isEmpty || pendingEvents.isEmpty) ...{
+              if (upcomingEvents.isEmpty && pendingEvents.isEmpty) ...{
                 Container(
                   height: MediaQuery.of(context).size.height * 0.3,
                   alignment: Alignment.bottomCenter,
-                  child: Text(AppStrings.welcome, textAlign: TextAlign.center),
+                  child: Text(
+                    AppStrings.welcome,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 24),
+                  ),
                 ),
               } else ...{
                 /// Upcoming Events

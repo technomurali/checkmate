@@ -82,19 +82,34 @@ class EventsReciptsCard extends StatelessWidget {
                   ),
                 ),
               ),
-            },
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: onSeeAll,
-                  child: const Text(
-                    "${AppStrings.seeAll} >",
-                    style: TextStyle(color: AppColors.primary),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: onSeeAll,
+                    child: const Text(
+                      "${AppStrings.seeAll}",
+                      style: TextStyle(color: AppColors.primary),
+                    ),
+                  ),
+                ],
+              ),
+            } else ...{
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                child: Center(
+                  child: Text(
+                    isPending
+                        ? AppStrings.noPendingReceipts
+                        : AppStrings.noUpcomingEvents,
+                    style: TextStyle(
+                      color: AppColors.pastStatusBadgeTextColor,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            },
           ],
         ),
       ),

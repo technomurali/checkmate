@@ -121,6 +121,7 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
 
           /// Receipts for Approval Card
           EventsReciptsCard(
+            isPending: true,
             items: const [
               {"title": "diabetesCareSolutions", "date": "26/JUNE/2024"},
               {"title": "diabetesCareSolutions", "date": "26/JUNE/2024"},

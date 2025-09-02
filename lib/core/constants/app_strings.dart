@@ -1,7 +1,7 @@
 class AppStrings {
   static const String appName = "CHECKMATE";
-  static const String welcome =
-      'Welcome to Checkmate create an event to get started';
+  static const String welcome = '''Welcome to Checkmate
+    Create an event to get started''';
   static const String email = "Email";
   static const String password = "Password";
   static const String newPassword = "New Password";
@@ -111,6 +111,20 @@ class AppStrings {
       "Please complete all required fields and agree to the declaration.";
   static const String submitDispute = "Submit Dispute";
   static const String updateDispute = "Update Dispute";
+  static const String disputeSubmitted = "Dispute Submitted";
+  static const String disputeUpdated = "Dispute Updated";
+  static const String disputeSubmittedMessage =
+      "Your dispute has been submitted successfully.";
+  static const String disputeUpdatedMessage =
+      "Your dispute has been updated successfully.";
+  static const String noDisputes = "No disputes found";
+  static const String noEvents = "No events found";
+  static const String noReceipts = "No receipts found";
+  static const String loading = "Loading...";
+  static const String comingSoon = "Coming Soon";
+  static const String noPendingReceipts = "No pending receipts";
+  static const String noUpcomingEvents = "No upcoming events";
+  static const String checkInNotPossible = "You cannot check-in now";
 }
 
 class ErrorText {

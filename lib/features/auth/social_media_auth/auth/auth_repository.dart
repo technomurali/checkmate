@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/features/auth/controllers/signin_controller.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
@@ -5,7 +7,7 @@ import 'package:checkmate/features/auth/social_media_auth/services/apple_auth_se
 import 'package:checkmate/features/auth/social_media_auth/services/google_auth_service.dart';
 import 'package:checkmate/features/auth/social_media_auth/services/linkedin_auth_service.dart';
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
 import 'auth_payload.dart';
 
 enum SocialProvider { google, apple, linkedin }
@@ -32,30 +34,37 @@ class AuthRepository {
     }
     if (payload == null) return false;
     // send to backend -> receive your own JWT
-    final response = await SigninController().signin(
-      email: 'rep@abc.com',
-      password: 'abcabc',
+
+    // final response = await SigninController().signin(
+    //   email: 'rep@abc.com',
+    //   password: 'abcabc',
+    // );
+    // if (response[SigninModalKeys.signinSuccess] == true) {
+    //   final user = response[SigninModalKeys.signinUser] as UserModal;
+    //   userModal = user;
+    //   userModal = UserModal(
+    //     id: user.id,
+    //     email: payload.email,
+    //     password: user.password,
+    //     firstName: payload.name,
+    //     lastName: payload.name,
+    //     city: user.city,
+    //     pharmaCompany: user.pharmaCompany,
+    //     role: user.role,
+    //     hco: user.hco,
+    //     profileUrl: payload.avatar,
+    //     modeOfAuthentication: user.modeOfAuthentication,
+    //   );
+    //   return true;
+    // } else {
+    //   return false;
+    // }
+    final responce = await http.post(
+      Uri.parse('https://172.32.32.69:7133/api/Auth/validate'),
+      body: json.encode({'token': payload.idToken}),
+      headers: {'Content-Type': 'application/json'},
     );
-    if (response[SigninModalKeys.signinSuccess] == true) {
-      final user = response[SigninModalKeys.signinUser] as UserModal;
-      userModal = user;
-      userModal = UserModal(
-        id: user.id,
-        email: payload.email,
-        password: user.password,
-        firstName: payload.name,
-        lastName: payload.name,
-        city: user.city,
-        pharmaCompany: user.pharmaCompany,
-        role: user.role,
-        hco: user.hco,
-        profileUrl: payload.avatar,
-        modeOfAuthentication: user.modeOfAuthentication,
-      );
-      return true;
-    } else {
-      return false;
-    }
+    return false;
     // _appJwt = jsonDecode(payload.idToken)['accessToken'] as String?;
   }
 

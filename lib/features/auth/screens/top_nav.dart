@@ -38,120 +38,126 @@ class TopNav extends StatelessWidget {
           return false; // consumed by in-app back
         }
         // No history left; allow the framework to pop the route (may exit screen/app)
-        return true;
+        return false;
       },
       child: Scaffold(
         body: Column(
-        children: [
-          Container(
-            height:
-                AppSizes().headerHeight + MediaQuery.of(context).padding.top,
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top - 10,
-              left: 10,
-            ),
-            alignment: Alignment.center,
-            width: double.infinity,
-            color: AppColors.topNavColor,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  InkWell(
-                    onTap: () => navProvider.navigateTo(TopNavScreen.dashboard),
-                    child: TopNavTile(
-                      icon: Icon(
-                        Icons.dashboard,
-                        size: AppSizes().headerIconSize,
-                      ),
-                      label: "Home",
-                    ),
-                  ),
-                  if (userModal.role == UserType.pharmaRep)
+          children: [
+            Container(
+              height:
+                  AppSizes().headerHeight + MediaQuery.of(context).padding.top,
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top - 10,
+                left: 10,
+              ),
+              alignment: Alignment.center,
+              width: double.infinity,
+              color: AppColors.topNavColor,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
                     InkWell(
                       onTap: () =>
-                          navProvider.navigateTo(TopNavScreen.newEvent),
+                          navProvider.navigateTo(TopNavScreen.dashboard),
                       child: TopNavTile(
                         icon: Icon(
-                          Icons.event_available_outlined,
+                          Icons.dashboard,
                           size: AppSizes().headerIconSize,
                         ),
-                        label: AppStrings.createEvent,
+                        label: "Home",
                       ),
                     ),
-                  InkWell(
-                    onTap: () =>
-                        navProvider.navigateTo(TopNavScreen.eventHistory),
-                    child: TopNavTile(
-                      icon: Icon(
-                        Icons.event_repeat_outlined,
-                        size: AppSizes().headerIconSize,
+                    if (userModal.role == UserType.pharmaRep)
+                      InkWell(
+                        onTap: () =>
+                            navProvider.navigateTo(TopNavScreen.newEvent),
+                        child: TopNavTile(
+                          icon: Icon(
+                            Icons.event_available_outlined,
+                            size: AppSizes().headerIconSize,
+                          ),
+                          label: AppStrings.createEvent,
+                        ),
                       ),
-                      label: AppStrings.eventHistory,
-                    ),
-                  ),
-                  if (userModal.role != UserType.pharmaRep)
                     InkWell(
                       onTap: () =>
-                          navProvider.navigateTo(TopNavScreen.fileDispute),
+                          navProvider.navigateTo(TopNavScreen.eventHistory),
                       child: TopNavTile(
                         icon: Icon(
-                          Icons.report_problem,
+                          Icons.event_repeat_outlined,
                           size: AppSizes().headerIconSize,
                         ),
-                        label: AppStrings.fileDispute,
+                        label: AppStrings.eventHistory,
                       ),
                     ),
-                  InkWell(
-                    onTap: () =>
-                        navProvider.navigateTo(TopNavScreen.disputeHistory),
-                    child: TopNavTile(
-                      icon: Icon(
-                        Icons.history,
-                        size: AppSizes().headerIconSize,
+                    if (userModal.role != UserType.pharmaRep)
+                      InkWell(
+                        onTap: () =>
+                            navProvider.navigateTo(TopNavScreen.fileDispute),
+                        child: TopNavTile(
+                          icon: Icon(
+                            Icons.report_problem,
+                            size: AppSizes().headerIconSize,
+                          ),
+                          label: AppStrings.fileDispute,
+                        ),
                       ),
-                      label: AppStrings.disputeHistory,
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () => navProvider.navigateTo(TopNavScreen.profile),
-                    child: TopNavTile(
-                      icon: Icon(Icons.person, size: AppSizes().headerIconSize),
-                      label: AppStrings.userProfile,
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      userModal = UserModal.empty();
-                      navProvider.reset();
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const SigninScreen()),
-                      );
-                    },
-                    child: TopNavTile(
-                      icon: Icon(
-                        Icons.power_settings_new_sharp,
-                        size: AppSizes().headerIconSize,
+                    InkWell(
+                      onTap: () =>
+                          navProvider.navigateTo(TopNavScreen.disputeHistory),
+                      child: TopNavTile(
+                        icon: Icon(
+                          Icons.history,
+                          size: AppSizes().headerIconSize,
+                        ),
+                        label: AppStrings.disputeHistory,
                       ),
-                      label: AppStrings.signOut,
                     ),
-                  ),
-                ],
+                    InkWell(
+                      onTap: () => navProvider.navigateTo(TopNavScreen.profile),
+                      child: TopNavTile(
+                        icon: Icon(
+                          Icons.person,
+                          size: AppSizes().headerIconSize,
+                        ),
+                        label: AppStrings.userProfile,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        userModal = UserModal.empty();
+                        navProvider.reset();
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const SigninScreen(),
+                          ),
+                        );
+                      },
+                      child: TopNavTile(
+                        icon: Icon(
+                          Icons.power_settings_new_sharp,
+                          size: AppSizes().headerIconSize,
+                        ),
+                        label: AppStrings.signOut,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: _getScreen(currentScreen, argument),
+            const SizedBox(height: 10),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: _getScreen(currentScreen, argument),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
   }
 
   Widget _getScreen(TopNavScreen screen, Object? argument) {
@@ -182,6 +188,6 @@ class TopNav extends StatelessWidget {
         return PendingReceiptScreen(eventId: argument as String);
       case TopNavScreen.receiptHistory:
         return ReceiptHistoryScreen();
-      }
+    }
   }
 }

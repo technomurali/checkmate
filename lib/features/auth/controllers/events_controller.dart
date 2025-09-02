@@ -17,7 +17,7 @@ class EventController {
         "${AppApi.baseUrl1}${AppApi.events}/getEventsByRep/${userModal.id}${status != null ? '?status=$status' : ''}",
       );
 
-      final response  = await http.get(uri);
+      final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
@@ -184,6 +184,27 @@ class EventController {
     } catch (e) {
       debugPrint("Error Deleting Event $e");
       return AppApiStatusCodes.error;
+    }
+  }
+
+  Future<bool> updateEvent(String eventId, body) async {
+    try {
+      final uri = Uri.parse("${AppApi.baseUrl1}${AppApi.events}/$eventId");
+      final response = await http.put(
+        uri,
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == AppApiStatusCodes.postSuccess) {
+        debugPrint("Event updated successfully.");
+        return true;
+      } else {
+        debugPrint("Failed to update event. Status: ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("Error updating event: $e");
+      return false;
     }
   }
 }

@@ -4,6 +4,8 @@ import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/core/utils/top_nav_provider.dart';
+import 'package:checkmate/core/widgets/confirm_alert_dialog.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
 import 'package:checkmate/features/auth/controllers/new_event_controller.dart';
@@ -14,6 +16,7 @@ import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:provider/provider.dart';
 
 class EventDetailsScreen extends StatefulWidget {
   final String eventId;
@@ -36,6 +39,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   bool hcpInHcoSelected = true;
   bool isEdit = false;
   bool isLoading = false;
+  bool isCheckinPossible = true;
+  int amountForIndividualHcp = 0;
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +53,64 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     EventTextControllers.endDateController = TextEditingController(
       text: event.endDate.toString(),
     );
+  }
+
+  deleteEvent(String eventId) {
+    setState(() {
+      isLoading = true;
+    });
+    _eventController.deleteEvent(eventId).then((value) {
+      if (value == AppApiStatusCodes.deleteSuccess) {
+        final navProvider = Provider.of<TopNavProvider>(context, listen: false);
+        setState(() {
+          isLoading = false;
+        });
+        navProvider.goBack();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(AppStrings.eventDeletefailed)),
+        );
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
+  }
+
+  updateEvent() {
+    setState(() {
+      isLoading = true;
+    });
+    final navProvider = Provider.of<TopNavProvider>(context, listen: false);
+    var testData = {
+      "eventName": event.eventName,
+      "startDate": event.startDate!.toIso8601String(),
+      "endDate": event.endDate!.toIso8601String(),
+      "numberOfStaff": event.numberOfStaff,
+      "amount": EventTextControllers.amountController.text.isNotEmpty
+          ? double.parse(EventTextControllers.amountController.text)
+          : 0.0,
+      "eventCostByPerson": 0,
+      "hco": "/accounts(${event.hco})",
+      "contactDtos": event.contactDtos,
+      "eventType": int.parse(
+        (event.eventType ?? BasicCodesFromCrm.upcoming).toString(),
+      ),
+      "eventStatus": int.parse(BasicCodesFromCrm.upcoming),
+      "eventDescription":
+          NewEventTextControllers.eventDescriptionController.text,
+      "eventApproval": int.parse(BasicCodesFromCrm.pending),
+      "userName": "/contacts(${userModal.id})",
+      "isMultiDay": event.isMultiDay,
+    };
+    debugPrint("Test Data for Update Event ${jsonEncode(testData)}");
+    _eventController.updateEvent(event.eventId ?? '', testData).then((value) {
+      setState(() {
+        isEdit = false;
+        isLoading = false;
+      });
+      navProvider.goBack();
+    });
   }
 
   @override
@@ -86,10 +150,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               EventTextControllers.hcoController.text = event.hco ?? '';
               EventTextControllers.eventDescriptionController.text =
                   event.eventDescription ?? '';
-
-              isLoading = false;
+              isCheckinPossible = !event.startDate!.isBefore(DateTime.now());
             }),
             v.hco != null ? fetchHcoName(v.hco!) : null,
+            if (!isCheckinPossible) {showdialogforcheckAvailability()},
           },
         );
   }
@@ -132,7 +196,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     _eventController.fetchHcp(hcoId: hcoId).then((v) {
       setState(() {
         hcpList = v;
-        debugPrint("hcpList: $hcpList");
         isLoading = false;
       });
     });
@@ -150,6 +213,24 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     } else {
       return "Unknown";
     }
+  }
+
+  showdialogforcheckAvailability() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(AppStrings.checkIn),
+        content: Text(AppStrings.checkInNotPossible),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: Text('Ok'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -182,22 +263,35 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            InkWell(
-                              onTap: () {
-                                setState(() {
-                                  isEdit = !isEdit;
-                                });
-                              },
-                              child: Icon(
-                                Icons.edit,
-                                color: !isEdit
-                                    ? AppColors.blue
-                                    : AppColors.border,
+                            if (isCheckinPossible) ...{
+                              InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    isEdit = !isEdit;
+                                  });
+                                },
+                                child: Icon(
+                                  Icons.edit,
+                                  color: !isEdit
+                                      ? AppColors.blue
+                                      : AppColors.border,
+                                ),
                               ),
-                            ),
+                            },
                             SizedBox(width: 10),
                             InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => ConfirmAlertDialog(
+                                    title: AppStrings.deleteEvent,
+                                    content: AppStrings.deleteEventContent,
+                                    onConfirm: () {
+                                      deleteEvent(event.eventId!);
+                                    },
+                                  ),
+                                );
+                              },
                               child: Icon(
                                 Icons.delete,
                                 color: AppColors.accentError,
@@ -487,9 +581,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 contactDtos: value
                                     .map(
                                       (e) => ContactDto(
-                                        id: int.tryParse(
-                                          e["hcpId"] ?? "0",
-                                        ).toString(),
+                                        id: e["hcpId"] ?? "0",
                                         firstName: (e["hcpName"] ?? "")
                                             .split(" ")
                                             .first,
@@ -560,9 +652,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 contactDtos: value
                                     .map(
                                       (e) => ContactDto(
-                                        id: int.tryParse(
-                                          e["hcpId"] ?? "0",
-                                        ).toString(),
+                                        id: e["hcpId"] ?? "0",
                                         firstName: (e["hcpName"] ?? "")
                                             .split(" ")
                                             .first,
@@ -614,6 +704,22 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             });
                           },
                         ),
+                        if (EventTextControllers
+                            .amountController
+                            .text
+                            .isNotEmpty) ...{
+                          SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "Amount per HCP: ${event.contactDtos != null && event.contactDtos!.isNotEmpty ? (double.parse(EventTextControllers.amountController.text) / (event.contactDtos!.length + double.parse(EventTextControllers.numberOfStaffController.text))).toStringAsFixed(2) : '0.00'}",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        },
                         SizedBox(height: 16),
                         // Receipt upload button
                         Row(
@@ -686,7 +792,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                     Button(
                       text: AppStrings.updateEvent,
                       onPressed: () {
-                        debugPrint("Update Event ${json.encode(event)}");
+                        updateEvent();
                       },
                     ),
                   if (userModal.role == UserType.pharmaRep &&
@@ -694,24 +800,34 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       event.eventStatus ==
                           int.parse(BasicCodesFromCrm.upcoming) &&
                       !isEdit) ...{
-                    Button(
-                      isDisabled:
-                          (_selectedReceiptFileName == null ||
-                              EventTextControllers
-                                  .amountController
-                                  .text
-                                  .isEmpty) &&
-                          isCheckedIn,
-                      text: isCheckedIn
-                          ? AppStrings.submitCheckIn
-                          : AppStrings.checkIn,
-                      onPressed: () {
-                        setState(() {
-                          isCheckedIn = true;
-                          _checkInDateTime = DateTime.now();
-                        });
-                      },
-                    ),
+                    if (isCheckedIn) ...{
+                      Button(
+                        isDisabled:
+                            (_selectedReceiptFileName == null ||
+                                EventTextControllers
+                                    .amountController
+                                    .text
+                                    .isEmpty) &&
+                            isCheckedIn,
+                        text: AppStrings.submitCheckIn,
+                        onPressed: () {
+                          debugPrint("Submit Check-In ${json.encode(event)}");
+                          // updateEvent();
+                        },
+                      ),
+                    },
+                    if (!isCheckedIn) ...{
+                      Button(
+                        isDisabled: !isCheckinPossible,
+                        text: AppStrings.checkIn,
+                        onPressed: () {
+                          setState(() {
+                            isCheckedIn = true;
+                            _checkInDateTime = DateTime.now();
+                          });
+                        },
+                      ),
+                    },
                     SizedBox(height: 12),
                     if (isCheckedIn)
                       Button(

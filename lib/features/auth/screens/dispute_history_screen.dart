@@ -37,7 +37,23 @@ class _DisputeHistoryScreenState extends State<DisputeHistoryScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        for (var i = 0; i < disputes.length; i++) ...{historyItemBuilder(i)},
+        if (disputes.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Text(
+              AppStrings.comingSoon,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          )
+        else
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.only(top: 10, bottom: 10),
+              itemBuilder: (ctx, i) => historyItemBuilder(i),
+              separatorBuilder: (ctx, i) => const Divider(height: 1),
+              itemCount: disputes.length,
+            ),
+          ),
       ],
     );
   }

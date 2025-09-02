@@ -7,6 +7,8 @@ import 'package:checkmate/core/constants/modal_keys.dart';
 class SigninScreenLogic extends ChangeNotifier {
   final SigninController _signinController;
   bool isLoading = false;
+  bool showError = false;
+  String errorMessage = '';
   SigninScreenLogic([SigninController? controller])
     : _signinController = controller ?? SigninController() {
     TextControllers.email.addListener(updateButtonState);
@@ -21,7 +23,12 @@ class SigninScreenLogic extends ChangeNotifier {
     final enabled =
         TextControllers.email.text.trim().isNotEmpty &&
         TextControllers.password.text.trim().isNotEmpty;
-
+    if (showError) {
+      showError = false;
+      errorMessage = '';
+      notifyListeners();
+      
+    }
     if (enabled != isButtonEnabled) {
       isButtonEnabled = enabled;
       notifyListeners();
@@ -48,6 +55,8 @@ class SigninScreenLogic extends ChangeNotifier {
         return user;
       } else {
         isLoading = false;
+        showError = true;
+        errorMessage = response[SigninModalKeys.signinMessage] ?? 'Login failed';
         notifyListeners();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -55,10 +64,15 @@ class SigninScreenLogic extends ChangeNotifier {
               response[SigninModalKeys.signinMessage] ?? 'Login failed',
             ),
           ),
+          
         );
         return null;
       }
     } catch (e) {
+      isLoading = false;
+      showError = true;
+      errorMessage = 'An unexpected error occurred: $e';
+      notifyListeners();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Network error. Please try again.')),
       );

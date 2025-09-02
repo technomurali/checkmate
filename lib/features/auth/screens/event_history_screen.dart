@@ -269,7 +269,19 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
             ),
             Row(
               children: [
-                Icon(Icons.add, size: 24, color: AppColors.eventTitleIconColor),
+                InkWell(
+                  onTap: () {
+                    Provider.of<TopNavProvider>(
+                      context,
+                      listen: false,
+                    ).navigateTo(TopNavScreen.newEvent);
+                  },
+                  child: Icon(
+                    Icons.add,
+                    size: 24,
+                    color: AppColors.eventTitleIconColor,
+                  ),
+                ),
                 SizedBox(width: 10),
                 Icon(
                   Icons.bar_chart,

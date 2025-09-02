@@ -51,6 +51,7 @@ class UserProfileTextControllers {
   static TextEditingController countryController = TextEditingController();
   static TextEditingController zipCodeController = TextEditingController();
   static TextEditingController companyController = TextEditingController();
+  static TextEditingController companyIdController = TextEditingController();
   static TextEditingController roleController = TextEditingController();
 }
 
