@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "154581048623",
+    "project_id": "push-notifications-919a7",
+    "storage_bucket": "push-notifications-919a7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:154581048623:android:e5934c65fda2476cc695da",
+        "android_client_info": {
+          "package_name": "com.example.checkmate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDS5JGvgL3PjxTDyVjl16CNifM5dDk8uDo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
