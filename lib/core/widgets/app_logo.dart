@@ -1,4 +1,3 @@
-import 'package:checkmate/core/constants/app_paths.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';

@@ -13,8 +13,9 @@ class AppApi {
   static const String pharmaLists = "Accounts/accounts/pharmaCompanies-active";
   static const String signup = "Auth/signup";
   static const String signin = 'ApplicationUser/login';
-  static const String verifyEmail = 'Auth/validateEmailVerificationCode';
-  static const String restPassword = 'Auth/reset-password';
+  static const String verifyEmail = 'ApplicationUser/verify-code';
+  static const String forgotPassword = 'ApplicationUser/forgot-password';
+  static const String restPassword = 'ApplicationUser/reset-password';
   static const String events = 'events';
   static const String event = 'event';
   static const String newEvent = 'new-event';

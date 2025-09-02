@@ -54,6 +54,7 @@ mixin EmailVerificationKeys {
 mixin ResetPasswordKeys {
   final String emailPasswordReset = "email";
   final String newPassword = "newPassword";
+  final String verificationCode = "code";
   final String resetMessage = 'message';
   final String resetSuccess = 'success';
 }

@@ -1,6 +1,5 @@
 import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
-import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/filter_icon.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/routes/route_name.dart';

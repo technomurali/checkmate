@@ -1,18 +1,14 @@
 import 'dart:convert';
 
 import 'package:checkmate/core/constants/app_colors.dart';
-import 'package:checkmate/core/constants/app_paths.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/core/widgets/custom_text_field.dart';
-import 'package:checkmate/features/auth/business_logic/signup_screen_logic.dart';
 import 'package:checkmate/features/auth/controllers/pharma_controller.dart';
 import 'package:checkmate/features/auth/controllers/profile_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
-import 'package:checkmate/features/auth/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 /// A fully-featured profile editing page with Save and Cancel buttons.
 class UserProfileScreen extends StatefulWidget {
@@ -28,7 +24,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   bool isLoading = false;
   List<Map> filteredCompanies = [];
   List<Map> allCompanies = [];
-  ProfileController _profileController = ProfileController();
+  final ProfileController _profileController = ProfileController();
   PharmaController pharmaController = PharmaController();
   @override
   void initState() {
@@ -332,6 +328,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         if (isLoading)
           Container(
             height: MediaQuery.of(context).size.height * 0.7,
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.5),
             child: const Center(child: CircularProgressIndicator()),
           ),

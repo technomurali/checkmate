@@ -1,19 +1,17 @@
+import 'package:checkmate/features/auth/controllers/reset_password_controller.dart';
 import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
-import 'package:checkmate/features/auth/controllers/verify_controller.dart';
-import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/utils/validators.dart';
 
 class ForgotPasswordScreenLogic extends ChangeNotifier {
-  final VerifyController _verifyController = VerifyController();
-
+  final PasswordResetController _resetController = PasswordResetController();
   bool sentCode = false;
   bool isVerificationCodeEntered = false;
   bool emailEnteredAndValid = false;
   bool wrongCodeEntered = false;
-
+  bool isLoading = false;
   // Proper listeners
   late final VoidCallback _emailListener;
   late final VoidCallback _codeListener;
@@ -43,29 +41,31 @@ class ForgotPasswordScreenLogic extends ChangeNotifier {
   void sendVerificationCode() {
     sentCode = true;
     //TODO: Add API call to send verification code
+    isLoading = true;
+    notifyListeners();
+    _resetController
+        .sendVerificationCode(email: TextControllers.email.text)
+        .then((value) {
+          isLoading = false;
+          notifyListeners();
+        });
     notifyListeners();
   }
 
   Future<void> verifyCode(BuildContext context) async {
-    final result = await _verifyController.verifyEmailCode(
-      TextControllers.verificationCode.text,
+    isLoading = true;
+    notifyListeners();
+    final result = await _resetController.verifyCode(
+      code: TextControllers.verificationCode.text,
+      email: TextControllers.email.text,
     );
 
-    if (result[ModalKeys().statusCode] == AppApiStatusCodes.success) {
+    if (result.statusCode == AppApiStatusCodes.success) {
       var email = TextControllers.email.text;
       resetForm();
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (_) => ChangeNotifierProvider(
-      //       create: (_) => PasswordResetScreenLogic(),
-      //       child: PasswordResetScreen(
-      //         message: result[ModalKeys().message],
-      //         email: email,
-      //       ),
-      //     ),
-      //   ),
-      // );
+      isLoading = false;
+      notifyListeners();
+
       Navigator.pushReplacementNamed(
         context,
         RouteName.resetPassword,
@@ -73,6 +73,7 @@ class ForgotPasswordScreenLogic extends ChangeNotifier {
       );
     } else {
       wrongCodeEntered = true;
+      isLoading = false;
       notifyListeners();
     }
   }
