@@ -39,7 +39,6 @@ class ForgotPasswordScreenLogic extends ChangeNotifier {
   }
 
   void sendVerificationCode() {
-    sentCode = true;
     //TODO: Add API call to send verification code
     isLoading = true;
     notifyListeners();
@@ -47,6 +46,7 @@ class ForgotPasswordScreenLogic extends ChangeNotifier {
         .sendVerificationCode(email: TextControllers.email.text)
         .then((value) {
           isLoading = false;
+          sentCode = true;
           notifyListeners();
         });
     notifyListeners();

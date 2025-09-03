@@ -26,6 +26,9 @@ class AppApi {
   static const String getEventStatus = 'Events/getEventStatus';
   static const String getEventApprovals = 'Events/getEventApprovals';
   static const String getHcpsWithHcoId = 'Contact/getHCPs/';
+  static String buildAttachmentsUrl(String eventId) {
+    return '${AppApi.baseUrl1}EventAttachments/$eventId/attachments';
+  }
 }
 
 class AppApiStatusCodes {

@@ -127,7 +127,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
        */
       var updateProfileData = {
         "Id": userModal.id ?? "",
-        "Kiosk": userModal.id ?? "",
+        "Kiosk": userModal.kiosk ?? "",
         "FirstName": UserProfileTextControllers.firstNameController.text.trim(),
         "LastName": UserProfileTextControllers.lastNameController.text.trim(),
         "Email": UserProfileTextControllers.emailController.text.trim(),

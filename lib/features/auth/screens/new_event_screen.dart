@@ -159,7 +159,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
         "eventDescription":
             NewEventTextControllers.eventDescriptionController.text,
         "eventApproval": int.parse(BasicCodesFromCrm.pending),
-        "userName": "/contacts(${userModal.id})",
+        "userName": "/contacts(${userModal.kiosk})",
         "isMultiDay": isMultiDay,
       };
       _newEventController.createEvent(testData).then((value) {
@@ -433,7 +433,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           );
                           if (pickedDate != null) {
                             NewEventTextControllers.endDateController.text =
-                                "${pickedDate.day}/${pickedDate.month}/${pickedDate.year} : ${pickedDate.hour}:${pickedDate.minute}";
+                                "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
                             endDatePicked = pickedDate;
                           }
                         },

@@ -62,7 +62,7 @@ class AppStrings {
   static const String eventCreatedFailed = "Event Creation Failed";
   static const String enterTheCompanyNameWarning =
       "Please choose or enter your company name to move forward.";
-  static const String deleteEvent = 'Delete Event';
+  static const String deleteEvent = 'Terminate Event';
   static const String deleteEventContent =
       'Are you sure you want to delete this event?';
   static const String searchEvents = "Search events...";
@@ -125,6 +125,10 @@ class AppStrings {
   static const String noPendingReceipts = "No pending receipts";
   static const String noUpcomingEvents = "No upcoming events";
   static const String checkInNotPossible = "You cannot check-in now";
+  static const String checkInSuccess = "Check-in successful";
+  static const String receiptUploadSuccess = "Receipt uploaded successfully";
+  static const String receiptUploadFailed = "Receipt upload failed";
+  static const String ok = "OK";
 }
 
 class ErrorText {

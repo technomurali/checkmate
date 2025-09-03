@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
@@ -33,6 +34,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   bool isCheckedIn = false;
   String? _selectedSignInSheetFileName;
   String? _selectedReceiptFileName;
+  String? receiptBase64;
+  String? signInSheetBase64;
   DateTime? _checkInDateTime;
   List<Hcp> hcpList = [];
   List<Hcp> hcpPractioners = [];
@@ -53,6 +56,61 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     EventTextControllers.endDateController = TextEditingController(
       text: event.endDate.toString(),
     );
+  }
+
+  submitCheckIn() {
+    setState(() {
+      isLoading = true;
+    });
+    var payload = [
+      {
+        "subject": "Event Receipt",
+        "notetext":
+            "This is attached Receipt for the ${event.eventName} conducted on ${event.startDate!.day} of ${event.startDate!.month}",
+        "filename": "$_selectedReceiptFileName",
+        "mimetype": _selectedReceiptFileName!.split('.').last,
+        "base64": receiptBase64,
+      },
+      {
+        "subject": "Signin Sheet",
+        "notetext":
+            "This is Attendee list for the ${event.eventName} conducted on ${event.startDate!.day} of ${event.startDate!.month}",
+        "filename": "$_selectedSignInSheetFileName",
+        "mimetype": _selectedSignInSheetFileName!.split('.').last,
+        "base64": signInSheetBase64,
+      },
+    ];
+    debugPrint("Check-In Payload: $payload");
+    _eventController.eventAttachments(payload, event.eventId ?? '').then((
+      response,
+    ) {
+      if (response.statusCode == AppApiStatusCodes.success) {
+        event = event.copyWith(
+          amount: EventTextControllers.amountController.text.isNotEmpty
+              ? double.parse(EventTextControllers.amountController.text)
+              : 0.0,
+        );
+        event = event.copyWith(
+          eventStatus: int.parse(BasicCodesFromCrm.completed),
+        );
+        updateEvent();
+        setState(() {
+          isCheckedIn = true;
+          _checkInDateTime = DateTime.now();
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(AppStrings.checkInSuccess)),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(AppStrings.receiptUploadFailed)),
+        );
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
   }
 
   deleteEvent(String eventId) {
@@ -100,7 +158,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       "eventDescription":
           NewEventTextControllers.eventDescriptionController.text,
       "eventApproval": int.parse(BasicCodesFromCrm.pending),
-      "userName": "/contacts(${userModal.id})",
+      "userName": "/contacts(${userModal.kiosk})",
       "isMultiDay": event.isMultiDay,
     };
     debugPrint("Test Data for Update Event ${jsonEncode(testData)}");
@@ -147,15 +205,41 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               EventTextControllers.numberOfStaffController.text = event
                   .numberOfStaff
                   .toString();
-              EventTextControllers.hcoController.text = event.hco ?? '';
+              EventTextControllers.hcoController.text = '';
               EventTextControllers.eventDescriptionController.text =
                   event.eventDescription ?? '';
-              isCheckinPossible = !event.startDate!.isBefore(DateTime.now());
+              // isCheckinPossible = !event.startDate!.isBefore(DateTime.now());
+
+              isCheckinPossible = !(isPastDate(
+                event.startDate ?? DateTime.now(),
+              ));
+              debugPrint(
+                "isCheckinPossible : $isCheckinPossible ${event.startDate!.isBefore(DateTime.now())} event.startDate : ${event.startDate!.isAtSameMomentAs(DateTime.now())} compare : ${event.startDate!.compareTo(DateTime.now())} compareCondition : ${event.startDate!.compareTo(DateTime.now()) > 0} isSameDay : ${isPastDate(event.startDate ?? DateTime.now())}",
+              );
             }),
             v.hco != null ? fetchHcoName(v.hco!) : null,
-            if (!isCheckinPossible) {showdialogforcheckAvailability()},
           },
         );
+  }
+
+  bool isPastDate(DateTime eventDate) {
+    final now = DateTime.now();
+
+    // strip time -> keep only year, month, day
+    final event = DateTime(eventDate.year, eventDate.month, eventDate.day);
+    final today = DateTime(now.year, now.month, now.day);
+
+    return !event.isAtSameMomentAs(today); // true only if event < today
+  }
+
+  bool isPastEventDate(DateTime eventDate) {
+    final now = DateTime.now();
+
+    // strip time -> keep only year, month, day
+    final event = DateTime(eventDate.year, eventDate.month, eventDate.day);
+    final today = DateTime(now.year, now.month, now.day);
+
+    return !event.isBefore(today); // true only if event < today
   }
 
   fetchHcpPractionners() async {
@@ -263,7 +347,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            if (isCheckinPossible) ...{
+                            if (isPastEventDate(
+                              event.startDate ?? DateTime.now(),
+                            )) ...{
                               InkWell(
                                 onTap: () {
                                   setState(() {
@@ -381,10 +467,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             EventTextControllers.startDateController.text =
                                 "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
                             setState(() {
-                              event = event.copyWith(
-                                startDate: DateTime.parse(
-                                  EventTextControllers.startDateController.text,
-                                ),
+                              isCheckinPossible = !isPastDate(pickedDate);
+                              event = event.copyWith(startDate: pickedDate);
+                              debugPrint(
+                                "Start Date : ${event.startDate} event : ${json.encode(event)} ",
                               );
                             });
                           }
@@ -413,13 +499,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                   EventTextControllers.endDateController.text =
                                       "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
                                   setState(() {
-                                    event = event.copyWith(
-                                      endDate: DateTime.parse(
-                                        EventTextControllers
-                                            .endDateController
-                                            .text,
-                                      ),
-                                    );
+                                    event = event.copyWith(endDate: pickedDate);
                                   });
                                 }
                               },
@@ -730,14 +810,33 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               onPressed: isCheckedIn
                                   ? () async {
                                       FilePickerResult? result =
-                                          await FilePicker.platform.pickFiles();
+                                          await FilePicker.platform.pickFiles(
+                                            type: FileType.image,
+                                          );
+
                                       if (result != null &&
-                                          result.files.isNotEmpty) {
+                                          result.files.single.bytes != null) {
                                         setState(() {
                                           _selectedReceiptFileName =
                                               result.files.single.name;
+                                          receiptBase64 = base64Encode(
+                                            result.files.single.bytes!,
+                                          );
+                                        });
+                                      } else {
+                                        final bytes = await File(
+                                          result!.files.single.path!,
+                                        ).readAsBytes();
+                                        setState(() {
+                                          _selectedReceiptFileName =
+                                              result.files.single.name;
+                                          receiptBase64 = base64Encode(bytes);
                                         });
                                       }
+
+                                      debugPrint(
+                                        "Receipt Base64 : $receiptBase64",
+                                      );
                                     }
                                   : () {
                                       debugPrint('Not checked in');
@@ -761,13 +860,31 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               onPressed: isCheckedIn
                                   ? () async {
                                       FilePickerResult? result =
-                                          await FilePicker.platform.pickFiles();
+                                          await FilePicker.platform.pickFiles(
+                                            type: FileType.image,
+                                          );
                                       if (result != null &&
                                           result.files.isNotEmpty) {
-                                        setState(() {
-                                          _selectedSignInSheetFileName =
-                                              result.files.single.name;
-                                        });
+                                        if (result.files.single.bytes != null) {
+                                          setState(() {
+                                            _selectedSignInSheetFileName =
+                                                result.files.single.name;
+                                            signInSheetBase64 = base64Encode(
+                                              result.files.single.bytes!,
+                                            );
+                                          });
+                                        } else {
+                                          final bytes = await File(
+                                            result.files.single.path!,
+                                          ).readAsBytes();
+                                          setState(() {
+                                            _selectedSignInSheetFileName =
+                                                result.files.single.name;
+                                            signInSheetBase64 = base64Encode(
+                                              bytes,
+                                            );
+                                          });
+                                        }
                                       }
                                     }
                                   : () {
@@ -807,12 +924,13 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 EventTextControllers
                                     .amountController
                                     .text
-                                    .isEmpty) &&
+                                    .isEmpty ||
+                                _selectedSignInSheetFileName == null) &&
                             isCheckedIn,
                         text: AppStrings.submitCheckIn,
                         onPressed: () {
                           debugPrint("Submit Check-In ${json.encode(event)}");
-                          // updateEvent();
+                          submitCheckIn();
                         },
                       ),
                     },
@@ -821,10 +939,14 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         isDisabled: !isCheckinPossible,
                         text: AppStrings.checkIn,
                         onPressed: () {
-                          setState(() {
-                            isCheckedIn = true;
-                            _checkInDateTime = DateTime.now();
-                          });
+                          if (!isCheckinPossible) {
+                            showdialogforcheckAvailability();
+                          } else {
+                            setState(() {
+                              isCheckedIn = true;
+                              _checkInDateTime = DateTime.now();
+                            });
+                          }
                         },
                       ),
                     },

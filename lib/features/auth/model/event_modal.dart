@@ -103,7 +103,7 @@ class EventModal {
     if (dateValue is DateTime) return dateValue;
     if (dateValue is String) {
       try {
-        return DateTime.parse(dateValue);
+        return DateTime.parse(dateValue).toLocal();
       } catch (e) {
         return null;
       }

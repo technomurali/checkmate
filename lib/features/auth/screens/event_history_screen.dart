@@ -179,7 +179,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
         // }
 
         // Debug print for status comparison
-        debugPrint('Selected status: ${userModal.id}');
+        debugPrint('Selected status: ${userModal.kiosk}');
         final matchesStatus =
             _selectedStatus == null || _selectedStatus == 'All'
             ? true
@@ -282,18 +282,19 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
                     color: AppColors.eventTitleIconColor,
                   ),
                 ),
-                SizedBox(width: 10),
-                Icon(
-                  Icons.bar_chart,
-                  size: 24,
-                  color: AppColors.eventTitleIconColor,
-                ),
-                SizedBox(width: 10),
-                Icon(
-                  Icons.access_time,
-                  size: 24,
-                  color: AppColors.eventTitleIconColor,
-                ),
+
+                // SizedBox(width: 10),
+                // Icon(
+                //   Icons.bar_chart,
+                //   size: 24,
+                //   color: AppColors.eventTitleIconColor,
+                // ),
+                // SizedBox(width: 10),
+                // Icon(
+                //   Icons.access_time,
+                //   size: 24,
+                //   color: AppColors.eventTitleIconColor,
+                // ),
               ],
             ),
           ],

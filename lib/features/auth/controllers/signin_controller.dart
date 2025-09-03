@@ -34,7 +34,7 @@ class SigninController {
         debugPrint("signin data /////// $data");
         // Parse user using your UserModal
         final user = UserModal(
-          id: data['kiosk'].toString(),
+          id: data['id'].toString(),
           email: data["email"],
           password: data["password"],
           firstName: data["firstName"],
@@ -42,6 +42,7 @@ class SigninController {
           city: data['city'],
           pharmaCompany: data["companyId"],
           role: data["userRoleId"],
+          kiosk: data["kiosk"].toString(),
         );
         return {
           SigninModalKeys.signinSuccess: true,

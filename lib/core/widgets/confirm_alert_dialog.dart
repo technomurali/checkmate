@@ -15,7 +15,7 @@ class ConfirmAlertDialog extends StatelessWidget {
     required this.content,
     required this.onConfirm,
     this.onCancel,
-    this.confirmText = 'Delete',
+    this.confirmText = 'Terminate',
     this.cancelText = 'Cancel',
   });
 

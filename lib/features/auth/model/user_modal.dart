@@ -15,6 +15,7 @@ class UserModal {
     this.modeOfAuthentication,
     this.npiNumber,
     this.phoneNumber,
+    this.kiosk,
   });
 
   final String? id;
@@ -30,6 +31,7 @@ class UserModal {
   final String? modeOfAuthentication;
   final String? npiNumber;
   final String? phoneNumber;
+  final String? kiosk;
 
   UserModal copyWith({
     String? id,
@@ -45,6 +47,7 @@ class UserModal {
     String? modeOfAuthentication,
     String? npiNumber,
     String? phoneNumber,
+    String? kiosk,
   }) {
     return UserModal(
       id: id ?? this.id,
@@ -60,6 +63,7 @@ class UserModal {
       modeOfAuthentication: modeOfAuthentication ?? this.modeOfAuthentication,
       npiNumber: npiNumber ?? this.npiNumber,
       phoneNumber: phoneNumber ?? this.phoneNumber,
+      kiosk: kiosk ?? this.kiosk,
     );
   }
 
@@ -78,6 +82,7 @@ class UserModal {
       modeOfAuthentication: json[ModalKeys().userModeOfAuthentication],
       npiNumber: json[ModalKeys().userNpiNumber],
       phoneNumber: json[ModalKeys().userPhoneNumber],
+      kiosk: json['kiosk'],
     );
   }
 
@@ -95,6 +100,7 @@ class UserModal {
     ModalKeys().userModeOfAuthentication: modeOfAuthentication,
     ModalKeys().userNpiNumber: npiNumber,
     ModalKeys().userPhoneNumber: phoneNumber,
+    'kiosk': kiosk,
   };
   factory UserModal.empty() {
     return UserModal(
@@ -111,6 +117,7 @@ class UserModal {
       modeOfAuthentication: '',
       npiNumber: '',
       phoneNumber: '',
+      kiosk: '',
     );
   }
 }

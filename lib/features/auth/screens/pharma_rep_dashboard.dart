@@ -167,7 +167,9 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
                     Provider.of<TopNavProvider>(
                       context,
                       listen: false,
-                    ).navigateTo(TopNavScreen.eventHistory);
+                    ).navigateTo(TopNavScreen.eventHistory,
+                    argument: "UPCOMING"
+                    );
                   },
                 ),
 

@@ -58,72 +58,148 @@ class TopNav extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    InkWell(
-                      onTap: () =>
-                          navProvider.navigateTo(TopNavScreen.dashboard),
-                      child: TopNavTile(
-                        icon: Icon(
-                          Icons.dashboard,
-                          size: AppSizes().headerIconSize,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        InkWell(
+                          onTap: () =>
+                              navProvider.navigateTo(TopNavScreen.dashboard),
+                          child: TopNavTile(
+                            icon: Icon(
+                              Icons.dashboard,
+                              size: AppSizes().headerIconSize,
+                            ),
+                            label: "Home",
+                          ),
                         ),
-                        label: "Home",
-                      ),
+                        Container(
+                          height: 5,
+                          width: 60,
+                          color: currentScreen == TopNavScreen.dashboard
+                              ? AppColors.topNavTileColor
+                              : Colors.transparent,
+                          child: const Text(""),
+                        ),
+                      ],
                     ),
                     if (userModal.role == UserType.pharmaRep)
-                      InkWell(
-                        onTap: () =>
-                            navProvider.navigateTo(TopNavScreen.newEvent),
-                        child: TopNavTile(
-                          icon: Icon(
-                            Icons.event_available_outlined,
-                            size: AppSizes().headerIconSize,
+                      Column(
+                        children: [
+                          InkWell(
+                            onTap: () =>
+                                navProvider.navigateTo(TopNavScreen.newEvent),
+                            child: TopNavTile(
+                              icon: Icon(
+                                Icons.event_available_outlined,
+                                size: AppSizes().headerIconSize,
+                              ),
+                              label: AppStrings.createEvent,
+                            ),
                           ),
-                          label: AppStrings.createEvent,
-                        ),
+                          Container(
+                            height: 5,
+                            width: 100,
+                            color: currentScreen == TopNavScreen.newEvent
+                                ? AppColors.topNavTileColor
+                                : Colors.transparent,
+                            child: const Text(""),
+                          ),
+                        ],
                       ),
-                    InkWell(
-                      onTap: () =>
-                          navProvider.navigateTo(TopNavScreen.eventHistory),
-                      child: TopNavTile(
-                        icon: Icon(
-                          Icons.event_repeat_outlined,
-                          size: AppSizes().headerIconSize,
+                    Column(
+                      children: [
+                        InkWell(
+                          onTap: () =>
+                              navProvider.navigateTo(TopNavScreen.eventHistory),
+                          child: TopNavTile(
+                            icon: Icon(
+                              Icons.event_repeat_outlined,
+                              size: AppSizes().headerIconSize,
+                            ),
+                            label: AppStrings.eventHistory,
+                          ),
                         ),
-                        label: AppStrings.eventHistory,
-                      ),
+                        Container(
+                          height: 5,
+                          width: 100,
+                          color: currentScreen == TopNavScreen.eventHistory
+                              ? AppColors.topNavTileColor
+                              : Colors.transparent,
+                          child: const Text(""),
+                        ),
+                      ],
                     ),
                     if (userModal.role != UserType.pharmaRep)
-                      InkWell(
-                        onTap: () =>
-                            navProvider.navigateTo(TopNavScreen.fileDispute),
-                        child: TopNavTile(
-                          icon: Icon(
-                            Icons.report_problem,
-                            size: AppSizes().headerIconSize,
+                      Column(
+                        children: [
+                          InkWell(
+                            onTap: () => navProvider.navigateTo(
+                              TopNavScreen.fileDispute,
+                            ),
+                            child: TopNavTile(
+                              icon: Icon(
+                                Icons.report_problem,
+                                size: AppSizes().headerIconSize,
+                              ),
+                              label: AppStrings.fileDispute,
+                            ),
                           ),
-                          label: AppStrings.fileDispute,
-                        ),
+                          Container(
+                            height: 5,
+                            width: 100,
+                            color: currentScreen == TopNavScreen.fileDispute
+                                ? AppColors.topNavTileColor
+                                : Colors.transparent,
+                            child: const Text(""),
+                          ),
+                        ],
                       ),
-                    InkWell(
-                      onTap: () =>
-                          navProvider.navigateTo(TopNavScreen.disputeHistory),
-                      child: TopNavTile(
-                        icon: Icon(
-                          Icons.history,
-                          size: AppSizes().headerIconSize,
+                    Column(
+                      children: [
+                        InkWell(
+                          onTap: () => navProvider.navigateTo(
+                            TopNavScreen.disputeHistory,
+                          ),
+                          child: TopNavTile(
+                            icon: Icon(
+                              Icons.history,
+                              size: AppSizes().headerIconSize,
+                            ),
+                            label: AppStrings.disputeHistory,
+                          ),
                         ),
-                        label: AppStrings.disputeHistory,
-                      ),
+                        Container(
+                          height: 5,
+                          width: 100,
+                          color: currentScreen == TopNavScreen.disputeHistory
+                              ? AppColors.topNavTileColor
+                              : Colors.transparent,
+                          child: const Text(""),
+                        ),
+                      ],
                     ),
-                    InkWell(
-                      onTap: () => navProvider.navigateTo(TopNavScreen.profile),
-                      child: TopNavTile(
-                        icon: Icon(
-                          Icons.person,
-                          size: AppSizes().headerIconSize,
+                    Column(
+                      children: [
+                        InkWell(
+                          onTap: () =>
+                              navProvider.navigateTo(TopNavScreen.profile),
+                          child: TopNavTile(
+                            icon: Icon(
+                              Icons.person,
+                              size: AppSizes().headerIconSize,
+                            ),
+                            label: AppStrings.userProfile,
+                          ),
                         ),
-                        label: AppStrings.userProfile,
-                      ),
+                        Container(
+                          height: 5,
+                          width: 80,
+                          color: currentScreen == TopNavScreen.profile
+                              ? AppColors.topNavTileColor
+                              : Colors.transparent,
+                          child: const Text(""),
+                        ),
+                      ],
                     ),
                     InkWell(
                       onTap: () {
