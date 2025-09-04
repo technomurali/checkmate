@@ -61,16 +61,16 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 32),
                   Text(AppStrings.secureCompliance),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: signupScreenLogic.isOptedForSocialSignUp,
-                        onChanged: signupScreenLogic.toggleSocialSignup,
-                      ),
-                      const Text(AppStrings.socialMediaSignUp),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+                  // Row(
+                  //   children: [
+                  //     Checkbox(
+                  //       value: signupScreenLogic.isOptedForSocialSignUp,
+                  //       onChanged: signupScreenLogic.toggleSocialSignup,
+                  //     ),
+                  //     const Text(AppStrings.socialMediaSignUp),
+                  //   ],
+                  // ),
+                  // const SizedBox(height: 16),
 
                   // Social or normal form
                   if (signupScreenLogic.isOptedForSocialSignUp) ...[

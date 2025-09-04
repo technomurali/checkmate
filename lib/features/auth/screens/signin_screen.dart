@@ -127,12 +127,12 @@ class SigninScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  const Text(AppStrings.signInWith),
-                  const SizedBox(height: 8),
+                  // const SizedBox(height: 8),
+                  // const Text(AppStrings.signInWith),
+                  // const SizedBox(height: 8),
 
-                  ///Social Media Signin
-                  const SocialButtonsRow(),
+                  // ///Social Media Signin
+                  // const SocialButtonsRow(),
                 ],
               ),
             ),
