@@ -10,7 +10,6 @@ import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
 
-/// A fully-featured profile editing page with Save and Cancel buttons.
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
 
@@ -100,31 +99,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     super.dispose();
   }
 
-  // ignore: unused_element
   void _handleSave() {
+    setState(() {
+      isLoading = true;
+    });
     if (_formKey.currentState?.validate() ?? false) {
-      // final updated = userModal.copyWith(
-      //   email: UserProfileTextControllers.emailController.text.trim(),
-      //   firstName: UserProfileTextControllers.firstNameController.text.trim(),
-      //   lastName: UserProfileTextControllers.lastNameController.text.trim(),
-      //   profileUrl: UserProfileTextControllers.profileUrlController.text.trim(),
-      //   modeOfAuthentication: userModal.modeOfAuthentication,
-      // );
-      /**
-       {
-   "Id": "81",
-  "Kiosk": "ee2eb445-a181-f011-b4cc-000d3a5a1868",
-  "UserName": "Physcian_Test",
-  "FirstName": "hcp-fistnnamneX",
-  "LastName": "hcp-lastnameX",
-  "Email": "hcp@abc.com",
-  "DisplayName": "HCP User x",
-  "City":"My City",
-  "CompanyId": "COMP-12345",
-  "UserRoleId": "Admin",
-  "ModeOfAuthentication": "Password",
- }
-       */
+      final updated = userModal.copyWith(
+        email: UserProfileTextControllers.emailController.text.trim(),
+        firstName: UserProfileTextControllers.firstNameController.text.trim(),
+        lastName: UserProfileTextControllers.lastNameController.text.trim(),
+        profileUrl: UserProfileTextControllers.profileUrlController.text.trim(),
+        modeOfAuthentication: userModal.modeOfAuthentication,
+      );
       var updateProfileData = {
         "Id": userModal.id ?? "",
         "Kiosk": userModal.kiosk ?? "",
@@ -138,10 +124,28 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       };
       debugPrint("Update Profile Data ${jsonEncode(updateProfileData)}");
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(SuccessStrings.profileSaved)),
-      );
-      // Navigator.pop(context, updated);
+      _profileController.updateProfile(updateProfileData).then((value) {
+        debugPrint("Update Profile Response $value");
+        if (value['status'] == true) {
+          setState(() {
+            isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(value['message'] ?? 'Profile updated successfully'),
+            ),
+          );
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(value['message'] ?? 'Failed to update profile'),
+            ),
+          );
+        }
+      });
     }
   }
 
@@ -159,7 +163,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 Center(
                   child: Stack(
                     children: [
-                      ///Profile Picture
                       CircleAvatar(
                         radius: 50,
                         backgroundImage:
@@ -171,12 +174,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                             (userModal.profileUrl == null ||
                                 userModal.profileUrl!.isEmpty)
                             ? ClipOval(
-                                // child: SvgPicture.string(
-                                //   AppPaths.logoPath,
-                                //   fit: BoxFit.cover,
-                                //   width: 100,
-                                //   height: 100,
-                                // ),
                                 child: Icon(
                                   Icons.person,
                                   size: 50,
@@ -186,7 +183,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                             : null,
                       ),
 
-                      ///Edit icon on the profile picture
                       Positioned(
                         bottom: 0,
                         right: 0,
@@ -213,7 +209,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                ///Email TextField
                 _buildTextField(
                   enabled: isEnabled,
                   controller: UserProfileTextControllers.emailController,
@@ -230,7 +225,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                ///First Name TextField
                 _buildTextField(
                   enabled: isEnabled,
                   controller: UserProfileTextControllers.firstNameController,
@@ -238,7 +232,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                ///Last Name TextField
                 _buildTextField(
                   enabled: isEnabled,
                   controller: UserProfileTextControllers.lastNameController,
@@ -246,7 +239,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                ///City TextField
                 _buildTextField(
                   enabled: isEnabled,
                   controller: UserProfileTextControllers.cityController,
@@ -254,7 +246,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                ///Pharma Company TextField
                 if (userModal.role == UserType.pharmaRep) ...{
                   CustomTextField(
                     readOnly: !isEnabled,
@@ -328,7 +319,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         if (isLoading)
           Container(
             height: MediaQuery.of(context).size.height * 0.7,
-            // ignore: deprecated_member_use
+
             color: Colors.black.withOpacity(0.5),
             child: const Center(child: CircularProgressIndicator()),
           ),
@@ -336,7 +327,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  /// Builds a standard editable text field with validation.
   Widget _buildTextField({
     required bool enabled,
     required TextEditingController controller,

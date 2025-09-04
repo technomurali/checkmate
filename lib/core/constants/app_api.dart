@@ -12,6 +12,7 @@ class AppApi {
 
   static const String pharmaLists = "Accounts/accounts/pharmaCompanies-active";
   static const String signup = "Auth/signup";
+  static const String updateProfile = "Auth/updateProfile";
   static const String signin = 'ApplicationUser/login';
   static const String verifyEmail = 'ApplicationUser/verify-code';
   static const String forgotPassword = 'ApplicationUser/forgot-password';

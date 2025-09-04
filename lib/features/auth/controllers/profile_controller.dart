@@ -21,4 +21,29 @@ class ProfileController {
       return "";
     }
   }
+
+  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data) async {
+    try {
+      var uri = Uri.parse("${AppApi.baseUrl1}${AppApi.updateProfile}");
+      var response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      );
+      if (response.statusCode == AppApiStatusCodes.success) {
+        return Future.value({
+          "success": true,
+          "message": "Profile Updated Successfully",
+        });
+      } else {
+        return Future.value({
+          "success": false,
+          "message":
+              "Error Updating Profile: ${jsonDecode(response.body)['message']}",
+        });
+      }
+    } catch (e) {
+      return Future.value({"success": false, "message": e.toString()});
+    }
+  }
 }
