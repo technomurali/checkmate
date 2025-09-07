@@ -18,8 +18,8 @@ class SigninController {
     final url = Uri.parse(AppApi.baseUrl1 + AppApi.signin);
 
     try {
-      BasicCodesFromCrm().getEventStatus();
-      BasicCodesFromCrm().getEventApprovals();
+      // BasicCodesFromCrm().getEventStatus();
+      // BasicCodesFromCrm().getEventApprovals();
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -34,15 +34,16 @@ class SigninController {
         debugPrint("signin data /////// $data");
         // Parse user using your UserModal
         final user = UserModal(
-          id: data['id'].toString(),
-          email: data["email"],
-          password: data["password"],
-          firstName: data["firstName"],
-          lastName: data["lastName"],
-          city: data['city'],
-          pharmaCompany: data["companyId"],
-          role: data["userRoleId"],
-          kiosk: data["kiosk"].toString(),
+          id: data['result']['id'].toString(),
+          email: data['result']["email"],
+          password: data['result']["password"],
+          firstName: data['result']["firstName"],
+          lastName: data['result']["lastName"],
+          city: data['result']['city'],
+          pharmaCompany: data['result']["companyId"],
+          role: data['result']["userRoleId"],
+          kiosk: data['result']["kiosk"].toString(),
+          token: data["token"] ?? '',
         );
         return {
           SigninModalKeys.signinSuccess: true,

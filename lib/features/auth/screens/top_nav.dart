@@ -249,7 +249,13 @@ class TopNav extends StatelessWidget {
       case TopNavScreen.newEvent:
         return NewEventScreen();
       case TopNavScreen.eventHistory:
-        return EventHistoryScreen();
+        final args = (argument as Map<String, dynamic>?) ?? const {};
+      
+        if(args['fromDashboard'] ?? false){return EventHistoryScreen(
+        fromDashboard: (args['fromDashboard'] as bool?) ?? false,
+      );}else{return EventHistoryScreen(
+        isPending: (args['isPending'] as bool?) ?? false,
+      );}
       case TopNavScreen.fileDispute:
         return DisputeFormScreen();
       case TopNavScreen.disputeHistory:

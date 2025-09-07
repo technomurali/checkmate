@@ -92,16 +92,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       isRequired: true,
                       controller: TextControllers.email,
                       label: AppStrings.email,
-                      validator: (value) {
-                        if (value.trim().isEmpty) return ErrorText.emailReq;
-                        final emailRegex = RegExp(
-                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                        );
-                        if (!emailRegex.hasMatch(value.trim())) {
-                          return ErrorText.emailError;
-                        }
-                        return null;
-                      },
+                     errorText: signupScreenLogic.emailError,
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(
@@ -110,10 +101,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       controller: TextControllers.password,
                       label: AppStrings.newPassword,
                       obscureText: true,
-                      validator: (val) {
-                        if (val.length < 6) return ErrorText.passMinError;
-                        return null;
-                      },
+                      errorText: signupScreenLogic.passwordError,
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(

@@ -111,7 +111,10 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
             ),
 
             if (isLoading) ...{
-              CircularProgressIndicator(),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.5,
+                child: Center(child: CircularProgressIndicator()),
+              ),
             } else ...{
               const SizedBox(height: 20),
               if (upcomingEvents.isEmpty && pendingEvents.isEmpty) ...{
@@ -167,8 +170,9 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
                     Provider.of<TopNavProvider>(
                       context,
                       listen: false,
-                    ).navigateTo(TopNavScreen.eventHistory,
-                    argument: "UPCOMING"
+                    ).navigateTo(
+                      TopNavScreen.eventHistory,
+                      argument: {"fromDashboard": true},
                     );
                   },
                 ),
@@ -212,7 +216,15 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
                       },
                     },
                   ],
-                  onSeeAll: () {},
+                  onSeeAll: () {
+                    Provider.of<TopNavProvider>(
+                      context,
+                      listen: false,
+                    ).navigateTo(
+                      TopNavScreen.eventHistory,
+                      argument: {"isPending": true},
+                    );
+                  },
                 ),
               },
             },

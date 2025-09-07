@@ -3,7 +3,6 @@ import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/core/widgets/custom_text_field.dart';
 import 'package:checkmate/features/auth/business_logic/signin_screen_logic.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
-import 'package:checkmate/features/auth/widgets/social_buttons_row.dart';
 import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -51,12 +50,14 @@ class SigninScreen extends StatelessWidget {
                   CustomTextField(
                     label: AppStrings.email,
                     controller: TextControllers.email,
+                    errorText: logic.emailError,
                   ),
                   const SizedBox(height: 16),
                   CustomTextField(
                     label: AppStrings.password,
                     obscureText: true,
                     controller: TextControllers.password,
+                    errorText: logic.passwordError,
                   ),
 
                   ///Forget Password Button

@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/features/auth/controllers/interceptor.dart';
 import 'package:checkmate/features/auth/model/pharma_modal.dart';
-import 'package:http/http.dart' as http;
 import 'package:checkmate/core/constants/app_api.dart';
+import 'package:http_interceptor/http_interceptor.dart';
 class PharmaController {
+    Client http = InterceptedClient.build(interceptors: [Interceptor()]);
   Future<PharmaModel> fetchPharmaCompanies() async {
     try {
       final response = await http.get(

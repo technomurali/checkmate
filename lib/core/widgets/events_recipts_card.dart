@@ -69,9 +69,7 @@ class EventsReciptsCard extends StatelessWidget {
                                 color: AppColors.primary,
                                 fontSize: 15,
                               ),
-                              overflow: showCheckIn
-                                  ? TextOverflow.ellipsis
-                                  : null,
+                              overflow: TextOverflow.ellipsis,
                               item["title"] ?? "",
                             ),
                           ),

@@ -9,30 +9,61 @@ class SigninScreenLogic extends ChangeNotifier {
   bool isLoading = false;
   bool showError = false;
   String errorMessage = '';
+  String? emailError;
+  String? passwordError;
   SigninScreenLogic([SigninController? controller])
     : _signinController = controller ?? SigninController() {
-    TextControllers.email.addListener(updateButtonState);
-    TextControllers.password.addListener(updateButtonState);
+    TextControllers.email.addListener(validateEmail);
+    TextControllers.password.addListener(validatePassword);
     TextControllers.email.clear();
     TextControllers.password.clear();
   }
 
   bool isButtonEnabled = false;
+  void validateEmail() {
+    final email = TextControllers.email.text.trim();
+    if (TextControllers.email.text.trim() != "") {
+      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+        emailError = "Enter a valid email";
+      } else {
+        emailError = null;
+      }
+    }
+    updateButtonState();
+    notifyListeners();
+  }
+
+  void validatePassword() {
+    final password = TextControllers.password.text.trim();
+    if (!isValidPassword(password)) {
+      passwordError = "Must be 6+ chars, include upper, lower, digit, special";
+    } else {
+      passwordError = null;
+    }
+    updateButtonState();
+    notifyListeners();
+  }
 
   void updateButtonState() {
     final enabled =
+        emailError == null &&
+        passwordError == null &&
         TextControllers.email.text.trim().isNotEmpty &&
         TextControllers.password.text.trim().isNotEmpty;
-    if (showError) {
-      showError = false;
-      errorMessage = '';
-      notifyListeners();
-      
-    }
     if (enabled != isButtonEnabled) {
       isButtonEnabled = enabled;
-      notifyListeners();
     }
+  }
+
+  bool isValidPassword(String password) {
+    // if (password != "") {
+    //   if (password.length < 6) return false;
+    //   if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
+    //   if (!RegExp(r'[a-z]').hasMatch(password)) return false;
+    //   if (!RegExp(r'[0-9]').hasMatch(password)) return false;
+    //   if (!RegExp(r'[!@#\$&*~%^(),.?":{}|<>]').hasMatch(password)) return false;
+    // }
+    return true;
   }
 
   Future<UserModal?> signinUser(BuildContext context) async {
@@ -56,7 +87,8 @@ class SigninScreenLogic extends ChangeNotifier {
       } else {
         isLoading = false;
         showError = true;
-        errorMessage = response[SigninModalKeys.signinMessage] ?? 'Login failed';
+        errorMessage =
+            response[SigninModalKeys.signinMessage] ?? 'Login failed';
         notifyListeners();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -64,7 +96,6 @@ class SigninScreenLogic extends ChangeNotifier {
               response[SigninModalKeys.signinMessage] ?? 'Login failed',
             ),
           ),
-          
         );
         return null;
       }

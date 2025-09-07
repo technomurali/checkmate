@@ -11,10 +11,12 @@ import 'package:checkmate/core/utils/top_nav_provider.dart';
 
 import 'dart:io';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-      return super.createHttpClient(context)
+    return super.createHttpClient(context)
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
   }
@@ -27,7 +29,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => SigninScreenLogic()),
         ChangeNotifierProvider(create: (_) => TopNavProvider()),
-         ChangeNotifierProvider(create: (_) => SignupScreenLogic()),
+        ChangeNotifierProvider(create: (_) => SignupScreenLogic()),
       ],
       child: const MyApp(),
     ),
@@ -40,6 +42,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+       navigatorKey: navigatorKey, 
       debugShowCheckedModeBanner: false,
       title: AppStrings.appName,
       theme: ThemeData(

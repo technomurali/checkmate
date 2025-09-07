@@ -142,6 +142,8 @@ class ErrorText {
   static const String smallCity = "City name is too short";
   static const String somethingWentWrong = "Something went wrong: ";
   static const String passwordCanNotBeEmpty = "Password cannot be empty";
+  static const String invalidPassword =
+      "Password must be at least 6 characters and include an uppercase letter, a lowercase letter, a number, and a special character.";
 
   /// Pharmacies Load Error
   static const String failedToLoadPharmaCompanies =

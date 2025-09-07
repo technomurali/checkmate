@@ -151,180 +151,174 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage:
-                            (userModal.profileUrl != null &&
-                                userModal.profileUrl!.isNotEmpty)
-                            ? NetworkImage(userModal.profileUrl!)
-                            : null,
-                        child:
-                            (userModal.profileUrl == null ||
-                                userModal.profileUrl!.isEmpty)
-                            ? ClipOval(
-                                child: Icon(
-                                  Icons.person,
-                                  size: 50,
-                                  color: AppColors.pastStatusBadgeTextColor,
-                                ),
-                              )
-                            : null,
-                      ),
+    return isLoading
+        ? SizedBox(
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: Center(child: CircularProgressIndicator()),
+          )
+        : SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Center(
+                  //   child: Stack(
+                  //     children: [
+                  //       CircleAvatar(
+                  //         radius: 50,
+                  //         backgroundImage:
+                  //             (userModal.profileUrl != null &&
+                  //                 userModal.profileUrl!.isNotEmpty)
+                  //             ? NetworkImage(userModal.profileUrl!)
+                  //             : null,
+                  //         child:
+                  //             (userModal.profileUrl == null ||
+                  //                 userModal.profileUrl!.isEmpty)
+                  //             ? ClipOval(
+                  //                 child: Icon(
+                  //                   Icons.person,
+                  //                   size: 50,
+                  //                   color: AppColors.pastStatusBadgeTextColor,
+                  //                 ),
+                  //               )
+                  //             : null,
+                  //       ),
 
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: InkWell(
-                          onTap: !isEnabled ? () {} : null,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isEnabled
-                                  ? AppColors.profileIconbgColor
-                                  : AppColors.border,
-                            ),
-                            padding: const EdgeInsets.all(6),
-                            child: Icon(
-                              Icons.edit,
-                              size: 18,
-                              color: AppColors.profileEditIconColor,
-                            ),
+                  //       Positioned(
+                  //         bottom: 0,
+                  //         right: 0,
+                  //         child: InkWell(
+                  //           onTap: !isEnabled ? () {} : null,
+                  //           child: Container(
+                  //             decoration: BoxDecoration(
+                  //               shape: BoxShape.circle,
+                  //               color: isEnabled
+                  //                   ? AppColors.profileIconbgColor
+                  //                   : AppColors.border,
+                  //             ),
+                  //             padding: const EdgeInsets.all(6),
+                  //             child: Icon(
+                  //               Icons.edit,
+                  //               size: 18,
+                  //               color: AppColors.profileEditIconColor,
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 24),
+                  _buildTextField(
+                    enabled: isEnabled,
+                    controller: UserProfileTextControllers.emailController,
+                    label: AppStrings.email,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return ErrorText.emailReq;
+                      }
+                      final emailReg = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+                      if (!emailReg.hasMatch(v)) return ErrorText.emailError;
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildTextField(
+                    enabled: isEnabled,
+                    controller: UserProfileTextControllers.firstNameController,
+                    label: AppStrings.firstName,
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildTextField(
+                    enabled: isEnabled,
+                    controller: UserProfileTextControllers.lastNameController,
+                    label: AppStrings.lastName,
+                  ),
+                  const SizedBox(height: 12),
+
+                  _buildTextField(
+                    enabled: isEnabled,
+                    controller: UserProfileTextControllers.cityController,
+                    label: AppStrings.city,
+                  ),
+                  const SizedBox(height: 12),
+
+                  if (userModal.role == UserType.pharmaRep) ...{
+                    CustomTextField(
+                      readOnly: !isEnabled,
+                      suffixIcon: IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.search),
+                      ),
+                      controller: isLoading
+                          ? TextEditingController()
+                          : UserProfileTextControllers.companyController,
+                      label: AppStrings.selectThePharma,
+                      onChanged: filterCompanies,
+                    ),
+                    if (filteredCompanies.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.3,
+                        ),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: filteredCompanies
+                                .asMap()
+                                .entries
+                                .map(
+                                  (entry) => Column(
+                                    children: [
+                                      InkWell(
+                                        onTap: () => selectCompany(entry.value),
+                                        child: Text(entry.value['accountName']),
+                                      ),
+                                      if (entry.key !=
+                                          filteredCompanies.length - 1)
+                                        const Divider(),
+                                    ],
+                                  ),
+                                )
+                                .toList(),
                           ),
                         ),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                _buildTextField(
-                  enabled: isEnabled,
-                  controller: UserProfileTextControllers.emailController,
-                  label: AppStrings.email,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) {
-                    if (v == null || v.isEmpty) {
-                      return ErrorText.emailReq;
-                    }
-                    final emailReg = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-                    if (!emailReg.hasMatch(v)) return ErrorText.emailError;
-                    return null;
                   },
-                ),
-                const SizedBox(height: 12),
-
-                _buildTextField(
-                  enabled: isEnabled,
-                  controller: UserProfileTextControllers.firstNameController,
-                  label: AppStrings.firstName,
-                ),
-                const SizedBox(height: 12),
-
-                _buildTextField(
-                  enabled: isEnabled,
-                  controller: UserProfileTextControllers.lastNameController,
-                  label: AppStrings.lastName,
-                ),
-                const SizedBox(height: 12),
-
-                _buildTextField(
-                  enabled: isEnabled,
-                  controller: UserProfileTextControllers.cityController,
-                  label: AppStrings.city,
-                ),
-                const SizedBox(height: 12),
-
-                if (userModal.role == UserType.pharmaRep) ...{
-                  CustomTextField(
-                    readOnly: !isEnabled,
-                    suffixIcon: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.search),
+                  if (userModal.role == UserType.hcp)
+                    _buildTextField(
+                      enabled: false,
+                      controller: UserProfileTextControllers.companyController,
+                      label: AppStrings.company,
                     ),
-                    controller: isLoading
-                        ? TextEditingController()
-                        : UserProfileTextControllers.companyController,
-                    label: AppStrings.selectThePharma,
-                    onChanged: filterCompanies,
+                  const SizedBox(height: 12),
+                  Button(
+                    text: isEnabled ? AppStrings.save : AppStrings.edit,
+                    onPressed: () {
+                      if (isEnabled) {
+                        _handleSave();
+                      }
+                      setState(() {
+                        isEnabled = !isEnabled;
+                      });
+                    },
                   ),
-                  if (filteredCompanies.isNotEmpty) ...[
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(context).size.height * 0.3,
-                      ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: filteredCompanies
-                              .asMap()
-                              .entries
-                              .map(
-                                (entry) => Column(
-                                  children: [
-                                    InkWell(
-                                      onTap: () => selectCompany(entry.value),
-                                      child: Text(entry.value['accountName']),
-                                    ),
-                                    if (entry.key !=
-                                        filteredCompanies.length - 1)
-                                      const Divider(),
-                                  ],
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-                    ),
-                  ],
-                },
-                if (userModal.role == UserType.hcp)
-                  _buildTextField(
-                    enabled: false,
-                    controller: UserProfileTextControllers.companyController,
-                    label: AppStrings.company,
-                  ),
-                const SizedBox(height: 12),
-                Button(
-                  text: isEnabled ? AppStrings.save : AppStrings.edit,
-                  onPressed: () {
-                    if (isEnabled) {
-                      _handleSave();
-                    }
-                    setState(() {
-                      isEnabled = !isEnabled;
-                    });
-                  },
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ),
-        if (isLoading)
-          Container(
-            height: MediaQuery.of(context).size.height * 0.7,
-
-            color: Colors.black.withOpacity(0.5),
-            child: const Center(child: CircularProgressIndicator()),
-          ),
-      ],
-    );
+          );
   }
 
   Widget _buildTextField({

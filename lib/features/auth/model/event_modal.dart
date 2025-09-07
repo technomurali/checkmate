@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:checkmate/core/constants/app_api.dart';
 import 'package:flutter/material.dart';
 
 class EventModal {
@@ -158,6 +159,7 @@ class ContactDto {
   final String? phoneNumber;
   final String? jobTitle;
   final String? company;
+  final String approval;
 
   ContactDto({
     this.id,
@@ -167,6 +169,7 @@ class ContactDto {
     this.phoneNumber,
     this.jobTitle,
     this.company,
+    required this.approval,
   });
 
   ContactDto copyWith({
@@ -177,6 +180,7 @@ class ContactDto {
     String? phoneNumber,
     String? jobTitle,
     String? company,
+    String? approval,
   }) => ContactDto(
     id: id ?? this.id,
     firstName: firstName ?? this.firstName,
@@ -185,6 +189,7 @@ class ContactDto {
     phoneNumber: phoneNumber ?? this.phoneNumber,
     jobTitle: jobTitle ?? this.jobTitle,
     company: company ?? this.company,
+    approval: approval ?? this.approval,
   );
 
   factory ContactDto.fromJson(Map<String, dynamic> json) => ContactDto(
@@ -195,6 +200,7 @@ class ContactDto {
     phoneNumber: json["phoneNumber"],
     jobTitle: json["jobTitle"],
     company: json["company"],
+    approval: json["approval"] ?? BasicCodesFromCrm.pending,
   );
 
   Map<String, dynamic> toJson() => {
@@ -205,5 +211,6 @@ class ContactDto {
     "phoneNumber": phoneNumber,
     "jobTitle": jobTitle,
     "company": company,
+    "approval": approval,
   };
 }

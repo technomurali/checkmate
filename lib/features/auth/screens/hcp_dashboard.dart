@@ -77,7 +77,10 @@ class _HCPDashboardState extends State<HCPDashboard> {
 
           const SizedBox(height: 20),
           if (isLoading) ...{
-            CircularProgressIndicator(),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.5,
+              child: Center(child: CircularProgressIndicator()),
+            ),
           } else ...{
             /// Upcoming Events Text
             Text(

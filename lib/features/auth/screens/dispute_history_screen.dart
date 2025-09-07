@@ -22,7 +22,7 @@ class _DisputeHistoryScreenState extends State<DisputeHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    fetchDisputes();
+    // fetchDisputes();
   }
 
   fetchDisputes() {

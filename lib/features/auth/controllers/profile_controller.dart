@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:checkmate/core/constants/app_api.dart';
+import 'package:checkmate/features/auth/controllers/interceptor.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:http_interceptor/http_interceptor.dart';
 
 class ProfileController {
+    Client http = InterceptedClient.build(interceptors: [Interceptor()]);
   Future<String> getCompanyName(String id) async {
     try {
       //https://checkmate-qa-aggnd3ahabbudhdm.canadacentral-01.azurewebsites.net/api/Accounts/88dfb0a4-a1fd-ee11-a1fe-000d3a30eadf

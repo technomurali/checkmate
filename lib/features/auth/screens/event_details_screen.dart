@@ -93,7 +93,23 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
         event = event.copyWith(
           eventStatus: int.parse(BasicCodesFromCrm.completed),
         );
-        updateEvent();
+        Map<String, dynamic> checkinPayLoad = {
+          "eventCost": double.parse(EventTextControllers.amountController.text),
+          "statusCode": int.parse(BasicCodesFromCrm.completed),
+          "eventCheckIn": _checkInDateTime!.toIso8601String(),
+        };
+        _eventController
+            .submitCheckIn(checkinPayLoad, event.eventId ?? '')
+            .then((value) {
+              setState(() {
+                isLoading = false;
+              });
+              final navProvider = Provider.of<TopNavProvider>(
+                context,
+                listen: false,
+              );
+              navProvider.goBack();
+            });
         setState(() {
           isCheckedIn = true;
           _checkInDateTime = DateTime.now();
@@ -299,6 +315,18 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     }
   }
 
+  String eventApprovalCodeToText(String statusCode) {
+    if (statusCode == BasicCodesFromCrm.approval) {
+      return "Approved";
+    } else if (statusCode == BasicCodesFromCrm.pending) {
+      return "Pending";
+    } else if (statusCode == BasicCodesFromCrm.rejected) {
+      return "Rejected";
+    } else {
+      return "Unknown";
+    }
+  }
+
   showdialogforcheckAvailability() {
     showDialog(
       context: context,
@@ -460,7 +488,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           final DateTime? pickedDate = await showDatePicker(
                             context: context,
                             initialDate: DateTime.now(),
-                            firstDate: DateTime(2000),
+                            firstDate: DateTime.now(),
                             lastDate: DateTime(2100),
                           );
                           if (pickedDate != null) {
@@ -530,233 +558,300 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       SizedBox(height: 16),
 
                       // Text(AppStrings.hcpInEvent),
-                      if (isEdit)
-                        Container(
-                          width: double.infinity,
-                          height: 40,
-                          // padding: EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: AppColors.border,
-                            border: Border.all(color: AppColors.border),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              Flexible(
-                                flex: 1,
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      hcpInHcoSelected = true;
-                                    });
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: hcpInHcoSelected
-                                          ? AppColors.primary
-                                          : AppColors.transparent,
-                                      border: Border.all(
-                                        color: AppColors.border,
+                      if (event.eventStatus ==
+                          int.parse(BasicCodesFromCrm.upcoming)) ...{
+                        if (isEdit)
+                          Container(
+                            width: double.infinity,
+                            height: 40,
+                            // padding: EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: AppColors.border,
+                              border: Border.all(color: AppColors.border),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Flexible(
+                                  flex: 1,
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        hcpInHcoSelected = true;
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: hcpInHcoSelected
+                                            ? AppColors.primary
+                                            : AppColors.transparent,
+                                        border: Border.all(
+                                          color: AppColors.border,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    width: double.infinity,
-                                    height: 50,
+                                      width: double.infinity,
+                                      height: 50,
 
-                                    child: Center(
-                                      child: Text(
-                                        "HCP in HCO",
-                                        style: TextStyle(
-                                          color: hcpInHcoSelected
-                                              ? AppColors.background
-                                              : AppColors.primary,
+                                      child: Center(
+                                        child: Text(
+                                          "HCP in HCO",
+                                          style: TextStyle(
+                                            color: hcpInHcoSelected
+                                                ? AppColors.background
+                                                : AppColors.primary,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Flexible(
-                                flex: 1,
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      hcpInHcoSelected = false;
-                                    });
-                                  },
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: hcpInHcoSelected
-                                          ? AppColors.transparent
-                                          : AppColors.primary,
-                                      border: Border.all(
-                                        color: AppColors.border,
+                                Flexible(
+                                  flex: 1,
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        hcpInHcoSelected = false;
+                                      });
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: hcpInHcoSelected
+                                            ? AppColors.transparent
+                                            : AppColors.primary,
+                                        border: Border.all(
+                                          color: AppColors.border,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        "HCP Practitioner",
-                                        style: TextStyle(
-                                          color: !hcpInHcoSelected
-                                              ? AppColors.background
-                                              : AppColors.primary,
+                                      child: Center(
+                                        child: Text(
+                                          "HCP Practitioner",
+                                          style: TextStyle(
+                                            color: !hcpInHcoSelected
+                                                ? AppColors.background
+                                                : AppColors.primary,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      const SizedBox(height: 10),
-                      SizedBox(height: 10),
-                      if (hcpInHcoSelected)
-                        DropdownSearch<Map<String, dynamic>>.multiSelection(
-                          popupProps: const PopupPropsMultiSelection.menu(
-                            showSearchBox:
-                                true, // <- this brings the search field
-                            searchFieldProps: TextFieldProps(
-                              // customise it if you like
+                        const SizedBox(height: 10),
+                        SizedBox(height: 10),
+                        if (hcpInHcoSelected)
+                          DropdownSearch<Map<String, dynamic>>.multiSelection(
+                            popupProps: const PopupPropsMultiSelection.menu(
+                              showSearchBox:
+                                  true, // <- this brings the search field
+                              searchFieldProps: TextFieldProps(
+                                // customise it if you like
+                                decoration: InputDecoration(
+                                  labelText: 'Search HCP',
+                                  prefixIcon: Icon(Icons.search),
+                                ),
+                              ),
+                            ),
+                            enabled:
+                                (userModal.role == UserType.pharmaRep &&
+                                    isCheckedIn) ||
+                                isEdit,
+                            items: (filter, loadProps) => hcpList
+                                .map<Map<String, dynamic>>(
+                                  (e) => {
+                                    "hcpId": (e.hcpId).toString(),
+                                    "hcpName": e.hcpName,
+                                  },
+                                )
+                                .toList(),
+                            selectedItems: (event.contactDtos ?? [])
+                                .map<Map<String, dynamic>>(
+                                  (e) => {
+                                    "hcpId": (e.id ?? "").toString(),
+                                    "hcpName": "${e.firstName} ${e.lastName}",
+                                  },
+                                )
+                                .toList(),
+                            itemAsString: (item) => item["hcpName"] ?? "",
+                            compareFn: (item, selectedItem) =>
+                                item["hcpId"] == selectedItem["hcpId"],
+                            decoratorProps: const DropDownDecoratorProps(
                               decoration: InputDecoration(
-                                labelText: 'Search HCP',
-                                prefixIcon: Icon(Icons.search),
+                                labelText: AppStrings.hcpInEvent,
                               ),
                             ),
-                          ),
-                          enabled:
-                              (userModal.role == UserType.pharmaRep &&
-                                  isCheckedIn) ||
-                              isEdit,
-                          items: (filter, loadProps) => hcpList
-                              .map<Map<String, dynamic>>(
-                                (e) => {
-                                  "hcpId": (e.hcpId).toString(),
-                                  "hcpName": e.hcpName,
-                                },
-                              )
-                              .toList(),
-                          selectedItems: (event.contactDtos ?? [])
-                              .map<Map<String, dynamic>>(
-                                (e) => {
-                                  "hcpId": (e.id ?? "").toString(),
-                                  "hcpName": "${e.firstName} ${e.lastName}",
-                                },
-                              )
-                              .toList(),
-                          itemAsString: (item) => item["hcpName"] ?? "",
-                          compareFn: (item, selectedItem) =>
-                              item["hcpId"] == selectedItem["hcpId"],
-                          decoratorProps: const DropDownDecoratorProps(
-                            decoration: InputDecoration(
-                              labelText: AppStrings.hcpInEvent,
-                            ),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              event = event.copyWith(
-                                contactDtos: value
-                                    .map(
-                                      (e) => ContactDto(
-                                        id: e["hcpId"] ?? "0",
-                                        firstName: (e["hcpName"] ?? "")
-                                            .split(" ")
-                                            .first,
-                                        lastName:
-                                            (e["hcpName"] ?? "")
+                            onChanged: (value) {
+                              setState(() {
+                                event = event.copyWith(
+                                  contactDtos: value
+                                      .map(
+                                        (e) => ContactDto(
+                                          id: e["hcpId"] ?? "0",
+                                          firstName: (e["hcpName"] ?? "")
+                                              .split(" ")
+                                              .first,
+                                          lastName:
+                                              (e["hcpName"] ?? "")
+                                                      .split(" ")
+                                                      .length >
+                                                  1
+                                              ? (e["hcpName"] ?? "")
                                                     .split(" ")
-                                                    .length >
-                                                1
-                                            ? (e["hcpName"] ?? "")
-                                                  .split(" ")
-                                                  .sublist(1)
-                                                  .join(" ")
-                                            : "",
-                                      ),
-                                    )
-                                    .toList(),
-                              );
-                            });
-                          },
-                          validator: (value) => value == null || value.isEmpty
-                              ? AppStrings.selectHCP
-                              : null,
-                        ),
+                                                    .sublist(1)
+                                                    .join(" ")
+                                              : "",
+                                          approval: BasicCodesFromCrm.pending,
+                                        ),
+                                      )
+                                      .toList(),
+                                );
+                              });
+                            },
+                            validator: (value) => value == null || value.isEmpty
+                                ? AppStrings.selectHCP
+                                : null,
+                          ),
 
-                      if (!hcpInHcoSelected)
-                        DropdownSearch<Map<String, dynamic>>.multiSelection(
-                          popupProps: const PopupPropsMultiSelection.menu(
-                            showSearchBox:
-                                true, // <- this brings the search field
-                            searchFieldProps: TextFieldProps(
-                              // customise it if you like
+                        if (!hcpInHcoSelected)
+                          DropdownSearch<Map<String, dynamic>>.multiSelection(
+                            popupProps: const PopupPropsMultiSelection.menu(
+                              showSearchBox:
+                                  true, // <- this brings the search field
+                              searchFieldProps: TextFieldProps(
+                                // customise it if you like
+                                decoration: InputDecoration(
+                                  labelText: 'Search HCP Practitioners',
+                                  prefixIcon: Icon(Icons.search),
+                                ),
+                              ),
+                            ),
+                            enabled:
+                                (userModal.role == UserType.pharmaRep &&
+                                    isCheckedIn) ||
+                                isEdit,
+                            items: (filter, loadProps) =>
+                                hcpPractioners.map<Map<String, dynamic>>((e) {
+                                  return {
+                                    "hcpId": (e.hcpId).toString(),
+                                    "hcpName": e.hcpName,
+                                  };
+                                }).toList(),
+                            selectedItems: (event.contactDtos ?? [])
+                                .map<Map<String, dynamic>>(
+                                  (e) => {
+                                    "hcpId": (e.id ?? "").toString(),
+                                    "hcpName": "${e.firstName} ${e.lastName}",
+                                  },
+                                )
+                                .toList(),
+                            itemAsString: (item) => item["hcpName"] ?? "",
+                            compareFn: (item, selectedItem) =>
+                                item["hcpId"] == selectedItem["hcpId"],
+                            decoratorProps: const DropDownDecoratorProps(
                               decoration: InputDecoration(
-                                labelText: 'Search HCP Practitioners',
-                                prefixIcon: Icon(Icons.search),
+                                labelText: AppStrings.hcpInEvent,
                               ),
                             ),
-                          ),
-                          enabled:
-                              (userModal.role == UserType.pharmaRep &&
-                                  isCheckedIn) ||
-                              isEdit,
-                          items: (filter, loadProps) =>
-                              hcpPractioners.map<Map<String, dynamic>>((e) {
-                                return {
-                                  "hcpId": (e.hcpId).toString(),
-                                  "hcpName": e.hcpName,
-                                };
-                              }).toList(),
-                          selectedItems: (event.contactDtos ?? [])
-                              .map<Map<String, dynamic>>(
-                                (e) => {
-                                  "hcpId": (e.id ?? "").toString(),
-                                  "hcpName": "${e.firstName} ${e.lastName}",
-                                },
-                              )
-                              .toList(),
-                          itemAsString: (item) => item["hcpName"] ?? "",
-                          compareFn: (item, selectedItem) =>
-                              item["hcpId"] == selectedItem["hcpId"],
-                          decoratorProps: const DropDownDecoratorProps(
-                            decoration: InputDecoration(
-                              labelText: AppStrings.hcpInEvent,
-                            ),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              event = event.copyWith(
-                                contactDtos: value
-                                    .map(
-                                      (e) => ContactDto(
-                                        id: e["hcpId"] ?? "0",
-                                        firstName: (e["hcpName"] ?? "")
-                                            .split(" ")
-                                            .first,
-                                        lastName:
-                                            (e["hcpName"] ?? "")
+                            onChanged: (value) {
+                              setState(() {
+                                event = event.copyWith(
+                                  contactDtos: value
+                                      .map(
+                                        (e) => ContactDto(
+                                          id: e["hcpId"] ?? "0",
+                                          firstName: (e["hcpName"] ?? "")
+                                              .split(" ")
+                                              .first,
+                                          lastName:
+                                              (e["hcpName"] ?? "")
+                                                      .split(" ")
+                                                      .length >
+                                                  1
+                                              ? (e["hcpName"] ?? "")
                                                     .split(" ")
-                                                    .length >
-                                                1
-                                            ? (e["hcpName"] ?? "")
-                                                  .split(" ")
-                                                  .sublist(1)
-                                                  .join(" ")
-                                            : "",
+                                                    .sublist(1)
+                                                    .join(" ")
+                                              : "",
+                                          approval: BasicCodesFromCrm.pending,
+                                        ),
+                                      )
+                                      .toList(),
+                                );
+                              });
+                            },
+                            validator: (value) => value == null || value.isEmpty
+                                ? AppStrings.selectHCP
+                                : null,
+                          ),
+                      },
+                      if (event.eventStatus !=
+                          int.parse(BasicCodesFromCrm.completed))
+                        Divider(),
+                      if (event.eventStatus ==
+                          int.parse(BasicCodesFromCrm.completed))
+                        Column(
+                          children: [
+                            Text("HCPs Attendees"),
+                            SizedBox(height: 10),
+                            for (var contact in event.contactDtos ?? []) ...{
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      "${contact.firstName} ${contact.lastName}",
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  //contact.approval.toString() == BasicCodesFromCrm.pending
+                                  if (contact.approval.toString() !=
+                                      BasicCodesFromCrm.pending)
+                                    InkWell(
+                                      child: Text(
+                                        eventApprovalCodeToText(
+                                          contact.approval ?? '0',
+                                        ),
+                                        style: TextStyle(
+                                          color:
+                                              contact.approval.toString() ==
+                                                  BasicCodesFromCrm.approval
+                                              ? AppColors.successGreen
+                                              : contact.approval.toString() ==
+                                                    BasicCodesFromCrm.rejected
+                                              ? AppColors.accentError
+                                              : AppColors.pending,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
-                                    )
-                                    .toList(),
-                              );
-                            });
-                          },
-                          validator: (value) => value == null || value.isEmpty
-                              ? AppStrings.selectHCP
-                              : null,
+                                    ),
+                                  if (contact.approval.toString() ==
+                                      BasicCodesFromCrm.pending)
+                                    ElevatedButton(
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                              AppColors.upcomingStatusBadge,
+                                            ),
+                                      ),
+                                      onPressed: () {},
+                                      child: Text(
+                                        "Send for Approval",
+                                        style: TextStyle(
+                                          color: AppColors
+                                              .upcomingStatusBadgeTextColor,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              SizedBox(height: 16),
+                            },
+                          ],
                         ),
-
                       SizedBox(height: 16),
                       if (isCheckedIn && _checkInDateTime != null)
                         Padding(

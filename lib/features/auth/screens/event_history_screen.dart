@@ -269,6 +269,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
             ),
             Row(
               children: [
+                if (userModal.role != UserType.hcp) 
                 InkWell(
                   onTap: () {
                     Provider.of<TopNavProvider>(
