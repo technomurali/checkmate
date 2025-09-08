@@ -11,6 +11,6 @@ mixin AppTextLimiter {
 }
 
 mixin HeaderSizes {
-  final double headerHeight = 90;
+  final double headerHeight = 95;
   final double headerIconSize = 36;
 }

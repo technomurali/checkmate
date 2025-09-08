@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
@@ -33,6 +34,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   bool isCheckedIn = false;
   String? _selectedSignInSheetFileName;
   String? _selectedReceiptFileName;
+  String? receiptBase64;
+  String? signInSheetBase64;
   DateTime? _checkInDateTime;
   List<Hcp> hcpList = [];
   List<Hcp> hcpPractioners = [];
@@ -53,6 +56,77 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     EventTextControllers.endDateController = TextEditingController(
       text: event.endDate.toString(),
     );
+  }
+
+  submitCheckIn() {
+    setState(() {
+      isLoading = true;
+    });
+    var payload = [
+      {
+        "subject": "Event Receipt",
+        "notetext":
+            "This is attached Receipt for the ${event.eventName} conducted on ${event.startDate!.day} of ${event.startDate!.month}",
+        "filename": "$_selectedReceiptFileName",
+        "mimetype": _selectedReceiptFileName!.split('.').last,
+        "base64": receiptBase64,
+      },
+      {
+        "subject": "Signin Sheet",
+        "notetext":
+            "This is Attendee list for the ${event.eventName} conducted on ${event.startDate!.day} of ${event.startDate!.month}",
+        "filename": "$_selectedSignInSheetFileName",
+        "mimetype": _selectedSignInSheetFileName!.split('.').last,
+        "base64": signInSheetBase64,
+      },
+    ];
+    debugPrint("Check-In Payload: $payload");
+    _eventController.eventAttachments(payload, event.eventId ?? '').then((
+      response,
+    ) {
+      if (response.statusCode == AppApiStatusCodes.success) {
+        event = event.copyWith(
+          amount: EventTextControllers.amountController.text.isNotEmpty
+              ? double.parse(EventTextControllers.amountController.text)
+              : 0.0,
+        );
+        event = event.copyWith(
+          eventStatus: int.parse(BasicCodesFromCrm.completed),
+        );
+        Map<String, dynamic> checkinPayLoad = {
+          "eventCost": double.parse(EventTextControllers.amountController.text),
+          "statusCode": int.parse(BasicCodesFromCrm.completed),
+          "eventCheckIn": _checkInDateTime!.toIso8601String(),
+        };
+        _eventController
+            .submitCheckIn(checkinPayLoad, event.eventId ?? '')
+            .then((value) {
+              setState(() {
+                isLoading = false;
+              });
+              final navProvider = Provider.of<TopNavProvider>(
+                context,
+                listen: false,
+              );
+              navProvider.goBack();
+            });
+        setState(() {
+          isCheckedIn = true;
+          _checkInDateTime = DateTime.now();
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(AppStrings.checkInSuccess)),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(AppStrings.receiptUploadFailed)),
+        );
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
   }
 
   deleteEvent(String eventId) {
@@ -100,7 +174,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       "eventDescription":
           NewEventTextControllers.eventDescriptionController.text,
       "eventApproval": int.parse(BasicCodesFromCrm.pending),
-      "userName": "/contacts(${userModal.id})",
+      "userName": "/contacts(${userModal.kiosk})",
       "isMultiDay": event.isMultiDay,
     };
     debugPrint("Test Data for Update Event ${jsonEncode(testData)}");
@@ -147,15 +221,41 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               EventTextControllers.numberOfStaffController.text = event
                   .numberOfStaff
                   .toString();
-              EventTextControllers.hcoController.text = event.hco ?? '';
+              EventTextControllers.hcoController.text = '';
               EventTextControllers.eventDescriptionController.text =
                   event.eventDescription ?? '';
-              isCheckinPossible = !event.startDate!.isBefore(DateTime.now());
+              // isCheckinPossible = !event.startDate!.isBefore(DateTime.now());
+
+              isCheckinPossible = !(isPastDate(
+                event.startDate ?? DateTime.now(),
+              ));
+              debugPrint(
+                "isCheckinPossible : $isCheckinPossible ${event.startDate!.isBefore(DateTime.now())} event.startDate : ${event.startDate!.isAtSameMomentAs(DateTime.now())} compare : ${event.startDate!.compareTo(DateTime.now())} compareCondition : ${event.startDate!.compareTo(DateTime.now()) > 0} isSameDay : ${isPastDate(event.startDate ?? DateTime.now())}",
+              );
             }),
             v.hco != null ? fetchHcoName(v.hco!) : null,
-            if (!isCheckinPossible) {showdialogforcheckAvailability()},
           },
         );
+  }
+
+  bool isPastDate(DateTime eventDate) {
+    final now = DateTime.now();
+
+    // strip time -> keep only year, month, day
+    final event = DateTime(eventDate.year, eventDate.month, eventDate.day);
+    final today = DateTime(now.year, now.month, now.day);
+
+    return !event.isAtSameMomentAs(today); // true only if event < today
+  }
+
+  bool isPastEventDate(DateTime eventDate) {
+    final now = DateTime.now();
+
+    // strip time -> keep only year, month, day
+    final event = DateTime(eventDate.year, eventDate.month, eventDate.day);
+    final today = DateTime(now.year, now.month, now.day);
+
+    return !event.isBefore(today); // true only if event < today
   }
 
   fetchHcpPractionners() async {
@@ -215,6 +315,18 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     }
   }
 
+  String eventApprovalCodeToText(String statusCode) {
+    if (statusCode == BasicCodesFromCrm.approval) {
+      return "Approved";
+    } else if (statusCode == BasicCodesFromCrm.pending) {
+      return "Pending";
+    } else if (statusCode == BasicCodesFromCrm.rejected) {
+      return "Rejected";
+    } else {
+      return "Unknown";
+    }
+  }
+
   showdialogforcheckAvailability() {
     showDialog(
       context: context,
@@ -263,7 +375,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            if (isCheckinPossible) ...{
+                            if (isPastEventDate(
+                              event.startDate ?? DateTime.now(),
+                            )) ...{
                               InkWell(
                                 onTap: () {
                                   setState(() {
@@ -374,17 +488,17 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           final DateTime? pickedDate = await showDatePicker(
                             context: context,
                             initialDate: DateTime.now(),
-                            firstDate: DateTime(2000),
+                            firstDate: DateTime.now(),
                             lastDate: DateTime(2100),
                           );
                           if (pickedDate != null) {
                             EventTextControllers.startDateController.text =
                                 "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
                             setState(() {
-                              event = event.copyWith(
-                                startDate: DateTime.parse(
-                                  EventTextControllers.startDateController.text,
-                                ),
+                              isCheckinPossible = !isPastDate(pickedDate);
+                              event = event.copyWith(startDate: pickedDate);
+                              debugPrint(
+                                "Start Date : ${event.startDate} event : ${json.encode(event)} ",
                               );
                             });
                           }
@@ -413,13 +527,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                   EventTextControllers.endDateController.text =
                                       "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
                                   setState(() {
-                                    event = event.copyWith(
-                                      endDate: DateTime.parse(
-                                        EventTextControllers
-                                            .endDateController
-                                            .text,
-                                      ),
-                                    );
+                                    event = event.copyWith(endDate: pickedDate);
                                   });
                                 }
                               },
@@ -450,233 +558,300 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       SizedBox(height: 16),
 
                       // Text(AppStrings.hcpInEvent),
-                      if (isEdit)
-                        Container(
-                          width: double.infinity,
-                          height: 40,
-                          // padding: EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: AppColors.border,
-                            border: Border.all(color: AppColors.border),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              Flexible(
-                                flex: 1,
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      hcpInHcoSelected = true;
-                                    });
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: hcpInHcoSelected
-                                          ? AppColors.primary
-                                          : AppColors.transparent,
-                                      border: Border.all(
-                                        color: AppColors.border,
+                      if (event.eventStatus ==
+                          int.parse(BasicCodesFromCrm.upcoming)) ...{
+                        if (isEdit)
+                          Container(
+                            width: double.infinity,
+                            height: 40,
+                            // padding: EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: AppColors.border,
+                              border: Border.all(color: AppColors.border),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Flexible(
+                                  flex: 1,
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        hcpInHcoSelected = true;
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: hcpInHcoSelected
+                                            ? AppColors.primary
+                                            : AppColors.transparent,
+                                        border: Border.all(
+                                          color: AppColors.border,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    width: double.infinity,
-                                    height: 50,
+                                      width: double.infinity,
+                                      height: 50,
 
-                                    child: Center(
-                                      child: Text(
-                                        "HCP in HCO",
-                                        style: TextStyle(
-                                          color: hcpInHcoSelected
-                                              ? AppColors.background
-                                              : AppColors.primary,
+                                      child: Center(
+                                        child: Text(
+                                          "HCP in HCO",
+                                          style: TextStyle(
+                                            color: hcpInHcoSelected
+                                                ? AppColors.background
+                                                : AppColors.primary,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Flexible(
-                                flex: 1,
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      hcpInHcoSelected = false;
-                                    });
-                                  },
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: hcpInHcoSelected
-                                          ? AppColors.transparent
-                                          : AppColors.primary,
-                                      border: Border.all(
-                                        color: AppColors.border,
+                                Flexible(
+                                  flex: 1,
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        hcpInHcoSelected = false;
+                                      });
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: hcpInHcoSelected
+                                            ? AppColors.transparent
+                                            : AppColors.primary,
+                                        border: Border.all(
+                                          color: AppColors.border,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        "HCP Practitioner",
-                                        style: TextStyle(
-                                          color: !hcpInHcoSelected
-                                              ? AppColors.background
-                                              : AppColors.primary,
+                                      child: Center(
+                                        child: Text(
+                                          "HCP Practitioner",
+                                          style: TextStyle(
+                                            color: !hcpInHcoSelected
+                                                ? AppColors.background
+                                                : AppColors.primary,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      const SizedBox(height: 10),
-                      SizedBox(height: 10),
-                      if (hcpInHcoSelected)
-                        DropdownSearch<Map<String, dynamic>>.multiSelection(
-                          popupProps: const PopupPropsMultiSelection.menu(
-                            showSearchBox:
-                                true, // <- this brings the search field
-                            searchFieldProps: TextFieldProps(
-                              // customise it if you like
+                        const SizedBox(height: 10),
+                        SizedBox(height: 10),
+                        if (hcpInHcoSelected)
+                          DropdownSearch<Map<String, dynamic>>.multiSelection(
+                            popupProps: const PopupPropsMultiSelection.menu(
+                              showSearchBox:
+                                  true, // <- this brings the search field
+                              searchFieldProps: TextFieldProps(
+                                // customise it if you like
+                                decoration: InputDecoration(
+                                  labelText: 'Search HCP',
+                                  prefixIcon: Icon(Icons.search),
+                                ),
+                              ),
+                            ),
+                            enabled:
+                                (userModal.role == UserType.pharmaRep &&
+                                    isCheckedIn) ||
+                                isEdit,
+                            items: (filter, loadProps) => hcpList
+                                .map<Map<String, dynamic>>(
+                                  (e) => {
+                                    "hcpId": (e.hcpId).toString(),
+                                    "hcpName": e.hcpName,
+                                  },
+                                )
+                                .toList(),
+                            selectedItems: (event.contactDtos ?? [])
+                                .map<Map<String, dynamic>>(
+                                  (e) => {
+                                    "hcpId": (e.id ?? "").toString(),
+                                    "hcpName": "${e.firstName} ${e.lastName}",
+                                  },
+                                )
+                                .toList(),
+                            itemAsString: (item) => item["hcpName"] ?? "",
+                            compareFn: (item, selectedItem) =>
+                                item["hcpId"] == selectedItem["hcpId"],
+                            decoratorProps: const DropDownDecoratorProps(
                               decoration: InputDecoration(
-                                labelText: 'Search HCP',
-                                prefixIcon: Icon(Icons.search),
+                                labelText: AppStrings.hcpInEvent,
                               ),
                             ),
-                          ),
-                          enabled:
-                              (userModal.role == UserType.pharmaRep &&
-                                  isCheckedIn) ||
-                              isEdit,
-                          items: (filter, loadProps) => hcpList
-                              .map<Map<String, dynamic>>(
-                                (e) => {
-                                  "hcpId": (e.hcpId).toString(),
-                                  "hcpName": e.hcpName,
-                                },
-                              )
-                              .toList(),
-                          selectedItems: (event.contactDtos ?? [])
-                              .map<Map<String, dynamic>>(
-                                (e) => {
-                                  "hcpId": (e.id ?? "").toString(),
-                                  "hcpName": "${e.firstName} ${e.lastName}",
-                                },
-                              )
-                              .toList(),
-                          itemAsString: (item) => item["hcpName"] ?? "",
-                          compareFn: (item, selectedItem) =>
-                              item["hcpId"] == selectedItem["hcpId"],
-                          decoratorProps: const DropDownDecoratorProps(
-                            decoration: InputDecoration(
-                              labelText: AppStrings.hcpInEvent,
-                            ),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              event = event.copyWith(
-                                contactDtos: value
-                                    .map(
-                                      (e) => ContactDto(
-                                        id: e["hcpId"] ?? "0",
-                                        firstName: (e["hcpName"] ?? "")
-                                            .split(" ")
-                                            .first,
-                                        lastName:
-                                            (e["hcpName"] ?? "")
+                            onChanged: (value) {
+                              setState(() {
+                                event = event.copyWith(
+                                  contactDtos: value
+                                      .map(
+                                        (e) => ContactDto(
+                                          id: e["hcpId"] ?? "0",
+                                          firstName: (e["hcpName"] ?? "")
+                                              .split(" ")
+                                              .first,
+                                          lastName:
+                                              (e["hcpName"] ?? "")
+                                                      .split(" ")
+                                                      .length >
+                                                  1
+                                              ? (e["hcpName"] ?? "")
                                                     .split(" ")
-                                                    .length >
-                                                1
-                                            ? (e["hcpName"] ?? "")
-                                                  .split(" ")
-                                                  .sublist(1)
-                                                  .join(" ")
-                                            : "",
-                                      ),
-                                    )
-                                    .toList(),
-                              );
-                            });
-                          },
-                          validator: (value) => value == null || value.isEmpty
-                              ? AppStrings.selectHCP
-                              : null,
-                        ),
+                                                    .sublist(1)
+                                                    .join(" ")
+                                              : "",
+                                          approval: BasicCodesFromCrm.pending,
+                                        ),
+                                      )
+                                      .toList(),
+                                );
+                              });
+                            },
+                            validator: (value) => value == null || value.isEmpty
+                                ? AppStrings.selectHCP
+                                : null,
+                          ),
 
-                      if (!hcpInHcoSelected)
-                        DropdownSearch<Map<String, dynamic>>.multiSelection(
-                          popupProps: const PopupPropsMultiSelection.menu(
-                            showSearchBox:
-                                true, // <- this brings the search field
-                            searchFieldProps: TextFieldProps(
-                              // customise it if you like
+                        if (!hcpInHcoSelected)
+                          DropdownSearch<Map<String, dynamic>>.multiSelection(
+                            popupProps: const PopupPropsMultiSelection.menu(
+                              showSearchBox:
+                                  true, // <- this brings the search field
+                              searchFieldProps: TextFieldProps(
+                                // customise it if you like
+                                decoration: InputDecoration(
+                                  labelText: 'Search HCP Practitioners',
+                                  prefixIcon: Icon(Icons.search),
+                                ),
+                              ),
+                            ),
+                            enabled:
+                                (userModal.role == UserType.pharmaRep &&
+                                    isCheckedIn) ||
+                                isEdit,
+                            items: (filter, loadProps) =>
+                                hcpPractioners.map<Map<String, dynamic>>((e) {
+                                  return {
+                                    "hcpId": (e.hcpId).toString(),
+                                    "hcpName": e.hcpName,
+                                  };
+                                }).toList(),
+                            selectedItems: (event.contactDtos ?? [])
+                                .map<Map<String, dynamic>>(
+                                  (e) => {
+                                    "hcpId": (e.id ?? "").toString(),
+                                    "hcpName": "${e.firstName} ${e.lastName}",
+                                  },
+                                )
+                                .toList(),
+                            itemAsString: (item) => item["hcpName"] ?? "",
+                            compareFn: (item, selectedItem) =>
+                                item["hcpId"] == selectedItem["hcpId"],
+                            decoratorProps: const DropDownDecoratorProps(
                               decoration: InputDecoration(
-                                labelText: 'Search HCP Practitioners',
-                                prefixIcon: Icon(Icons.search),
+                                labelText: AppStrings.hcpInEvent,
                               ),
                             ),
-                          ),
-                          enabled:
-                              (userModal.role == UserType.pharmaRep &&
-                                  isCheckedIn) ||
-                              isEdit,
-                          items: (filter, loadProps) =>
-                              hcpPractioners.map<Map<String, dynamic>>((e) {
-                                return {
-                                  "hcpId": (e.hcpId).toString(),
-                                  "hcpName": e.hcpName,
-                                };
-                              }).toList(),
-                          selectedItems: (event.contactDtos ?? [])
-                              .map<Map<String, dynamic>>(
-                                (e) => {
-                                  "hcpId": (e.id ?? "").toString(),
-                                  "hcpName": "${e.firstName} ${e.lastName}",
-                                },
-                              )
-                              .toList(),
-                          itemAsString: (item) => item["hcpName"] ?? "",
-                          compareFn: (item, selectedItem) =>
-                              item["hcpId"] == selectedItem["hcpId"],
-                          decoratorProps: const DropDownDecoratorProps(
-                            decoration: InputDecoration(
-                              labelText: AppStrings.hcpInEvent,
-                            ),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              event = event.copyWith(
-                                contactDtos: value
-                                    .map(
-                                      (e) => ContactDto(
-                                        id: e["hcpId"] ?? "0",
-                                        firstName: (e["hcpName"] ?? "")
-                                            .split(" ")
-                                            .first,
-                                        lastName:
-                                            (e["hcpName"] ?? "")
+                            onChanged: (value) {
+                              setState(() {
+                                event = event.copyWith(
+                                  contactDtos: value
+                                      .map(
+                                        (e) => ContactDto(
+                                          id: e["hcpId"] ?? "0",
+                                          firstName: (e["hcpName"] ?? "")
+                                              .split(" ")
+                                              .first,
+                                          lastName:
+                                              (e["hcpName"] ?? "")
+                                                      .split(" ")
+                                                      .length >
+                                                  1
+                                              ? (e["hcpName"] ?? "")
                                                     .split(" ")
-                                                    .length >
-                                                1
-                                            ? (e["hcpName"] ?? "")
-                                                  .split(" ")
-                                                  .sublist(1)
-                                                  .join(" ")
-                                            : "",
+                                                    .sublist(1)
+                                                    .join(" ")
+                                              : "",
+                                          approval: BasicCodesFromCrm.pending,
+                                        ),
+                                      )
+                                      .toList(),
+                                );
+                              });
+                            },
+                            validator: (value) => value == null || value.isEmpty
+                                ? AppStrings.selectHCP
+                                : null,
+                          ),
+                      },
+                      if (event.eventStatus !=
+                          int.parse(BasicCodesFromCrm.completed))
+                        Divider(),
+                      if (event.eventStatus ==
+                          int.parse(BasicCodesFromCrm.completed))
+                        Column(
+                          children: [
+                            Text("HCPs Attendees"),
+                            SizedBox(height: 10),
+                            for (var contact in event.contactDtos ?? []) ...{
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      "${contact.firstName} ${contact.lastName}",
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  //contact.approval.toString() == BasicCodesFromCrm.pending
+                                  if (contact.approval.toString() !=
+                                      BasicCodesFromCrm.pending)
+                                    InkWell(
+                                      child: Text(
+                                        eventApprovalCodeToText(
+                                          contact.approval ?? '0',
+                                        ),
+                                        style: TextStyle(
+                                          color:
+                                              contact.approval.toString() ==
+                                                  BasicCodesFromCrm.approval
+                                              ? AppColors.successGreen
+                                              : contact.approval.toString() ==
+                                                    BasicCodesFromCrm.rejected
+                                              ? AppColors.accentError
+                                              : AppColors.pending,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
-                                    )
-                                    .toList(),
-                              );
-                            });
-                          },
-                          validator: (value) => value == null || value.isEmpty
-                              ? AppStrings.selectHCP
-                              : null,
+                                    ),
+                                  if (contact.approval.toString() ==
+                                      BasicCodesFromCrm.pending)
+                                    ElevatedButton(
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                              AppColors.upcomingStatusBadge,
+                                            ),
+                                      ),
+                                      onPressed: () {},
+                                      child: Text(
+                                        "Send for Approval",
+                                        style: TextStyle(
+                                          color: AppColors
+                                              .upcomingStatusBadgeTextColor,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              SizedBox(height: 16),
+                            },
+                          ],
                         ),
-
                       SizedBox(height: 16),
                       if (isCheckedIn && _checkInDateTime != null)
                         Padding(
@@ -730,14 +905,33 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               onPressed: isCheckedIn
                                   ? () async {
                                       FilePickerResult? result =
-                                          await FilePicker.platform.pickFiles();
+                                          await FilePicker.platform.pickFiles(
+                                            type: FileType.image,
+                                          );
+
                                       if (result != null &&
-                                          result.files.isNotEmpty) {
+                                          result.files.single.bytes != null) {
                                         setState(() {
                                           _selectedReceiptFileName =
                                               result.files.single.name;
+                                          receiptBase64 = base64Encode(
+                                            result.files.single.bytes!,
+                                          );
+                                        });
+                                      } else {
+                                        final bytes = await File(
+                                          result!.files.single.path!,
+                                        ).readAsBytes();
+                                        setState(() {
+                                          _selectedReceiptFileName =
+                                              result.files.single.name;
+                                          receiptBase64 = base64Encode(bytes);
                                         });
                                       }
+
+                                      debugPrint(
+                                        "Receipt Base64 : $receiptBase64",
+                                      );
                                     }
                                   : () {
                                       debugPrint('Not checked in');
@@ -761,13 +955,31 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               onPressed: isCheckedIn
                                   ? () async {
                                       FilePickerResult? result =
-                                          await FilePicker.platform.pickFiles();
+                                          await FilePicker.platform.pickFiles(
+                                            type: FileType.image,
+                                          );
                                       if (result != null &&
                                           result.files.isNotEmpty) {
-                                        setState(() {
-                                          _selectedSignInSheetFileName =
-                                              result.files.single.name;
-                                        });
+                                        if (result.files.single.bytes != null) {
+                                          setState(() {
+                                            _selectedSignInSheetFileName =
+                                                result.files.single.name;
+                                            signInSheetBase64 = base64Encode(
+                                              result.files.single.bytes!,
+                                            );
+                                          });
+                                        } else {
+                                          final bytes = await File(
+                                            result.files.single.path!,
+                                          ).readAsBytes();
+                                          setState(() {
+                                            _selectedSignInSheetFileName =
+                                                result.files.single.name;
+                                            signInSheetBase64 = base64Encode(
+                                              bytes,
+                                            );
+                                          });
+                                        }
                                       }
                                     }
                                   : () {
@@ -807,12 +1019,13 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 EventTextControllers
                                     .amountController
                                     .text
-                                    .isEmpty) &&
+                                    .isEmpty ||
+                                _selectedSignInSheetFileName == null) &&
                             isCheckedIn,
                         text: AppStrings.submitCheckIn,
                         onPressed: () {
                           debugPrint("Submit Check-In ${json.encode(event)}");
-                          // updateEvent();
+                          submitCheckIn();
                         },
                       ),
                     },
@@ -821,10 +1034,14 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         isDisabled: !isCheckinPossible,
                         text: AppStrings.checkIn,
                         onPressed: () {
-                          setState(() {
-                            isCheckedIn = true;
-                            _checkInDateTime = DateTime.now();
-                          });
+                          if (!isCheckinPossible) {
+                            showdialogforcheckAvailability();
+                          } else {
+                            setState(() {
+                              isCheckedIn = true;
+                              _checkInDateTime = DateTime.now();
+                            });
+                          }
                         },
                       ),
                     },

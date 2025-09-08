@@ -12,7 +12,9 @@ class CustomTextField extends StatefulWidget {
   final Widget? suffixIcon;
   final Widget? prefixIcon;
   final bool readOnly;
-  const CustomTextField({
+  String? errorText;
+  FocusNode? focusNode;
+  CustomTextField({
     super.key,
     required this.controller,
     required this.label,
@@ -24,6 +26,8 @@ class CustomTextField extends StatefulWidget {
     this.suffixIcon,
     this.readOnly = false,
     this.prefixIcon,
+    this.errorText,
+    this.focusNode,
   });
 
   @override
@@ -31,7 +35,6 @@ class CustomTextField extends StatefulWidget {
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
-  String? errorText;
   bool isPasswordVisible = false;
   bool hasUserInteracted = false;
   void validate(String value) {
@@ -46,10 +49,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
       newError = null;
     }
 
-    if (newError != errorText) {
+    if (newError != widget.errorText) {
       if (mounted) {
         setState(() {
-          errorText = newError;
+          widget.errorText = newError;
         });
       }
     }
@@ -76,6 +79,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      focusNode: widget.focusNode,
       enabled: !widget.readOnly,
       onChanged: (value) {
         setState(() {
@@ -114,12 +118,12 @@ class _CustomTextFieldState extends State<CustomTextField> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
-            color: errorText == null
+            color: widget.errorText == null
                 ? AppColors.primary
                 : AppColors.accentError,
           ),
         ),
-        errorText: errorText,
+        errorText: widget.errorText,
         suffixIcon: widget.obscureText
             ? IconButton(
                 icon: Icon(

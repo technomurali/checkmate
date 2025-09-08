@@ -14,6 +14,8 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'dart:io';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -46,6 +48,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+       navigatorKey: navigatorKey, 
       debugShowCheckedModeBanner: false,
       title: AppStrings.appName,
       theme: ThemeData(

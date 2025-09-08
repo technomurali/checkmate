@@ -31,6 +31,22 @@ class TopNavProvider extends ChangeNotifier {
     _argument = argument;
     notifyListeners();
   }
+  bool _isOnLogin = false;
+
+  bool get isOnLogin => _isOnLogin;
+
+  void resetToLogin() {
+    // Clear any in-app stacks/history you maintain
+    // e.g., _stack.clear();
+    _isOnLogin = true;
+    _history.clear();
+    notifyListeners();
+  }
+
+  void goToHome() {
+    _isOnLogin = false;
+    notifyListeners();
+  }
 
   bool goBack() {
     if (_history.isEmpty) return false;

@@ -1,20 +1,22 @@
 import 'dart:convert';
 import 'package:checkmate/core/constants/app_Api.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
+import 'package:checkmate/features/auth/controllers/interceptor.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/features/auth/model/hcp_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:http_interceptor/http_interceptor.dart';
+// import 'package:http/http.dart' as http;
 
 class EventController {
   String? _error;
   String? get error => _error;
-
+  Client http = InterceptedClient.build(interceptors: [Interceptor()]);
   Future<List<EventModal>> fetchEvents({String? status}) async {
     try {
       final uri = Uri.parse(
-        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRep/${userModal.id}${status != null ? '?status=$status' : ''}",
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRep/${userModal.kiosk}${status != null ? '?status=$status' : ''}",
       );
 
       final response = await http.get(uri);
@@ -39,7 +41,7 @@ class EventController {
   Future<List<EventModal>> fetchEventsWithStatus({String? status}) async {
     try {
       final uri = Uri.parse(
-        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRepAndStatus/${userModal.id}/$status",
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRepAndStatus/${userModal.kiosk}/$status",
       );
 
       final response = await http.get(
@@ -66,7 +68,7 @@ class EventController {
   Future<List<EventModal>> fetchEventsWithPending({String? status}) async {
     try {
       final uri = Uri.parse(
-        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRepAndApproval/${userModal.id}/$status",
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRepAndApproval/${userModal.kiosk}/$status",
       );
 
       final response = await http.get(
@@ -204,6 +206,50 @@ class EventController {
       }
     } catch (e) {
       debugPrint("Error updating event: $e");
+      return false;
+    }
+  }
+
+  // Attachments Receipts
+  Future<Response> eventAttachments(
+    List<Map<String, dynamic>> body,
+    String eventId,
+  ) async {
+    var data = json.encode(body);
+    try {
+      final uri = Uri.parse(AppApi.buildAttachmentsUrl(eventId));
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: data,
+      );
+      return response;
+    } catch (e) {
+      debugPrint("Error updating event: $e");
+      return Response('Error', 400);
+    }
+  }
+
+  Future submitCheckIn(Map<String, dynamic> payload, String id) async {
+    var url = Uri.parse(
+      "${AppApi.baseUrl1}${AppApi.events}/${AppApi.events}/$id",
+    );
+    try {
+      final response = await http.patch(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+      debugPrint("submitCheckIn payload: ${jsonEncode(payload)}");
+      if (response.statusCode == AppApiStatusCodes.postSuccess) {
+        debugPrint("Check-In submitted successfully.");
+        return true;
+      } else {
+        debugPrint("Failed to submit Check-In. Status: ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("Error submitting Check-In: $e");
       return false;
     }
   }

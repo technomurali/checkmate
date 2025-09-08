@@ -1,6 +1,5 @@
 import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
-import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/filter_icon.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/routes/route_name.dart';
@@ -130,11 +129,15 @@ class EventListItemTile extends StatelessWidget {
               // mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  event.eventName ?? '',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width * 0.5,
+                  child: Text(
+                    event.eventName ?? '',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 SizedBox(height: 16),

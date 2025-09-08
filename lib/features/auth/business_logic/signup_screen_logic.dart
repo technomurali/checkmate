@@ -12,6 +12,8 @@ class SignupScreenLogic extends ChangeNotifier {
   bool isSignUpDisabled = true;
   bool isOptedForSocialSignUp = false;
   bool isLoading = false;
+  String? passwordError;
+  String? emailError;
 
   List<Map> filteredCompanies = [];
   List<Map> allCompanies = [];
@@ -35,11 +37,13 @@ class SignupScreenLogic extends ChangeNotifier {
     TextControllers.email.addListener(() {
       isValid['email'] = TextControllers.email.text.contains('@');
       _checkFormValidity();
+      validateEmail();
     });
     TextControllers.password.addListener(() {
       isValid['newPassword'] = TextControllers.password.text.length >= 6;
       isValid['confirmPassword'] =
           TextControllers.password.text == TextControllers.confirmPassword.text;
+      validatePassword();
       _checkFormValidity();
     });
     TextControllers.confirmPassword.addListener(() {
@@ -70,6 +74,39 @@ class SignupScreenLogic extends ChangeNotifier {
     final allValid = isValid.values.every((e) => e);
     isSignUpDisabled = !((allValid || true) && !isOptedForSocialSignUp);
     notifyListeners();
+  }
+
+  void validateEmail() {
+    final email = TextControllers.email.text.trim();
+    if (TextControllers.email.text.trim() != "") {
+      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+        emailError = ErrorText.emailError;
+      } else {
+        emailError = null;
+      }
+    }
+    notifyListeners();
+  }
+
+  void validatePassword() {
+    final password = TextControllers.password.text.trim();
+    if (!isValidPassword(password)) {
+      passwordError = "Must be 6+ chars, include upper, lower, digit, special";
+    } else {
+      passwordError = null;
+    }
+    notifyListeners();
+  }
+
+  bool isValidPassword(String password) {
+    // if (password != "") {
+    //   if (password.length < 6) return false;
+    //   if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
+    //   if (!RegExp(r'[a-z]').hasMatch(password)) return false;
+    //   if (!RegExp(r'[0-9]').hasMatch(password)) return false;
+    //   if (!RegExp(r'[!@#\$&*~%^(),.?":{}|<>]').hasMatch(password)) return false;
+    // }
+    return true;
   }
 
   void toggleSocialSignup(bool? value) {

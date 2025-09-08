@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:checkmate/core/constants/app_Api.dart';
-import 'package:http/http.dart' as http;
+import 'package:checkmate/features/auth/controllers/interceptor.dart';
+import 'package:flutter/material.dart';
+import 'package:http_interceptor/http_interceptor.dart';
 
 class NewEventController {
+  Client http = InterceptedClient.build(interceptors: [Interceptor()]);
   Future<List<Map<String, dynamic>>> getEventTypes() async {
     try {
       final url = "${AppApi.baseUrl1}${AppApi.events}/${AppApi.getEventTypes}";
@@ -83,6 +86,7 @@ class NewEventController {
       final uri = Uri.parse(AppApi.baseUrl1 + AppApi.events);
       var jsonWalaBody = json.encode(data);
       dynamic g = json.decode(jsonWalaBody);
+      debugPrint("jsonWalaBody: $g");
       final response = await http.post(
         uri,
         body: jsonWalaBody,

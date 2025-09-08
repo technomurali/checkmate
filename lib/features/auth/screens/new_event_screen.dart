@@ -159,7 +159,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
         "eventDescription":
             NewEventTextControllers.eventDescriptionController.text,
         "eventApproval": int.parse(BasicCodesFromCrm.pending),
-        "userName": "/contacts(${userModal.id})",
+        "userName": "/contacts(${userModal.kiosk})",
         "isMultiDay": isMultiDay,
       };
       _newEventController.createEvent(testData).then((value) {
@@ -204,457 +204,565 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    Autocomplete<Map<String, dynamic>>(
-                      displayStringForOption: (option) => option['accountName'],
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text == '') {
-                          return Iterable.empty();
-                        } else {
-                          return _hcos.where((ele) {
-                            return ele['accountName'].toLowerCase().contains(
-                              textEditingValue.text.toLowerCase(),
-                            );
-                          });
-                        }
-                      },
-                      onSelected: (selection) {
-                        setState(() {
-                          _selectedHCOName = selection['accountName'];
-                          _selectedHCOId = selection['id']?.toString();
-                          _selectedHCP = [];
-                          // print("selected hcps: ${selected['hcps']}");
-                          if (_selectedHCOId != null) {
-                            _hcps = [];
-                            fetchHCPbyHCO(_selectedHCOId!);
-                          }
-                          // _hcps = List<Map<String, dynamic>>.from(selected['hcps']);
-                        });
-                      },
-                      fieldViewBuilder:
-                          (
-                            context,
-                            textEditingController,
-                            focusNode,
-                            onFieldSubmitted,
-                          ) {
-                            _autocompleteControllerHCO = textEditingController;
-                            return TextField(
-                              controller: textEditingController,
-                              focusNode: focusNode,
-                              decoration: InputDecoration(
-                                labelText: "Search HCO",
-                                suffixIcon: Icon(Icons.search),
-                              ),
-                            );
-                          },
-                    ),
-
-                    /// HCO Dropdown
-                    // DropdownSearch<String>(
-                    //   popupProps: const PopupProps.menu(
-                    //     showSearchBox: true, // <- this brings the search field
-                    //     searchFieldProps: TextFieldProps(
-                    //       // customise it if you like
-                    //       decoration: InputDecoration(
-                    //         labelText: 'Search HCO',
-                    //         prefixIcon: Icon(Icons.search),
-                    //       ),
-                    //     ),
-                    //   ),
-
-                    //   items: (filter, loadProps) {
-                    //     return _hcos
-                    //         .map((hco) => hco['accountName'] as String)
-                    //         .toList();
-                    //   },
-                    //   selectedItem: _selectedHCOName,
-                    //   decoratorProps: const DropDownDecoratorProps(
-                    //     decoration: InputDecoration(labelText: AppStrings.labelHCO),
-                    //   ),
-                    //   onChanged: (value) {
-                    //     final selected = _hcos.firstWhere(
-                    //       (hco) => hco['accountName'] == value,
-                    //       orElse: () => {},
-                    //     );
-                    //     setState(() {
-                    //       _selectedHCOName = value;
-                    //       _selectedHCOId = selected['id']?.toString();
-                    //       _selectedHCP = [];
-                    //       // print("selected hcps: ${selected['hcps']}");
-                    //       if (_selectedHCOId != null) {
-                    //         _hcps = [];
-                    //         fetchHCPbyHCO(_selectedHCOId!);
-                    //       }
-                    //       // _hcps = List<Map<String, dynamic>>.from(selected['hcps']);
-                    //     });
-                    //   },
-                    //   validator: (value) => value == null || value.isEmpty
-                    //       ? AppStrings.selectHCO
-                    //       : null,
-                    // ),
-                    const SizedBox(height: 10),
-
-                    /// Event Type Dropdown
-                    DropdownButtonFormField<String>(
-                      value: _selectedEventType,
-                      decoration: InputDecoration(
-                        labelText: AppStrings.labelEventType,
-                      ),
-                      items: eventTypes.map<DropdownMenuItem<String>>((event) {
-                        return DropdownMenuItem<String>(
-                          value: event["value"].toString(),
-                          child: Text(event["label"] as String),
-                        );
-                      }).toList(),
-                      onChanged: (value) =>
-                          setState(() => _selectedEventType = value),
-                      validator: (value) => value == null || value.isEmpty
-                          ? AppStrings.selectEventType
-                          : null,
-                    ),
-                    const SizedBox(height: 10),
-
-                    /// Event Name TextField
-                    TextFormField(
-                      controller: NewEventTextControllers.eventNameController,
-                      decoration: const InputDecoration(
-                        labelText: AppStrings.labelEventName,
-                      ),
-                      validator: (value) => value == null || value.isEmpty
-                          ? AppStrings.requiredField
-                          : null,
-                    ),
-                    const SizedBox(height: 10),
-
-                    /// Event Description TextField
-                    TextField(
-                      autocorrect: true,
-                      minLines: AppSizes().eventDescriptionMinLines,
-                      controller:
-                          NewEventTextControllers.eventDescriptionController,
-                      decoration: InputDecoration(
-                        labelText: AppStrings.labelEventDescription,
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                    ),
-                    SizedBox(height: 10),
-
-                    /// Multi-day Event Checkbox
-                    // CheckboxListTile(
-                    //   contentPadding: EdgeInsets.zero,
-                    //   title: Text(AppStrings.multiDayEvent),
-                    //   value: isMultiDay,
-                    //   onChanged: (val) {
-                    //     setState(() {
-                    //       isMultiDay = val ?? false;
-                    //       if (!isMultiDay) {
-                    //         NewEventTextControllers.endDateController.clear();
-                    //       }
-                    //     });
-                    //   },
-                    //   controlAffinity: ListTileControlAffinity.leading,
-                    // ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Switch(
-                          value: isMultiDay,
-                          onChanged: (v) {
-                            setState(() {
-                              isMultiDay = !isMultiDay;
-                              if (!isMultiDay) {
-                                NewEventTextControllers.endDateController
-                                    .clear();
-                              }
+    return _isLoading
+        ? SizedBox(
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: Center(child: CircularProgressIndicator()),
+          )
+        : Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    children: [
+                      Autocomplete<Map<String, dynamic>>(
+                        displayStringForOption: (option) =>
+                            option['accountName'],
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          if (textEditingValue.text == '') {
+                            return Iterable.empty();
+                          } else {
+                            return _hcos.where((ele) {
+                              return ele['accountName'].toLowerCase().contains(
+                                textEditingValue.text.toLowerCase(),
+                              );
                             });
-                          },
-                        ),
-                        SizedBox(width: 10),
-                        Text(AppStrings.multiDayEvent),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-
-                    /// Start Date TextField
-                    TextFormField(
-                      controller: NewEventTextControllers.startDateController,
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: !!isMultiDay
-                            ? AppStrings.labelEventStartDate
-                            : AppStrings.labelStartDate,
+                          }
+                        },
+                        onSelected: (selection) {
+                          setState(() {
+                            _selectedHCOName = selection['accountName'];
+                            _selectedHCOId = selection['id']?.toString();
+                            _selectedHCP = [];
+                            // print("selected hcps: ${selected['hcps']}");
+                            if (_selectedHCOId != null) {
+                              _hcps = [];
+                              fetchHCPbyHCO(_selectedHCOId!);
+                            }
+                            // _hcps = List<Map<String, dynamic>>.from(selected['hcps']);
+                          });
+                        },
+                        fieldViewBuilder:
+                            (
+                              context,
+                              textEditingController,
+                              focusNode,
+                              onFieldSubmitted,
+                            ) {
+                              _autocompleteControllerHCO =
+                                  textEditingController;
+                              return TextField(
+                                controller: textEditingController,
+                                focusNode: focusNode,
+                                decoration: InputDecoration(
+                                  labelText: "Search HCO",
+                                  suffixIcon: Icon(Icons.search),
+                                ),
+                              );
+                            },
                       ),
-                      onTap: () async {
-                        final DateTime? pickedDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime(2030),
-                        );
-                        if (pickedDate != null) {
-                          NewEventTextControllers.startDateController.text =
-                              "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                          startDatePicked = pickedDate;
-                        }
-                      },
-                      validator: (value) => value == null || value.isEmpty
-                          ? AppStrings.requiredField
-                          : null,
-                    ),
-                    const SizedBox(height: 10),
 
-                    /// Multi-day Event Start Date
-                    if (isMultiDay)
+                      /// HCO Dropdown
+                      // DropdownSearch<String>(
+                      //   popupProps: const PopupProps.menu(
+                      //     showSearchBox: true, // <- this brings the search field
+                      //     searchFieldProps: TextFieldProps(
+                      //       // customise it if you like
+                      //       decoration: InputDecoration(
+                      //         labelText: 'Search HCO',
+                      //         prefixIcon: Icon(Icons.search),
+                      //       ),
+                      //     ),
+                      //   ),
+
+                      //   items: (filter, loadProps) {
+                      //     return _hcos
+                      //         .map((hco) => hco['accountName'] as String)
+                      //         .toList();
+                      //   },
+                      //   selectedItem: _selectedHCOName,
+                      //   decoratorProps: const DropDownDecoratorProps(
+                      //     decoration: InputDecoration(labelText: AppStrings.labelHCO),
+                      //   ),
+                      //   onChanged: (value) {
+                      //     final selected = _hcos.firstWhere(
+                      //       (hco) => hco['accountName'] == value,
+                      //       orElse: () => {},
+                      //     );
+                      //     setState(() {
+                      //       _selectedHCOName = value;
+                      //       _selectedHCOId = selected['id']?.toString();
+                      //       _selectedHCP = [];
+                      //       // print("selected hcps: ${selected['hcps']}");
+                      //       if (_selectedHCOId != null) {
+                      //         _hcps = [];
+                      //         fetchHCPbyHCO(_selectedHCOId!);
+                      //       }
+                      //       // _hcps = List<Map<String, dynamic>>.from(selected['hcps']);
+                      //     });
+                      //   },
+                      //   validator: (value) => value == null || value.isEmpty
+                      //       ? AppStrings.selectHCO
+                      //       : null,
+                      // ),
+                      const SizedBox(height: 10),
+
+                      /// Event Type Dropdown
+                      DropdownButtonFormField<String>(
+                        value: _selectedEventType,
+                        decoration: InputDecoration(
+                          labelText: AppStrings.labelEventType,
+                        ),
+                        items: eventTypes.map<DropdownMenuItem<String>>((
+                          event,
+                        ) {
+                          return DropdownMenuItem<String>(
+                            value: event["value"].toString(),
+                            child: Text(event["label"] as String),
+                          );
+                        }).toList(),
+                        onChanged: (value) =>
+                            setState(() => _selectedEventType = value),
+                        validator: (value) => value == null || value.isEmpty
+                            ? AppStrings.selectEventType
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+
+                      /// Event Name TextField
                       TextFormField(
-                        controller: NewEventTextControllers.endDateController,
-                        readOnly: true,
+                        controller: NewEventTextControllers.eventNameController,
                         decoration: const InputDecoration(
-                          labelText: AppStrings.labelEndDate,
+                          labelText: AppStrings.labelEventName,
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? AppStrings.requiredField
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+
+                      /// Event Description TextField
+                      TextField(
+                        autocorrect: true,
+                        minLines: AppSizes().eventDescriptionMinLines,
+                        controller:
+                            NewEventTextControllers.eventDescriptionController,
+                        decoration: InputDecoration(
+                          labelText: AppStrings.labelEventDescription,
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.multiline,
+                        maxLines: null,
+                      ),
+                      SizedBox(height: 10),
+
+                      /// Multi-day Event Checkbox
+                      // CheckboxListTile(
+                      //   contentPadding: EdgeInsets.zero,
+                      //   title: Text(AppStrings.multiDayEvent),
+                      //   value: isMultiDay,
+                      //   onChanged: (val) {
+                      //     setState(() {
+                      //       isMultiDay = val ?? false;
+                      //       if (!isMultiDay) {
+                      //         NewEventTextControllers.endDateController.clear();
+                      //       }
+                      //     });
+                      //   },
+                      //   controlAffinity: ListTileControlAffinity.leading,
+                      // ),
+
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.start,
+                      //   children: [
+                      //     Switch(
+                      //       value: isMultiDay,
+                      //       onChanged: (v) {
+                      //         setState(() {
+                      //           isMultiDay = !isMultiDay;
+                      //           if (!isMultiDay) {
+                      //             NewEventTextControllers.endDateController
+                      //                 .clear();
+                      //           }
+                      //         });
+                      //       },
+                      //     ),
+                      //     SizedBox(width: 10),
+                      //     Text(AppStrings.multiDayEvent),
+                      //   ],
+                      // ),
+                      // const SizedBox(height: 10),
+
+                      /// Start Date TextField
+                      TextFormField(
+                        controller: NewEventTextControllers.startDateController,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: !!isMultiDay
+                              ? AppStrings.labelEventStartDate
+                              : AppStrings.labelStartDate,
                         ),
                         onTap: () async {
                           final DateTime? pickedDate = await showDatePicker(
                             context: context,
-                            initialDate: startDatePicked,
-                            firstDate: startDatePicked,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime.now(),
                             lastDate: DateTime(2030),
                           );
                           if (pickedDate != null) {
-                            NewEventTextControllers.endDateController.text =
-                                "${pickedDate.day}/${pickedDate.month}/${pickedDate.year} : ${pickedDate.hour}:${pickedDate.minute}";
-                            endDatePicked = pickedDate;
+                            NewEventTextControllers.startDateController.text =
+                                "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                            startDatePicked = pickedDate;
                           }
                         },
-                        validator: (value) =>
-                            isMultiDay && (value == null || value.isEmpty)
+                        validator: (value) => value == null || value.isEmpty
                             ? AppStrings.requiredField
                             : null,
                       ),
-
-                    /// Multi-day Event End Date
-                    if (isMultiDay) const SizedBox(height: 10),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller:
-                          NewEventTextControllers.numberOfStaffController,
-                      decoration: const InputDecoration(
-                        labelText: AppStrings.labelNumberOfStaff,
-                      ),
-                      validator: (value) => value == null || value.isEmpty
-                          ? AppStrings.requiredField
-                          : null,
-                    ),
-                    const SizedBox(height: 10),
-                    if (_selectedHCP.isNotEmpty) ...{
-                      Text("Total HCP's in Event: ${_selectedHCP.length}"),
                       const SizedBox(height: 10),
-                    },
-                    Container(
-                      width: double.infinity,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.border,
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          Flexible(
-                            flex: 1,
-                            child: InkWell(
-                              onTap: () {
-                                setState(() {
-                                  hcpInHcoSelected = true;
-                                });
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: hcpInHcoSelected
-                                      ? AppColors.primary
-                                      : AppColors.transparent,
-                                  border: Border.all(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                width: double.infinity,
-                                height: 50,
 
-                                child: Center(
-                                  child: Text(
-                                    "HCP in HCO",
-                                    style: TextStyle(
-                                      color: hcpInHcoSelected
-                                          ? AppColors.background
-                                          : AppColors.primary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                      /// Multi-day Event Start Date
+                      if (isMultiDay)
+                        TextFormField(
+                          controller: NewEventTextControllers.endDateController,
+                          readOnly: true,
+                          decoration: const InputDecoration(
+                            labelText: AppStrings.labelEndDate,
                           ),
-                          Flexible(
-                            flex: 1,
-                            child: InkWell(
-                              onTap: () {
-                                setState(() {
-                                  hcpInHcoSelected = false;
-                                });
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: hcpInHcoSelected
-                                      ? AppColors.transparent
-                                      : AppColors.primary,
-                                  border: Border.all(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "HCP Practitioner",
-                                    style: TextStyle(
-                                      color: !hcpInHcoSelected
-                                          ? AppColors.background
-                                          : AppColors.primary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    if (_selectedHCP.isNotEmpty) ...{
-                      Text(
-                        'Selected HCP Practitioners',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
+                          onTap: () async {
+                            final DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: startDatePicked,
+                              firstDate: startDatePicked,
+                              lastDate: DateTime(2030),
+                            );
+                            if (pickedDate != null) {
+                              NewEventTextControllers.endDateController.text =
+                                  "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                              endDatePicked = pickedDate;
+                            }
+                          },
+                          validator: (value) =>
+                              isMultiDay && (value == null || value.isEmpty)
+                              ? AppStrings.requiredField
+                              : null,
+                        ),
+
+                      /// Multi-day Event End Date
+                      if (isMultiDay) const SizedBox(height: 10),
                       TextFormField(
-                        readOnly: true, // Optional: disable manual typing
-                        decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 10,
-                            horizontal: 12,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                        keyboardType: TextInputType.number,
+                        controller:
+                            NewEventTextControllers.numberOfStaffController,
+                        decoration: const InputDecoration(
+                          labelText: AppStrings.labelNumberOfStaff,
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? AppStrings.requiredField
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+                      if (_selectedHCP.isNotEmpty) ...{
+                        Text("Total HCP's in Event: ${_selectedHCP.length}"),
+                        const SizedBox(height: 10),
+                      },
+                      Container(
+                        width: double.infinity,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.border,
+                          border: Border.all(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Flexible(
+                              flex: 1,
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    hcpInHcoSelected = true;
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: hcpInHcoSelected
+                                        ? AppColors.primary
+                                        : AppColors.transparent,
+                                    border: Border.all(color: AppColors.border),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  width: double.infinity,
+                                  height: 50,
 
-                          prefixIconConstraints: const BoxConstraints(
-                            minHeight: 48,
-                            minWidth: 0,
-                          ),
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: _selectedHCP.map((hcp) {
-                                return Chip(
-                                  label: Text(
-                                    hcp["name"],
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
+                                  child: Center(
+                                    child: Text(
+                                      "HCP in HCO",
+                                      style: TextStyle(
+                                        color: hcpInHcoSelected
+                                            ? AppColors.background
+                                            : AppColors.primary,
+                                      ),
                                     ),
                                   ),
-                                  backgroundColor: Colors.lightBlue.shade100,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              flex: 1,
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    hcpInHcoSelected = false;
+                                  });
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: hcpInHcoSelected
+                                        ? AppColors.transparent
+                                        : AppColors.primary,
+                                    border: Border.all(color: AppColors.border),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  deleteIcon: const Icon(Icons.close, size: 18),
-                                  onDeleted: () {
-                                    setState(() {
-                                      _selectedHCP.remove(hcp);
-                                    });
-                                  },
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  visualDensity: VisualDensity.compact,
-                                );
-                              }).toList(),
+                                  child: Center(
+                                    child: Text(
+                                      "HCP Practitioner",
+                                      style: TextStyle(
+                                        color: !hcpInHcoSelected
+                                            ? AppColors.background
+                                            : AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (_selectedHCP.isNotEmpty) ...{
+                        Text(
+                          'Selected HCP Practitioners',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          readOnly: true, // Optional: disable manual typing
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 12,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+
+                            prefixIconConstraints: const BoxConstraints(
+                              minHeight: 48,
+                              minWidth: 0,
+                            ),
+                            prefixIcon: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _selectedHCP.map((hcp) {
+                                  return Chip(
+                                    label: Text(
+                                      hcp["name"],
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    backgroundColor: Colors.lightBlue.shade100,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    deleteIcon: const Icon(
+                                      Icons.close,
+                                      size: 18,
+                                    ),
+                                    onDeleted: () {
+                                      setState(() {
+                                        _selectedHCP.remove(hcp);
+                                      });
+                                    },
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    visualDensity: VisualDensity.compact,
+                                  );
+                                }).toList(),
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                      SizedBox(height: 10),
-                    },
+                        SizedBox(height: 10),
+                      },
 
-                    /// HCP Dropdown
-                    if (hcpInHcoSelected) ...{
-                      if (_hcps.length < 11) ...{
-                        Autocomplete<Map<String, dynamic>>(
-                          displayStringForOption: (option) =>
-                              "${option['firstName']} ${option['lastName']}",
-                          optionsBuilder: (TextEditingValue textEditingValue) {
-                            if (textEditingValue.text == '') {
-                              return Iterable.empty();
-                            } else {
-                              return _hcps.where((ele) {
-                                String name =
-                                    "${ele['firstName']} ${ele['lastName']}";
-                                return name.toLowerCase().contains(
-                                  textEditingValue.text.toLowerCase(),
-                                );
-                              });
-                            }
-                          },
-                          fieldViewBuilder:
-                              (
-                                context,
-                                textEditingController,
-                                focusNode,
-                                onFieldSubmitted,
-                              ) {
-                                _autocompleteController = textEditingController;
-                                return TextField(
-                                  controller: textEditingController,
-                                  focusNode: focusNode,
-                                  decoration: InputDecoration(
-                                    labelText: "Search HCP Practitioners",
-                                    suffixIcon: Icon(Icons.search),
+                      /// HCP Dropdown
+                      if (hcpInHcoSelected) ...{
+                        if (_hcps.length < 11) ...{
+                          Autocomplete<Map<String, dynamic>>(
+                            displayStringForOption: (option) =>
+                                "${option['firstName']} ${option['lastName']}",
+                            optionsBuilder: (TextEditingValue textEditingValue) {
+                              if (textEditingValue.text == '') {
+                                return Iterable.empty();
+                              } else {
+                                return _hcps.where((ele) {
+                                  String name =
+                                      "${ele['firstName']} ${ele['lastName']}";
+                                  return name.toLowerCase().contains(
+                                    textEditingValue.text.toLowerCase(),
+                                  );
+                                });
+                              }
+                            },
+                            fieldViewBuilder:
+                                (
+                                  context,
+                                  textEditingController,
+                                  focusNode,
+                                  onFieldSubmitted,
+                                ) {
+                                  _autocompleteController =
+                                      textEditingController;
+                                  return TextField(
+                                    controller: textEditingController,
+                                    focusNode: focusNode,
+                                    decoration: InputDecoration(
+                                      labelText: "Search HCP Practitioners",
+                                      suffixIcon: Icon(Icons.search),
+                                    ),
+                                  );
+                                },
+
+                            onSelected: (selection) {
+                              var a = FocusScope.of(context).focusedChild;
+                              if (a != null) {
+                                a.unfocus();
+                              }
+                              if (!_selectedHCP.any(
+                                (hcp) => hcp['id'] == selection['id'],
+                              )) {
+                                setState(() {
+                                  _selectedHCP.add({
+                                    "id": selection['id'],
+                                    "name":
+                                        "${selection['firstName']} ${selection['lastName']}",
+                                    "approval": BasicCodesFromCrm.pending,
+                                  });
+                                });
+                                Future.delayed(Duration(milliseconds: 100), () {
+                                  _autocompleteController.clear();
+                                });
+                              }
+                            },
+                          ),
+                        } else ...{
+                          DropdownSearch<Map<String, dynamic>>.multiSelection(
+                            popupProps: const PopupPropsMultiSelection.menu(
+                              showSearchBox:
+                                  true, // <- this brings the search field
+                              searchFieldProps: TextFieldProps(
+                                // customise it if you like
+                                decoration: InputDecoration(
+                                  labelText: 'Search HCP',
+                                  prefixIcon: Icon(Icons.search),
+                                ),
+                              ),
+                            ),
+                            items: (filter, loadProps) {
+                              return _hcps
+                                  .map<Map<String, dynamic>>(
+                                    (e) => {
+                                      HCPModalKeys.hcpId: (e['id']).toString(),
+                                      HCPModalKeys.hcpName:
+                                          "${e['firstName']}  ${e['lastName']}",
+                                    },
+                                  )
+                                  .toList();
+                            },
+                            selectedItems: _selectedHCP
+                                .map<Map<String, dynamic>>(
+                                  (e) => {
+                                    HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
+                                        .toString(),
+                                    HCPModalKeys.hcpName:
+                                        e[HCPModalKeys.hcpName],
+                                  },
+                                )
+                                .toList(),
+                            itemAsString: (item) {
+                              return item[HCPModalKeys.hcpName] ??
+                                  item[HCPModalKeys.hcpName] ??
+                                  "";
+                            },
+                            compareFn: (item, selectedItem) =>
+                                item[HCPModalKeys.hcpId] ==
+                                selectedItem[HCPModalKeys.hcpId],
+                            decoratorProps: DropDownDecoratorProps(
+                              decoration: InputDecoration(
+                                labelText: _selectedHCP.isEmpty
+                                    ? "Select HCPs In HCO"
+                                    : null,
+                              ),
+                            ),
+                            dropdownBuilder: (context, selectedItems) =>
+                                _selectedHCP.isNotEmpty
+                                ? SizedBox(child: Text('Select HCPs In HCO'))
+                                : SizedBox(),
+                            onChanged: (value) {
+                              var a = FocusScope.of(context).focusedChild;
+                              if (a != null) {
+                                a.unfocus();
+                              }
+                              int noOfselecteHcps = value.length;
+                              int noOfStaff = int.parse(
+                                NewEventTextControllers
+                                        .numberOfStaffController
+                                        .text
+                                        .isNotEmpty
+                                    ? NewEventTextControllers
+                                          .numberOfStaffController
+                                          .text
+                                    : '0',
+                              );
+                              if (noOfselecteHcps > noOfStaff) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'You can select only $noOfStaff HCPs as per number of staff entered',
+                                    ),
                                   ),
                                 );
-                              },
+                                return;
+                              } else {
+                                setState(() {
+                                  _selectedHCP = value;
 
-                          onSelected: (selection) {
-                            var a = FocusScope.of(context).focusedChild;
-                            if (a != null) {
-                              a.unfocus();
-                            }
-                            if (!_selectedHCP.any(
-                              (hcp) => hcp['id'] == selection['id'],
-                            )) {
-                              setState(() {
-                                _selectedHCP.add({
-                                  "id": selection['id'],
-                                  "name":
-                                      "${selection['firstName']} ${selection['lastName']}",
+                                  hcpContactDto = value.map((e) {
+                                    return {
+                                      HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
+                                    };
+                                  }).toList();
                                 });
-                              });
-                              Future.delayed(Duration(milliseconds: 100), () {
-                                _autocompleteController.clear();
-                              });
-                            }
-                          },
-                        ),
+                              }
+                            },
+                            validator: (value) => value == null || value.isEmpty
+                                ? AppStrings.selectHCP
+                                : null,
+                          ),
+                        },
                       } else ...{
                         DropdownSearch<Map<String, dynamic>>.multiSelection(
                           popupProps: const PopupPropsMultiSelection.menu(
@@ -663,31 +771,43 @@ class _NewEventScreenState extends State<NewEventScreen> {
                             searchFieldProps: TextFieldProps(
                               // customise it if you like
                               decoration: InputDecoration(
-                                labelText: 'Search HCP',
+                                labelText: "Select HCP Practitioners",
                                 prefixIcon: Icon(Icons.search),
                               ),
                             ),
                           ),
-                          items: (filter, loadProps) {
-                            return _hcps
-                                .map<Map<String, dynamic>>(
-                                  (e) => {
-                                    HCPModalKeys.hcpId: (e['id']).toString(),
-                                    HCPModalKeys.hcpName:
-                                        "${e['firstName']}  ${e['lastName']}",
-                                  },
-                                )
-                                .toList();
-                          },
-                          selectedItems: _selectedHCP
+                          items: (filter, loadProps) => _hcpPractitioners
                               .map<Map<String, dynamic>>(
                                 (e) => {
                                   HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
                                       .toString(),
-                                  HCPModalKeys.hcpName: e[HCPModalKeys.hcpName],
+                                  HCPModalKeys.hcpName:
+                                      "${e['firstName']}  ${e['lastName']}",
                                 },
                               )
                               .toList(),
+                          selectedItems: _selectedHCP
+                              .map<Map<String, dynamic>>(
+                                (e) => {
+                                  HCPModalKeys.hcpId:
+                                      (e[HCPModalKeys.hcpId] ??
+                                              e[HCPModalKeys.hcpId] ??
+                                              "")
+                                          .toString(),
+                                  HCPModalKeys.hcpName:
+                                      e[HCPModalKeys.hcpName] ??
+                                      e[HCPModalKeys.hcpName] ??
+                                      e.toString(),
+                                },
+                              )
+                              .toList(),
+
+                          dropdownBuilder: (context, selectedItems) =>
+                              _selectedHCP.isNotEmpty
+                              ? SizedBox(
+                                  child: Text('Select HCP Practitioners'),
+                                )
+                              : SizedBox(),
                           itemAsString: (item) {
                             return item[HCPModalKeys.hcpName] ??
                                 item[HCPModalKeys.hcpName] ??
@@ -699,14 +819,10 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           decoratorProps: DropDownDecoratorProps(
                             decoration: InputDecoration(
                               labelText: _selectedHCP.isEmpty
-                                  ? "Select HCPs In HCO"
-                                  : null,
+                                  ? "Select HCP Practitioners"
+                                  : '',
                             ),
                           ),
-                          dropdownBuilder: (context, selectedItems) =>
-                              _selectedHCP.isNotEmpty
-                              ? SizedBox(child: Text('Select HCPs In HCO'))
-                              : SizedBox(),
                           onChanged: (value) {
                             var a = FocusScope.of(context).focusedChild;
                             if (a != null) {
@@ -735,7 +851,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
                             } else {
                               setState(() {
                                 _selectedHCP = value;
-
                                 hcpContactDto = value.map((e) {
                                   return {
                                     HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
@@ -749,125 +864,16 @@ class _NewEventScreenState extends State<NewEventScreen> {
                               : null,
                         ),
                       },
-                    } else ...{
-                      DropdownSearch<Map<String, dynamic>>.multiSelection(
-                        popupProps: const PopupPropsMultiSelection.menu(
-                          showSearchBox:
-                              true, // <- this brings the search field
-                          searchFieldProps: TextFieldProps(
-                            // customise it if you like
-                            decoration: InputDecoration(
-                              labelText: "Select HCP Practitioners",
-                              prefixIcon: Icon(Icons.search),
-                            ),
-                          ),
-                        ),
-                        items: (filter, loadProps) => _hcpPractitioners
-                            .map<Map<String, dynamic>>(
-                              (e) => {
-                                HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
-                                    .toString(),
-                                HCPModalKeys.hcpName:
-                                    "${e['firstName']}  ${e['lastName']}",
-                              },
-                            )
-                            .toList(),
-                        selectedItems: _selectedHCP
-                            .map<Map<String, dynamic>>(
-                              (e) => {
-                                HCPModalKeys.hcpId:
-                                    (e[HCPModalKeys.hcpId] ??
-                                            e[HCPModalKeys.hcpId] ??
-                                            "")
-                                        .toString(),
-                                HCPModalKeys.hcpName:
-                                    e[HCPModalKeys.hcpName] ??
-                                    e[HCPModalKeys.hcpName] ??
-                                    e.toString(),
-                              },
-                            )
-                            .toList(),
 
-                        dropdownBuilder: (context, selectedItems) =>
-                            _selectedHCP.isNotEmpty
-                            ? SizedBox(child: Text('Select HCP Practitioners'))
-                            : SizedBox(),
-                        itemAsString: (item) {
-                          return item[HCPModalKeys.hcpName] ??
-                              item[HCPModalKeys.hcpName] ??
-                              "";
-                        },
-                        compareFn: (item, selectedItem) =>
-                            item[HCPModalKeys.hcpId] ==
-                            selectedItem[HCPModalKeys.hcpId],
-                        decoratorProps: DropDownDecoratorProps(
-                          decoration: InputDecoration(
-                            labelText: _selectedHCP.isEmpty
-                                ? "Select HCP Practitioners"
-                                : '',
-                          ),
-                        ),
-                        onChanged: (value) {
-                          var a = FocusScope.of(context).focusedChild;
-                          if (a != null) {
-                            a.unfocus();
-                          }
-                          int noOfselecteHcps = value.length;
-                          int noOfStaff = int.parse(
-                            NewEventTextControllers
-                                    .numberOfStaffController
-                                    .text
-                                    .isNotEmpty
-                                ? NewEventTextControllers
-                                      .numberOfStaffController
-                                      .text
-                                : '0',
-                          );
-                          if (noOfselecteHcps > noOfStaff) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'You can select only $noOfStaff HCPs as per number of staff entered',
-                                ),
-                              ),
-                            );
-                            return;
-                          } else {
-                            setState(() {
-                              _selectedHCP = value;
-                              hcpContactDto = value.map((e) {
-                                return {
-                                  HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
-                                };
-                              }).toList();
-                            });
-                          }
-                        },
-                        validator: (value) => value == null || value.isEmpty
-                            ? AppStrings.selectHCP
-                            : null,
-                      ),
-                    },
+                      const SizedBox(height: 10),
+                    ],
+                  ),
 
-                    const SizedBox(height: 10),
-                  ],
-                ),
-
-                /// Create Event Button
-                Button(onPressed: _submitForm, text: AppStrings.createEvent),
-              ],
+                  /// Create Event Button
+                  Button(onPressed: _submitForm, text: AppStrings.createEvent),
+                ],
+              ),
             ),
-          ),
-        ),
-        if (_isLoading) ...{
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.2),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          ),
-        },
-      ],
-    );
+          );
   }
 }

@@ -69,9 +69,7 @@ class EventsReciptsCard extends StatelessWidget {
                                 color: AppColors.primary,
                                 fontSize: 15,
                               ),
-                              overflow: showCheckIn
-                                  ? TextOverflow.ellipsis
-                                  : null,
+                              overflow: TextOverflow.ellipsis,
                               item["title"] ?? "",
                             ),
                           ),
@@ -88,7 +86,7 @@ class EventsReciptsCard extends StatelessWidget {
                   TextButton(
                     onPressed: onSeeAll,
                     child: const Text(
-                      "${AppStrings.seeAll}",
+                      AppStrings.seeAll,
                       style: TextStyle(color: AppColors.primary),
                     ),
                   ),

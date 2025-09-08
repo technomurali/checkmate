@@ -44,8 +44,8 @@ class _DisputeDetailsScreenState extends State<DisputeDetailsScreen> {
   initState() {
     super.initState();
 
-    getPharmaCompany();
-    getDisputeDetails();
+    // getPharmaCompany();
+    // getDisputeDetails();
   }
 
   getPharmaCompany() {

@@ -1,8 +1,5 @@
 import 'dart:convert';
 
-import 'package:checkmate/core/constants/modal_keys.dart';
-import 'package:checkmate/features/auth/controllers/signin_controller.dart';
-import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:checkmate/features/auth/social_media_auth/services/apple_auth_service.dart';
 import 'package:checkmate/features/auth/social_media_auth/services/google_auth_service.dart';
 import 'package:checkmate/features/auth/social_media_auth/services/linkedin_auth_service.dart';

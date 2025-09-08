@@ -1,10 +1,13 @@
 import 'dart:convert';
 
 import 'package:checkmate/core/constants/app_api.dart';
+import 'package:checkmate/features/auth/controllers/interceptor.dart';
 import 'package:checkmate/features/auth/model/dispute_modal.dart';
-import 'package:http/http.dart' as http;
+import 'package:http_interceptor/http_interceptor.dart';
+// import 'package:http/http.dart' as http;
 
 class DisputeController {
+    Client http = InterceptedClient.build(interceptors: [Interceptor()]);
   Future<bool> submitDispute(DisputeModal disputeModal) async {
     final response = await http.post(
       Uri.parse("${AppApi.baseUrl}${AppApi.disputes}/save"),
