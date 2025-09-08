@@ -2,12 +2,15 @@ import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/features/auth/business_logic/signin_screen_logic.dart';
 
 import 'package:checkmate/features/auth/business_logic/signup_screen_logic.dart';
+import 'package:checkmate/firebase/firebase_options.dart';
+import 'package:checkmate/firebase/notifications.dart';
 import 'package:checkmate/routes/route_name.dart';
 import 'package:checkmate/routes/router.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/constants/app_colors.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'dart:io';
 
@@ -22,8 +25,11 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FirebaseNotifications.instance.initialize();
   runApp(
     MultiProvider(
       providers: [
