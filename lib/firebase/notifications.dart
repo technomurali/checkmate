@@ -1,79 +1,146 @@
+// lib/firebase/firebase_notifications.dart
 import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('Handling a background message: ${message.messageId}');
+/// Top-level background handler (required by firebase_messaging)
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint('BG message: ${message.messageId} data=${message.data}');
+  // If you really want to show a notification while background-handling,
+  // you can initialize FlutterLocalNotificationsPlugin here too (advanced).
 }
 
 class FirebaseNotifications {
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  FirebaseNotifications._();
+  static final FirebaseNotifications instance = FirebaseNotifications._();
 
-  void handleMessage(RemoteMessage message) {
-    print('Received a message: ${message.messageId}');
-    if (message.notification != null) {
-      print('Message also contained a notification: ${message.notification}');
-    }
-  }
+  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _fln = FlutterLocalNotificationsPlugin();
 
-  Future initPushNotifications() async {
-    await _firebaseMessaging.requestPermission();
-    String? token = await _firebaseMessaging.getToken();
-    print("Firebase Messaging Token: $token");
+  // Single high-importance channel for Android
+  static const AndroidNotificationChannel _androidChannel = AndroidNotificationChannel(
+    'high_importance_channel', // id (keep stable)
+    'High Importance Notifications', // name (user-visible)
+    description: 'Used for important notifications.',
+    importance: Importance.high,
+  );
 
-    FirebaseMessaging.onMessage.listen(handleMessage);
-    FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage? message) {
-      if (message != null) {
-        handleMessage(message);
-      }
-    });
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  }
-
+  /// Call this once, e.g. in main()
   Future<void> initialize() async {
-    NotificationSettings settings = await _firebaseMessaging.requestPermission(
+    // iOS: request permission + show notifications in foreground
+    final settings = await _fcm.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      criticalAlert: true,
+      provisional: false,
+      announcement: false,
+      carPlay: false,
+      providesAppNotificationSettings: true,
+    );
+
+    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
     );
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('User granted permission');
+    // Android: init local notifications + create channel
+    await _setupLocalNotifications();
 
-      if (Platform.isIOS) {
-        String? apnsToken = await _firebaseMessaging.getAPNSToken();
-        if (apnsToken == null) {
-          FirebaseMessaging.instance.onTokenRefresh.listen((String token) {
-            print('FCM token (onTokenRefresh): $token');
-          });
-        } else {
-          final fcmToken = await _firebaseMessaging.getToken();
-          print('FCM token: $fcmToken');
-        }
-      } else {
-        final fcmToken = await _firebaseMessaging.getToken();
-        print('FCM token: $fcmToken');
-      }
+    // Tokens
+    final token = await _fcm.getToken();
+    debugPrint('FCM token: $token');
+    _fcm.onTokenRefresh.listen((t) => debugPrint('FCM token refreshed: $t'));
 
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        print('Received a message while in the foreground!');
-        print('Message data: ${message.data}');
+    // Message handlers
+    FirebaseMessaging.onMessage.listen(_onForegroundMessage);
+    FirebaseMessaging.onMessageOpenedApp.listen(_onOpenedFromTray);
 
-        if (message.notification != null) {
-          print(
-            'Message also contained a notification: ${message.notification}',
-          );
-        }
-      });
-
-      FirebaseMessaging.onBackgroundMessage(
-        _firebaseMessagingBackgroundHandler,
-      );
-    } else {
-      print('User declined or has not accepted permission');
+    // If app opened from terminated by tapping a notification
+    final initial = await FirebaseMessaging.instance.getInitialMessage();
+    if (initial != null) {
+      _onOpenedFromTray(initial);
     }
+
+    // Background handler must be top-level
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+    if (settings.authorizationStatus != AuthorizationStatus.authorized) {
+      debugPrint('Push permission not granted (${settings.authorizationStatus}).');
+    }
+  }
+
+  Future<void> _setupLocalNotifications() async {
+    // Android init: use your app icon as small icon
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    // iOS init
+    const iosInit = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
+
+    final initSettings = InitializationSettings(android: androidInit, iOS: iosInit);
+    await _fln.initialize(initSettings);
+
+    if (Platform.isAndroid) {
+      final androidPlugin =
+          _fln.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+      // Create high-importance channel once
+      await androidPlugin?.createNotificationChannel(_androidChannel);
+
+      // Android 13+ runtime permission for notifications (optional but recommended)
+      await androidPlugin?.requestNotificationsPermission();
+    }
+  }
+
+  // Show a local notification (used for Android foreground; optional on iOS)
+  Future<void> _showLocalNotification(RemoteMessage message) async {
+    final notif = message.notification;
+    final title = notif?.title ?? message.data['title'] ?? 'Notification';
+    final body  = notif?.body  ?? message.data['body']  ?? '';
+
+    final details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        _androidChannel.id,
+        _androidChannel.name,
+        channelDescription: _androidChannel.description,
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: notif?.android?.smallIcon, // defaults to @mipmap/ic_launcher
+        ticker: 'ticker',
+      ),
+      iOS: const DarwinNotificationDetails(),
+    );
+
+    await _fln.show(
+      message.hashCode,
+      title,
+      body,
+      details,
+      payload: message.data.isEmpty ? null : message.data.toString(),
+    );
+  }
+
+  // Foreground messages → show local notification on Android
+  void _onForegroundMessage(RemoteMessage message) {
+    debugPrint('FG message: ${message.messageId} data=${message.data}');
+    if (Platform.isAndroid) {
+      _showLocalNotification(message);
+    }
+    // iOS banners already handled by setForegroundNotificationPresentationOptions
+  }
+
+  // When user taps a notification (from background/terminated)
+  void _onOpenedFromTray(RemoteMessage message) {
+    debugPrint('Opened from tray: ${message.messageId} data=${message.data}');
+    // TODO: Navigate using message.data (e.g., route, id)
+    // Example:
+    // final route = message.data['route'];
+    // if (route != null) Navigator.of(context).pushNamed(route);
   }
 }

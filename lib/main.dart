@@ -12,31 +12,28 @@ import 'core/constants/app_colors.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-
 import 'dart:io';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-      return super.createHttpClient(context)
+    return super.createHttpClient(context)
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
   }
 }
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-);
-await FirebaseNotifications().initialize();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FirebaseNotifications.instance.initialize();
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SigninScreenLogic()),
         ChangeNotifierProvider(create: (_) => TopNavProvider()),
-         ChangeNotifierProvider(create: (_) => SignupScreenLogic()),
+        ChangeNotifierProvider(create: (_) => SignupScreenLogic()),
       ],
       child: const MyApp(),
     ),
