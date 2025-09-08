@@ -92,15 +92,24 @@ class _SignupScreenState extends State<SignupScreen> {
                       isRequired: true,
                       controller: TextControllers.email,
                       label: AppStrings.email,
-                     errorText: signupScreenLogic.emailError,
+                      errorText: signupScreenLogic.emailError,
                     ),
                     const SizedBox(height: 16),
+                    // CustomTextField(
+                    //   prefixIcon: Icon(Icons.lock_outline),
+                    //   isRequired: true,
+                    //   controller: TextControllers.password,
+                    //   label: AppStrings.newPassword,
+                    //   obscureText: true,
+                    //   errorText: signupScreenLogic.passwordError,
+                    // ),
                     CustomTextField(
                       prefixIcon: Icon(Icons.lock_outline),
                       isRequired: true,
-                      controller: TextControllers.password,
                       label: AppStrings.newPassword,
+                      focusNode: TextControllers.passwordFocusNode,
                       obscureText: true,
+                      controller: TextControllers.password,
                       errorText: signupScreenLogic.passwordError,
                     ),
                     const SizedBox(height: 16),
@@ -110,13 +119,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       controller: TextControllers.confirmPassword,
                       label: AppStrings.confirmPassword,
                       obscureText: true,
-                      validator: (val) {
-                        if (val.length < 6) return ErrorText.passMinError;
-                        if (val != TextControllers.password.text) {
-                          return ErrorText.passMisMatch;
-                        }
-                        return null;
-                      },
+                      errorText: signupScreenLogic.isValid['confirmPassword']!
+                          ? null
+                          : ErrorText.passMisMatch,
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -287,7 +292,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
           ),
           if (signupScreenLogic.isLoading) ...{
-            Positioned.fill(
+            Positioned(
               child: Container(
                 // ignore: deprecated_member_use
                 color: AppColors.border.withOpacity(0.5),

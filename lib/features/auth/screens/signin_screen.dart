@@ -49,14 +49,14 @@ class SigninScreen extends StatelessWidget {
                   const SizedBox(height: 32),
                   CustomTextField(
                     label: AppStrings.email,
-                    controller: TextControllers.email,
+                    controller: SigninTextControllers.email,
                     errorText: logic.emailError,
                   ),
                   const SizedBox(height: 16),
                   CustomTextField(
                     label: AppStrings.password,
                     obscureText: true,
-                    controller: TextControllers.password,
+                    controller: SigninTextControllers.password,
                     errorText: logic.passwordError,
                   ),
 

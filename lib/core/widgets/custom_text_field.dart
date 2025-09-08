@@ -13,6 +13,7 @@ class CustomTextField extends StatefulWidget {
   final Widget? prefixIcon;
   final bool readOnly;
   String? errorText;
+  FocusNode? focusNode;
   CustomTextField({
     super.key,
     required this.controller,
@@ -26,6 +27,7 @@ class CustomTextField extends StatefulWidget {
     this.readOnly = false,
     this.prefixIcon,
     this.errorText,
+    this.focusNode,
   });
 
   @override
@@ -77,6 +79,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      focusNode: widget.focusNode,
       enabled: !widget.readOnly,
       onChanged: (value) {
         setState(() {

@@ -13,16 +13,16 @@ class SigninScreenLogic extends ChangeNotifier {
   String? passwordError;
   SigninScreenLogic([SigninController? controller])
     : _signinController = controller ?? SigninController() {
-    TextControllers.email.addListener(validateEmail);
-    TextControllers.password.addListener(validatePassword);
-    TextControllers.email.clear();
-    TextControllers.password.clear();
+    SigninTextControllers.email.addListener(validateEmail);
+    SigninTextControllers.password.addListener(validatePassword);
+    SigninTextControllers.email.clear();
+    SigninTextControllers.password.clear();
   }
 
   bool isButtonEnabled = false;
   void validateEmail() {
-    final email = TextControllers.email.text.trim();
-    if (TextControllers.email.text.trim() != "") {
+    final email = SigninTextControllers.email.text.trim();
+    if (SigninTextControllers.email.text.trim() != "") {
       if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
         emailError = "Enter a valid email";
       } else {
@@ -34,7 +34,7 @@ class SigninScreenLogic extends ChangeNotifier {
   }
 
   void validatePassword() {
-    final password = TextControllers.password.text.trim();
+    final password = SigninTextControllers.password.text.trim();
     if (!isValidPassword(password)) {
       passwordError = "Must be 6+ chars, include upper, lower, digit, special";
     } else {
@@ -48,8 +48,8 @@ class SigninScreenLogic extends ChangeNotifier {
     final enabled =
         emailError == null &&
         passwordError == null &&
-        TextControllers.email.text.trim().isNotEmpty &&
-        TextControllers.password.text.trim().isNotEmpty;
+        SigninTextControllers.email.text.trim().isNotEmpty &&
+        SigninTextControllers.password.text.trim().isNotEmpty;
     if (enabled != isButtonEnabled) {
       isButtonEnabled = enabled;
     }
@@ -71,8 +71,8 @@ class SigninScreenLogic extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
       final response = await _signinController.signin(
-        email: TextControllers.email.text.trim(),
-        password: TextControllers.password.text.trim(),
+        email: SigninTextControllers.email.text.trim(),
+        password: SigninTextControllers.password.text.trim(),
       );
 
       if (response[SigninModalKeys.signinSuccess] == true) {
@@ -81,8 +81,8 @@ class SigninScreenLogic extends ChangeNotifier {
         isButtonEnabled = false;
         isLoading = false;
         notifyListeners();
-        TextControllers.email.clear();
-        TextControllers.password.clear();
+        SigninTextControllers.email.clear();
+        SigninTextControllers.password.clear();
         return user;
       } else {
         isLoading = false;
@@ -113,8 +113,8 @@ class SigninScreenLogic extends ChangeNotifier {
 
   @override
   void dispose() {
-    TextControllers.email.removeListener(updateButtonState);
-    TextControllers.password.removeListener(updateButtonState);
+    SigninTextControllers.email.removeListener(updateButtonState);
+    SigninTextControllers.password.removeListener(updateButtonState);
     super.dispose();
   }
 }

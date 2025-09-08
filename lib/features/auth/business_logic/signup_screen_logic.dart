@@ -93,19 +93,19 @@ class SignupScreenLogic extends ChangeNotifier {
     if (!isValidPassword(password)) {
       passwordError = "Must be 6+ chars, include upper, lower, digit, special";
     } else {
-      passwordError = '';
+      passwordError = null;
     }
     notifyListeners();
   }
 
   bool isValidPassword(String password) {
-    if (password != "") {
-      if (password.length < 6) return false;
-      if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
-      if (!RegExp(r'[a-z]').hasMatch(password)) return false;
-      if (!RegExp(r'[0-9]').hasMatch(password)) return false;
-      if (!RegExp(r'[!@#\$&*~%^(),.?":{}|<>]').hasMatch(password)) return false;
-    }
+    // if (password != "") {
+    //   if (password.length < 6) return false;
+    //   if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
+    //   if (!RegExp(r'[a-z]').hasMatch(password)) return false;
+    //   if (!RegExp(r'[0-9]').hasMatch(password)) return false;
+    //   if (!RegExp(r'[!@#\$&*~%^(),.?":{}|<>]').hasMatch(password)) return false;
+    // }
     return true;
   }
 

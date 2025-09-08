@@ -11,8 +11,12 @@ class TextControllers {
   static TextEditingController verificationCode = TextEditingController();
   static TextEditingController companyId = TextEditingController();
   static TextEditingController userRoleId = TextEditingController();
+  static final FocusNode passwordFocusNode = FocusNode();
 }
-
+class SigninTextControllers {
+  static TextEditingController email = TextEditingController();
+  static TextEditingController password = TextEditingController();
+}
 class EventTextControllers {
   static TextEditingController eventNameController = TextEditingController();
   static TextEditingController startDateController = TextEditingController();
