@@ -206,8 +206,9 @@ class _NewEventScreenState extends State<NewEventScreen> {
   Widget build(BuildContext context) {
     return _isLoading
         ? SizedBox(
-          height: MediaQuery.of(context).size.height * 0.7,
-          child: Center(child: CircularProgressIndicator()))
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: Center(child: CircularProgressIndicator()),
+          )
         : Padding(
             padding: const EdgeInsets.all(16.0),
             child: Form(
@@ -373,26 +374,27 @@ class _NewEventScreenState extends State<NewEventScreen> {
                       //   },
                       //   controlAffinity: ListTileControlAffinity.leading,
                       // ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Switch(
-                            value: isMultiDay,
-                            onChanged: (v) {
-                              setState(() {
-                                isMultiDay = !isMultiDay;
-                                if (!isMultiDay) {
-                                  NewEventTextControllers.endDateController
-                                      .clear();
-                                }
-                              });
-                            },
-                          ),
-                          SizedBox(width: 10),
-                          Text(AppStrings.multiDayEvent),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
+
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.start,
+                      //   children: [
+                      //     Switch(
+                      //       value: isMultiDay,
+                      //       onChanged: (v) {
+                      //         setState(() {
+                      //           isMultiDay = !isMultiDay;
+                      //           if (!isMultiDay) {
+                      //             NewEventTextControllers.endDateController
+                      //                 .clear();
+                      //           }
+                      //         });
+                      //       },
+                      //     ),
+                      //     SizedBox(width: 10),
+                      //     Text(AppStrings.multiDayEvent),
+                      //   ],
+                      // ),
+                      // const SizedBox(height: 10),
 
                       /// Start Date TextField
                       TextFormField(
