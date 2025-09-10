@@ -38,6 +38,56 @@ class EventController {
     }
   }
 
+  Future<List<EventModal>> fetchHcpEvents({String? status}) async {
+    try {
+      final uri = Uri.parse(
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByHcp/${userModal.kiosk}${status != null ? '?status=$status' : ''}",
+      );
+
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        debugPrint("Events TRL 1 ::: $jsonBody");
+
+        final List<dynamic> eventsJson = jsonBody;
+        debugPrint("Events TRL 2 ::: ${eventsJson.runtimeType}");
+        return eventsJson.map((e) => EventModal.fromJson(e)).toList();
+      } else {
+        debugPrint("Failed to fetch events. Status: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      debugPrint("Error fetching events: $e");
+      return [];
+    }
+  }
+
+  Future<List<EventModal>> fetchOfficeuserEvents({String? status}) async {
+    try {
+      final uri = Uri.parse(
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRep/${userModal.kiosk}${status != null ? '?status=$status' : ''}",
+      );
+
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        debugPrint("Events TRL 1 ::: $jsonBody");
+
+        final List<dynamic> eventsJson = jsonBody;
+        debugPrint("Events TRL 2 ::: ${eventsJson.runtimeType}");
+        return eventsJson.map((e) => EventModal.fromJson(e)).toList();
+      } else {
+        debugPrint("Failed to fetch events. Status: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      debugPrint("Error fetching events: $e");
+      return [];
+    }
+  }
+
   Future<List<EventModal>> fetchEventsWithStatus({String? status}) async {
     try {
       final uri = Uri.parse(
@@ -66,6 +116,115 @@ class EventController {
   }
 
   Future<List<EventModal>> fetchEventsWithPending({String? status}) async {
+    try {
+      final uri = Uri.parse(
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRepAndApproval/${userModal.kiosk}/$status",
+      );
+
+      final response = await http.get(
+        uri,
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      );
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        debugPrint("Events TRL 1 ::: $jsonBody");
+
+        final List<dynamic> eventsJson = jsonBody;
+        debugPrint("Events TRL 2 ::: ${eventsJson.runtimeType}");
+        return eventsJson.map((e) => EventModal.fromJson(e)).toList();
+      } else {
+        debugPrint("Failed to fetch events. Status: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      debugPrint("Error fetching events: $e");
+      return [];
+    }
+  }
+
+  Future<List<EventModal>> fetchHcpEventsWithStatus({String? status}) async {
+    try {
+      final uri = Uri.parse(
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByHcpAndStatus/${userModal.kiosk}/$status",
+      );
+
+      final response = await http.get(
+        uri,
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      );
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        debugPrint("Events TRL 1 ::: $jsonBody");
+
+        final List<dynamic> eventsJson = jsonBody;
+        debugPrint("Events TRL 2 ::: ${eventsJson.runtimeType}");
+        return eventsJson.map((e) => EventModal.fromJson(e)).toList();
+      } else {
+        debugPrint("Failed to fetch events. Status: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      debugPrint("Error fetching events: $e");
+      return [];
+    }
+  }
+
+  Future<List<EventModal>> fetchHcpEventsWithPending({String? status}) async {
+    //Events/doctors/events/956f74f7-0b8b-f011-b4cc-6045bd0460f1
+    try {
+      final uri = Uri.parse(
+        "${AppApi.baseUrl1}${AppApi.events}/doctors/events/${userModal.kiosk}",
+      );
+
+      final response = await http.get(
+        uri,
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      );
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        debugPrint("Events TRL 1 ::: $jsonBody");
+
+        final List<dynamic> eventsJson = jsonBody;
+        debugPrint("Events TRL 2 ::: ${eventsJson.runtimeType}");
+        return eventsJson.map((e) => EventModal.fromJson(e)).toList();
+      } else {
+        debugPrint("Failed to fetch events. Status: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      debugPrint("Error fetching events: $e");
+      return [];
+    }
+  }
+
+  Future<List<EventModal>> fetchEventsHCOWithStatus({String? status}) async {
+    try {
+      final uri = Uri.parse(
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRepAndStatus/${userModal.kiosk}/$status",
+      );
+
+      final response = await http.get(
+        uri,
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      );
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        debugPrint("Events TRL 1 ::: $jsonBody");
+
+        final List<dynamic> eventsJson = jsonBody;
+        debugPrint("Events TRL 2 ::: ${eventsJson.runtimeType}");
+        return eventsJson.map((e) => EventModal.fromJson(e)).toList();
+      } else {
+        debugPrint("Failed to fetch events. Status: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      debugPrint("Error fetching events: $e");
+      return [];
+    }
+  }
+
+  Future<List<EventModal>> fetchEventsHCOWithPending({String? status}) async {
     try {
       final uri = Uri.parse(
         "${AppApi.baseUrl1}${AppApi.events}/getEventsByRepAndApproval/${userModal.kiosk}/$status",
@@ -251,6 +410,48 @@ class EventController {
     } catch (e) {
       debugPrint("Error submitting Check-In: $e");
       return false;
+    }
+  }
+
+  Future<Response> approve(eventId, doctorId, remarks) async {
+    var url = Uri.parse(AppApi.buildApprovalUrl(eventId, doctorId, "remarks"));
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+      debugPrint(
+        "approvebyHcp payload: ${jsonEncode({'eventId': eventId, 'doctorId': doctorId, 'remarks': remarks})}",
+      );
+      return response;
+    } catch (e) {
+      debugPrint("Error submitting approvebyHcp: $e");
+      return Response('Error : $e', 400);
+    }
+  }
+  Future<Response> reject(eventId, doctorId, remarks) async {
+    var url = Uri.parse(AppApi.buildRejectionUrl(eventId, doctorId, "$remarks"));
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+      debugPrint(
+        "approvebyHcp payload: ${jsonEncode({'eventId': eventId, 'doctorId': doctorId, 'remarks': remarks})}",
+      );
+      return response;
+    } catch (e) {
+      debugPrint("Error submitting approvebyHcp: $e");
+      return Response('Error : $e', 400);
+    }
+  }
+  Future<Response>fetchEventAttachments(String eventId)async{
+    final uri = Uri.parse(AppApi.buildAttachmentsUrl(eventId));
+    try {
+      return await http.get(uri,headers: {'Content-Type': 'application/json'});
+    } catch (e) {
+      debugPrint("Error fetching event attachments: $e");
+      return Response('Error', 400);
     }
   }
 }

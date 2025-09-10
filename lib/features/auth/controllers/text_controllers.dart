@@ -83,3 +83,7 @@ class DisputeFormTextControllers {
   // 3. Dispute Reason
   static TextEditingController descriptionController = TextEditingController();
 }
+
+class ReceiptRejectionTextController {
+  static TextEditingController remarksController = TextEditingController();
+}

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Top-level background handler (required by firebase_messaging)
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -45,13 +46,14 @@ class FirebaseNotifications {
       badge: true,
       sound: true,
     );
-
+final SharedPreferences prefs = await SharedPreferences.getInstance();
     // Android: init local notifications + create channel
     await _setupLocalNotifications();
 
     // Tokens
     final token = await _fcm.getToken();
     debugPrint('FCM token: $token');
+    await prefs.setString('fcmToken', token ?? '');
     _fcm.onTokenRefresh.listen((t) => debugPrint('FCM token refreshed: $t'));
 
     // Message handlers

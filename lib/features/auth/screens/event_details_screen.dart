@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
@@ -44,7 +45,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   bool isLoading = false;
   bool isCheckinPossible = true;
   int amountForIndividualHcp = 0;
-
+  List<Uint8List> eventAttachments = [];
   @override
   void initState() {
     super.initState();
@@ -56,6 +57,33 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     EventTextControllers.endDateController = TextEditingController(
       text: event.endDate.toString(),
     );
+  }
+
+  fetchImagesOfEvent(String eventId) async {
+    setState(() {
+      isLoading = true;
+    });
+    await _eventController.fetchEventAttachments(eventId).then((value) {
+      if (value.statusCode == AppApiStatusCodes.success) {
+        jsonDecode(value.body).forEach((attachment) {
+          List attachments = [];
+          attachments.add(attachment['base64']);
+          setState(() {
+            eventAttachments = attachments
+                .map<Uint8List>(
+                  (base64Str) =>
+                      base64Decode(base64Str.toString().split(',').last),
+                )
+                .toList();
+          });
+        });
+      } else {
+        debugPrint("Failed to load attachments");
+      }
+      setState(() {
+        isLoading = false;
+      });
+    });
   }
 
   submitCheckIn() {
@@ -122,6 +150,28 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text(AppStrings.receiptUploadFailed)),
         );
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
+  }
+
+  eventParticipantApproval(String doctorId, String remarks) {
+    setState(() {
+      isLoading = true;
+    });
+    _eventController.approve(event.eventId ?? '', doctorId, remarks).then((
+      response,
+    ) {
+      if (response.statusCode == AppApiStatusCodes.success) {
+        fetchEvent();
+        setState(() {
+          isLoading = false;
+        });
+        final navProvider = Provider.of<TopNavProvider>(context, listen: false);
+        navProvider.goBack();
+      } else {
         setState(() {
           isLoading = false;
         });
@@ -234,6 +284,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               );
             }),
             v.hco != null ? fetchHcoName(v.hco!) : null,
+            fetchImagesOfEvent(v.eventId ?? widget.eventId),
           },
         );
   }
@@ -443,10 +494,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       Divider(),
                       SizedBox(height: 16),
                       TextFormField(
-                        enabled:
-                            (userModal.role == UserType.pharmaRep &&
-                                isCheckedIn) ||
-                            isEdit,
+                        enabled: userModal.role == UserType.pharmaRep && isEdit,
                         controller: EventTextControllers.eventNameController,
                         decoration: InputDecoration(
                           labelText: AppStrings.labelEventName,
@@ -460,9 +508,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       Divider(),
                       TextField(
                         enabled:
-                            (userModal.role == UserType.pharmaRep &&
-                                isCheckedIn) ||
-                            isEdit,
+                            (userModal.role == UserType.pharmaRep) && isEdit,
                         autocorrect: true,
                         minLines: AppSizes().eventDescriptionMinLines,
                         controller:
@@ -476,7 +522,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       ),
                       SizedBox(height: 16),
                       TextFormField(
-                        enabled: isCheckedIn || isEdit,
+                        enabled: isEdit,
                         controller: EventTextControllers.startDateController,
                         readOnly: true,
                         decoration: InputDecoration(
@@ -508,7 +554,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       SizedBox(height: 16),
                       event.isMultiDay
                           ? TextFormField(
-                              enabled: isCheckedIn || isEdit,
+                              enabled: isEdit,
                               controller:
                                   EventTextControllers.endDateController,
                               readOnly: true,
@@ -538,9 +584,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       TextFormField(
                         keyboardType: TextInputType.number,
                         enabled:
-                            (userModal.role == UserType.pharmaRep &&
-                                isCheckedIn) ||
-                            isEdit,
+                            (userModal.role == UserType.pharmaRep) && isEdit,
                         controller:
                             EventTextControllers.numberOfStaffController,
                         decoration: InputDecoration(
@@ -658,8 +702,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               ),
                             ),
                             enabled:
-                                (userModal.role == UserType.pharmaRep &&
-                                    isCheckedIn) ||
+                                (userModal.role == UserType.pharmaRep) &&
                                 isEdit,
                             items: (filter, loadProps) => hcpList
                                 .map<Map<String, dynamic>>(
@@ -731,8 +774,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               ),
                             ),
                             enabled:
-                                (userModal.role == UserType.pharmaRep &&
-                                    isCheckedIn) ||
+                                (userModal.role == UserType.pharmaRep) &&
                                 isEdit,
                             items: (filter, loadProps) =>
                                 hcpPractioners.map<Map<String, dynamic>>((e) {
@@ -810,7 +852,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                   //contact.approval.toString() == BasicCodesFromCrm.pending
                                   if (contact.approval.toString() !=
                                       BasicCodesFromCrm.pending)
-                                    InkWell(
+                                    Container(
+                                      alignment: Alignment.center,
+                                      padding: EdgeInsets.only(right: 24),
                                       child: Text(
                                         eventApprovalCodeToText(
                                           contact.approval ?? '0',
@@ -829,7 +873,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                       ),
                                     ),
                                   if (contact.approval.toString() ==
-                                      BasicCodesFromCrm.pending)
+                                          BasicCodesFromCrm.pending &&
+                                      userModal.role == UserType.pharmaRep)
                                     ElevatedButton(
                                       style: ButtonStyle(
                                         backgroundColor:
@@ -846,6 +891,37 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                         ),
                                       ),
                                     ),
+                                  if (contact.approval.toString() ==
+                                          BasicCodesFromCrm.pending &&
+                                      userModal.role != UserType.pharmaRep)
+                                    ElevatedButton(
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            contact.id == userModal.kiosk
+                                            ? MaterialStateProperty.all(
+                                                AppColors.successGreen,
+                                              )
+                                            : MaterialStateProperty.all(
+                                                AppColors.border,
+                                              ),
+                                      ),
+                                      onPressed: contact.id == userModal.kiosk
+                                          ? () {
+                                              eventParticipantApproval(
+                                                contact.id,
+                                                "",
+                                              );
+                                            }
+                                          : null,
+                                      child: Text(
+                                        "Approve",
+                                        style: TextStyle(
+                                          color: AppColors.background,
+                                        ),
+                                      ),
+                                    ),
+
+                                  SizedBox(width: 8),
                                 ],
                               ),
                               SizedBox(height: 16),
@@ -854,7 +930,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         ),
                       SizedBox(height: 16),
                       if (isCheckedIn && _checkInDateTime != null)
-                        Padding(
+                        Container(
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             'Checked in at: '
@@ -941,7 +1017,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           ],
                         ),
                         if (_selectedReceiptFileName != null)
-                          Padding(
+                          Container(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text('Selected:  $_selectedReceiptFileName'),
                           ),
@@ -990,7 +1066,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           ],
                         ),
                         if (_selectedSignInSheetFileName != null)
-                          Padding(
+                          Container(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
                               'Selected:  $_selectedSignInSheetFileName',
@@ -1005,6 +1081,16 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       text: AppStrings.updateEvent,
                       onPressed: () {
                         updateEvent();
+                      },
+                    ),
+                  if (isEdit) SizedBox(height: 12),
+                  if (isEdit)
+                    Button(
+                      text: AppStrings.cancelupdateEvent,
+                      onPressed: () {
+                        setState(() {
+                          isEdit = !isEdit;
+                        });
                       },
                     ),
                   if (userModal.role == UserType.pharmaRep &&
@@ -1058,6 +1144,20 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           });
                         },
                       ),
+                  },
+                  if (event.eventStatus ==
+                      int.parse(BasicCodesFromCrm.completed)) ...{
+                    if (eventAttachments.isNotEmpty) Text("Attachments"),
+                    SizedBox(height: 10),
+                    for (var i = 0; i < eventAttachments.length; i++) ...{
+                      Image.memory(
+                        eventAttachments[i],
+                        height: 100,
+                        width: 100,
+                        fit: BoxFit.cover,
+                      ),
+                      SizedBox(height: 10),
+                    },
                   },
                 ],
               ),

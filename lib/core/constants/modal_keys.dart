@@ -23,6 +23,7 @@ mixin SigninModalKeys {
   static const String signinUser = 'user';
   static const String signinEmail = 'email';
   static const String signinPassword = 'password';
+  static const String fcmToken = 'fcmToken';
 }
 
 mixin UserModalKeys {

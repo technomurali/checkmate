@@ -200,7 +200,9 @@ class ContactDto {
     phoneNumber: json["phoneNumber"],
     jobTitle: json["jobTitle"],
     company: json["company"],
-    approval: json["approval"] ?? BasicCodesFromCrm.pending,
+    approval: json["approval"] == null
+        ? BasicCodesFromCrm.pending
+        : json["approval"].toString(),
   );
 
   Map<String, dynamic> toJson() => {

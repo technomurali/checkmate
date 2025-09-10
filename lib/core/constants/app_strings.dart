@@ -34,6 +34,7 @@ class AppStrings {
   static const String pendingReceipts = "Pending Approval";
   static const String checkIn = "Check in";
   static const String updateEvent = "Update Event";
+  static const String cancelupdateEvent = "Cancel Update Event";
   static const String submitCheckIn = "Submit Check-in";
   static const String cancelCheckIn = "Cancel Check-in";
   static const String seeAll = "See all";
@@ -129,6 +130,9 @@ class AppStrings {
   static const String receiptUploadSuccess = "Receipt uploaded successfully";
   static const String receiptUploadFailed = "Receipt upload failed";
   static const String ok = "OK";
+  static const String approve = "Approve";
+  static const String reject = "Reject";
+  static const String rejectMessage = "You are requested to review and confirm the event details. If rejecting, please provide a reason to complete compliance.";
 }
 
 class ErrorText {

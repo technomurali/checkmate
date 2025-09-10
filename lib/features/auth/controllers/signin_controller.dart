@@ -4,6 +4,7 @@ import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SigninController {
   SigninController();
@@ -16,17 +17,19 @@ class SigninController {
       "sigin /////// ${jsonEncode({SigninModalKeys.signinEmail: email, SigninModalKeys.signinPassword: password})}",
     );
     final url = Uri.parse(AppApi.baseUrl1 + AppApi.signin);
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       // BasicCodesFromCrm().getEventStatus();
       // BasicCodesFromCrm().getEventApprovals();
+      var data = {
+        SigninModalKeys.signinEmail: email,
+        SigninModalKeys.signinPassword: password,
+        SigninModalKeys.fcmToken: prefs.getString('fcmToken') ?? '',
+      };
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          SigninModalKeys.signinEmail: email,
-          SigninModalKeys.signinPassword: password,
-        }),
+        body: jsonEncode(data),
       );
 
       if (response.statusCode == 200) {
@@ -45,6 +48,7 @@ class SigninController {
           kiosk: data['result']["kiosk"].toString(),
           token: data["token"] ?? '',
         );
+        prefs.setString('user', jsonEncode(user.toJson()));
         return {
           SigninModalKeys.signinSuccess: true,
           SigninModalKeys.signinMessage: data[SigninModalKeys.signinMessage],

@@ -44,10 +44,15 @@ class TopNav extends StatelessWidget {
         body: Column(
           children: [
             Container(
-              height:
-                  AppSizes().headerHeight + MediaQuery.of(context).padding.top,
+              height: MediaQuery.of(context).padding.top > 0
+                  ? AppSizes().headerHeight +
+                        MediaQuery.of(context).padding.top +
+                        6
+                  : AppSizes().headerHeight + 6,
               padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top - 10,
+                top: MediaQuery.of(context).padding.top > 10
+                    ? MediaQuery.of(context).padding.top - 10
+                    : 0,
                 left: 10,
               ),
               alignment: Alignment.center,
@@ -223,10 +228,9 @@ class TopNav extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            // const SizedBox(height: 10),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: _getScreen(currentScreen, argument),
               ),
             ),
@@ -250,12 +254,16 @@ class TopNav extends StatelessWidget {
         return NewEventScreen();
       case TopNavScreen.eventHistory:
         final args = (argument as Map<String, dynamic>?) ?? const {};
-      
-        if(args['fromDashboard'] ?? false){return EventHistoryScreen(
-        fromDashboard: (args['fromDashboard'] as bool?) ?? false,
-      );}else{return EventHistoryScreen(
-        isPending: (args['isPending'] as bool?) ?? false,
-      );}
+
+        if (args['fromDashboard'] ?? false) {
+          return EventHistoryScreen(
+            fromDashboard: (args['fromDashboard'] as bool?) ?? false,
+          );
+        } else {
+          return EventHistoryScreen(
+            isPending: (args['isPending'] as bool?) ?? false,
+          );
+        }
       case TopNavScreen.fileDispute:
         return DisputeFormScreen();
       case TopNavScreen.disputeHistory:

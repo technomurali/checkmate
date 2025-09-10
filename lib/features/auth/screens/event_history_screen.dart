@@ -207,7 +207,8 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     setState(() {
       isLoading = true;
     });
-    _eventController.fetchEvents().then(
+  if (userModal.role == UserType.hcp) {
+      _eventController.fetchHcpEvents().then(
       (v) => {
         setState(() {
           events = v;
@@ -218,6 +219,31 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
         _filterEvents(),
       },
     );
+  } else if (userModal.role == UserType.pharmaRep) {
+      _eventController.fetchOfficeuserEvents().then(
+      (v) => {
+        setState(() {
+          events = v;
+          filteredEvents = v;
+          isLoading = false;
+        }),
+
+        _filterEvents(),
+      },
+    );
+  }else{
+      _eventController.fetchEvents().then(
+      (v) => {
+        setState(() {
+          events = v;
+          filteredEvents = v;
+          isLoading = false;
+        }),
+
+        _filterEvents(),
+      },
+    );
+  }
   }
 
   deleteEvent(String eventId) {

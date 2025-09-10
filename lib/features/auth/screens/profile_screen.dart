@@ -213,7 +213,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   // ),
                   // const SizedBox(height: 24),
                   _buildTextField(
-                    enabled: isEnabled,
+                    enabled: false,
                     controller: UserProfileTextControllers.emailController,
                     label: AppStrings.email,
                     keyboardType: TextInputType.emailAddress,

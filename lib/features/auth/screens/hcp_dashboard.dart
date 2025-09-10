@@ -26,7 +26,7 @@ class _HCPDashboardState extends State<HCPDashboard> {
       isLoading = true;
     });
     _eventController
-        .fetchEventsWithStatus(status: BasicCodesFromCrm.upcoming)
+        .fetchHcpEventsWithStatus(status: BasicCodesFromCrm.upcoming)
         .then(
           (v) => {
             setState(() {
@@ -40,7 +40,7 @@ class _HCPDashboardState extends State<HCPDashboard> {
 
   fetchPENDINGEvents() async {
     _eventController
-        .fetchEventsWithStatus(status: BasicCodesFromCrm.pending)
+        .fetchHcpEventsWithPending(status: BasicCodesFromCrm.pending)
         .then(
           (v) => {
             setState(() {
