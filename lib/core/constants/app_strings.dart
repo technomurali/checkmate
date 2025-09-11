@@ -1,5 +1,6 @@
 class AppStrings {
   static const String appName = "CHECKMATE";
+
   static const String welcome = '''Welcome to Checkmate
     Create an event to get started''';
   static const String email = "Email";
@@ -46,11 +47,11 @@ class AppStrings {
   static const String receiptForApproval = "Awaiting Approval";
   static const String numberOfStaff = "Number of staff";
   static const String hcpInEvent = "HCP's in the event";
-  static const String hcoInEvent = "HCO's in the event";
-  static const String labelEventName = "Event Name";
-  static const String labelStartDate = "Event Date";
+  static const String hcoInEvent = "HCO in the event";
+  static const String labelEventName = "Event Name *";
+  static const String labelStartDate = "Event Date *";
   static const String labelEndDate = "Event End Date";
-  static const String labelNumberOfStaff = "Number of Staff";
+  static const String labelNumberOfStaff = "Number of Staff *";
   static const String labelHCO = "HCO";
   static const String labelHCOOfficeUser = "OFFICE USER";
   static const String labelHCP = "HCP";
@@ -85,7 +86,7 @@ class AppStrings {
   static const String edit = "Edit";
   static const String pharmaCompany = "Pharma Company";
   static const String company = "Hco";
-  static const String labelEventType = "Event Type";
+  static const String labelEventType = "Event Type *";
   static const String selectEventType = "Please select event type";
   static const String multiDayEvent = "Multi-day Event";
   static const String disputeCategory = "Dispute Category";
@@ -125,14 +126,21 @@ class AppStrings {
   static const String comingSoon = "Coming Soon";
   static const String noPendingReceipts = "No pending receipts";
   static const String noUpcomingEvents = "No upcoming events";
-  static const String checkInNotPossible = "You cannot check-in now";
-  static const String checkInSuccess = "Check-in successful";
+  static const String checkInNotPossible =
+      "Check-in opens only on the official event date.";
+  static const String checkInSuccess =
+      "Check-in successful, Submitted for approval.";
   static const String receiptUploadSuccess = "Receipt uploaded successfully";
   static const String receiptUploadFailed = "Receipt upload failed";
   static const String ok = "OK";
   static const String approve = "Approve";
   static const String reject = "Reject";
-  static const String rejectMessage = "You are requested to review and confirm the event details. If rejecting, please provide a reason to complete compliance.";
+  static const String rejectMessage =
+      "You are requested to review and confirm the event details. If rejecting, please provide a reason to complete compliance.";
+  static const String searchHCO = "Search HCO *";
+  static const String searchHcpPractitioners = "Search HCP Practitioners *";
+  static const String selectHcpPractitioners = "Select HCP Practitioners *";
+  static const String amountPerHcp = "Amount per HCP:";
 }
 
 class ErrorText {
@@ -161,7 +169,7 @@ class ErrorText {
 
 class UserType {
   static const String pharmaRep = "546170001";
-  static const String hco = "OFFICE_USER";
+  static const String hco = "546170004";
   static const String hcp = "546170000";
 }
 

@@ -63,12 +63,14 @@ class EventController {
     }
   }
 
-  Future<List<EventModal>> fetchOfficeuserEvents({String? status}) async {
+  Future<List<EventModal>> fetchOfficeuserEvents(hcoId) async {
     try {
       final uri = Uri.parse(
-        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRep/${userModal.kiosk}${status != null ? '?status=$status' : ''}",
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByHco/${hcoId.toString()}",
       );
-
+      debugPrint(
+        "uri: ${AppApi.baseUrl1}${AppApi.events}/getEventsByHco/${hcoId.toString()}}",
+      );
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
@@ -197,10 +199,13 @@ class EventController {
     }
   }
 
-  Future<List<EventModal>> fetchEventsHCOWithStatus({String? status}) async {
+  Future<List<EventModal>> fetchEventsHCOWithStatus({
+    String? status,
+    hcoId,
+  }) async {
     try {
       final uri = Uri.parse(
-        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRepAndStatus/${userModal.kiosk}/$status",
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByHcoAndStatus/${hcoId}/$status",
       );
 
       final response = await http.get(
@@ -224,10 +229,13 @@ class EventController {
     }
   }
 
-  Future<List<EventModal>> fetchEventsHCOWithPending({String? status}) async {
+  Future<List<EventModal>> fetchEventsHCOWithPending({
+    String? status,
+    String? hcoId,
+  }) async {
     try {
       final uri = Uri.parse(
-        "${AppApi.baseUrl1}${AppApi.events}/getEventsByRepAndApproval/${userModal.kiosk}/$status",
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByHcoAndApproval/${hcoId}/$status",
       );
 
       final response = await http.get(
@@ -429,8 +437,11 @@ class EventController {
       return Response('Error : $e', 400);
     }
   }
+
   Future<Response> reject(eventId, doctorId, remarks) async {
-    var url = Uri.parse(AppApi.buildRejectionUrl(eventId, doctorId, "$remarks"));
+    var url = Uri.parse(
+      AppApi.buildRejectionUrl(eventId, doctorId, "$remarks"),
+    );
     try {
       final response = await http.post(
         url,
@@ -445,10 +456,11 @@ class EventController {
       return Response('Error : $e', 400);
     }
   }
-  Future<Response>fetchEventAttachments(String eventId)async{
+
+  Future<Response> fetchEventAttachments(String eventId) async {
     final uri = Uri.parse(AppApi.buildAttachmentsUrl(eventId));
     try {
-      return await http.get(uri,headers: {'Content-Type': 'application/json'});
+      return await http.get(uri, headers: {'Content-Type': 'application/json'});
     } catch (e) {
       debugPrint("Error fetching event attachments: $e");
       return Response('Error', 400);

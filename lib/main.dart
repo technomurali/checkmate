@@ -29,7 +29,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // await FirebaseNotifications.instance.initialize();
+  await FirebaseNotifications.instance.initialize();
   runApp(
     MultiProvider(
       providers: [

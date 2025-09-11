@@ -11,7 +11,7 @@ class EventListItemTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   const EventListItemTile({super.key, this.onTap, required this.event});
-  Map<String, String> codeForTextOutput(String status) {
+  Map<String, String> codeForTextOutput({String? status}) {
     debugPrint("Here is The Status Filter $status");
     // Now check the status using statusIds instead of status strings
     if (status == BasicCodesFromCrm.approval) {
@@ -20,17 +20,33 @@ class EventListItemTile extends StatelessWidget {
         'code': 'A',
         'statusId': BasicCodesFromCrm.approval,
       };
+    }
+    // else if (status == BasicCodesFromCrm.completed) {
+    //   return {
+    //     'status': 'COMPLETED',
+    //     'code': 'B',
+    //     'statusId': BasicCodesFromCrm.completed,
+    //   };
+    // }
+    else if (event.statusText!.toUpperCase() == "PAST" &&
+        event.eventCheckIn != null) {
+      return {
+        'status': 'COMPLETED',
+        'code': 'B',
+        'statusId': BasicCodesFromCrm.completed,
+      };
+    } else if (event.statusText!.toUpperCase() == "PAST" &&
+        event.eventCheckIn == null) {
+      return {
+        'status': 'IN COMPLETE',
+        'code': 'B',
+        'statusId': BasicCodesFromCrm.completed,
+      };
     } else if (status == BasicCodesFromCrm.upcoming) {
       return {
         'status': 'UPCOMING',
         'code': 'B',
         'statusId': BasicCodesFromCrm.upcoming,
-      };
-    } else if (status == BasicCodesFromCrm.completed) {
-      return {
-        'status': 'PAST',
-        'code': 'B',
-        'statusId': BasicCodesFromCrm.completed,
       };
     } else if (status == BasicCodesFromCrm.terminated) {
       return {
@@ -94,37 +110,18 @@ class EventListItemTile extends StatelessWidget {
               top: 0,
               child: Tooltip(
                 message: codeForTextOutput(
-                  event.eventStatus.toString(),
+                  status: event.eventStatus.toString(),
                 )['status'],
                 child: FilterIcon(
                   status:
                       codeForTextOutput(
-                        event.eventStatus.toString(),
+                        status: event.eventStatus.toString(),
                       )['status'] ??
                       '',
                 ),
               ),
             ),
 
-            // if (event.eventStatus.toString().isNotEmpty &&
-            //     codeForTextOutput(event.eventStatus.toString())['statusId'] !=
-            //         BasicCodesFromCrm.upcoming) ...{
-            //   //  if (status['status']?.toLowerCase() == "o") ...{
-            //   Positioned(
-            //     right: 50,
-            //     top: 0,
-            //     child: Tooltip(
-            //       message: codeForTextOutput(
-            //         event.eventApproval.toString(),
-            //       )['status'],
-            //       child: FilterIcon(
-            //         status: codeForTextOutput(
-            //           event.eventApproval.toString(),
-            //         )['status']!,
-            //       ),
-            //     ),
-            //   ),
-            // },
             Column(
               // mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,

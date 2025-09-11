@@ -13,7 +13,7 @@ class FilterIcon extends StatelessWidget {
           color: AppColors.upcomingStatusBadge,
           textColor: AppColors.upcomingStatusBadgeTextColor,
         );
-      case "PAST" || "APPROVED":
+      case "COMPLETED" || "APPROVED":
         return container(
           color: AppColors.pastStatusBadge,
           textColor: AppColors.pastStatusBadgeTextColor,

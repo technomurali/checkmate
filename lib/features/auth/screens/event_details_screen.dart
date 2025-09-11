@@ -65,8 +65,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     });
     await _eventController.fetchEventAttachments(eventId).then((value) {
       if (value.statusCode == AppApiStatusCodes.success) {
+        List attachments = [];
         jsonDecode(value.body).forEach((attachment) {
-          List attachments = [];
           attachments.add(attachment['base64']);
           setState(() {
             eventAttachments = attachments
@@ -275,7 +275,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               EventTextControllers.eventDescriptionController.text =
                   event.eventDescription ?? '';
               // isCheckinPossible = !event.startDate!.isBefore(DateTime.now());
-
+              EventTextControllers.amountController.text = event.amount != null
+                  ? event.amount.toString()
+                  : '';
               isCheckinPossible = !(isPastDate(
                 event.startDate ?? DateTime.now(),
               ));
@@ -835,6 +837,41 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           int.parse(BasicCodesFromCrm.completed))
                         Divider(),
                       if (event.eventStatus ==
+                          int.parse(BasicCodesFromCrm.completed)) ...{
+                        TextFormField(
+                          keyboardType: TextInputType.number,
+                          controller: EventTextControllers.amountController,
+                          decoration: InputDecoration(
+                            labelText: '${AppStrings.amount} *',
+                          ),
+                          enabled: false,
+                          onChanged: (val) {
+                            setState(() {
+                              event = event.copyWith(amount: double.parse(val));
+                            });
+                          },
+                        ),
+                        if (EventTextControllers
+                            .amountController
+                            .text
+                            .isNotEmpty) ...{
+                          SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "${AppStrings.amountPerHcp} ${event.contactDtos != null && event.contactDtos!.isNotEmpty ? (double.parse(EventTextControllers.amountController.text) / (event.contactDtos!.length + double.parse(EventTextControllers.numberOfStaffController.text))).toStringAsFixed(2) : '0.00'}",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        },
+                        Divider(),
+                        SizedBox(height: 16),
+                      },
+
+                      if (event.eventStatus ==
                           int.parse(BasicCodesFromCrm.completed))
                         Column(
                           children: [
@@ -928,6 +965,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             },
                           ],
                         ),
+
                       SizedBox(height: 16),
                       if (isCheckedIn && _checkInDateTime != null)
                         Container(
@@ -947,7 +985,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         TextFormField(
                           keyboardType: TextInputType.number,
                           controller: EventTextControllers.amountController,
-                          decoration: InputDecoration(labelText: 'Amount'),
+                          decoration: InputDecoration(
+                            labelText: '${AppStrings.amount} *',
+                          ),
                           enabled: isCheckedIn,
                           onChanged: (val) {
                             setState(() {
@@ -963,7 +1003,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              "Amount per HCP: ${event.contactDtos != null && event.contactDtos!.isNotEmpty ? (double.parse(EventTextControllers.amountController.text) / (event.contactDtos!.length + double.parse(EventTextControllers.numberOfStaffController.text))).toStringAsFixed(2) : '0.00'}",
+                              "${AppStrings.amountPerHcp} ${event.contactDtos != null && event.contactDtos!.isNotEmpty ? (double.parse(EventTextControllers.amountController.text) / (event.contactDtos!.length + double.parse(EventTextControllers.numberOfStaffController.text))).toStringAsFixed(2) : '0.00'}",
                               style: TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.textSecondary,
@@ -1115,6 +1155,21 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         },
                       ),
                     },
+                    if (!isCheckinPossible) ...{
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppStrings.checkInNotPossible,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.accentError,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12),
+                    },
                     if (!isCheckedIn) ...{
                       Button(
                         isDisabled: !isCheckinPossible,
@@ -1149,15 +1204,60 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       int.parse(BasicCodesFromCrm.completed)) ...{
                     if (eventAttachments.isNotEmpty) Text("Attachments"),
                     SizedBox(height: 10),
-                    for (var i = 0; i < eventAttachments.length; i++) ...{
-                      Image.memory(
-                        eventAttachments[i],
-                        height: 100,
-                        width: 100,
-                        fit: BoxFit.cover,
-                      ),
-                      SizedBox(height: 10),
-                    },
+                    Row(
+                      children: [
+                        for (var i = 0; i < eventAttachments.length; i++) ...{
+                          InkWell(
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) => StatefulBuilder(
+                                  builder: (context, setState) {
+                                    return Container(
+                                      color: Colors.black,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                          0.75,
+                                      child: Column(
+                                        children: [
+                                          Align(
+                                            alignment: Alignment.topRight,
+                                            child: IconButton(
+                                              icon: Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                              ),
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: InteractiveViewer(
+                                              child: Image.memory(
+                                                eventAttachments[i],
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                            child: Image.memory(
+                              eventAttachments[i],
+                              height: 50,
+                              width: 50,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                        },
+                      ],
+                    ),
                   },
                 ],
               ),

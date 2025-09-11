@@ -19,6 +19,8 @@ class EventModal {
   final int? eventApproval;
   final String? userName;
   final bool isMultiDay;
+  final String? statusText;
+  final DateTime? eventCheckIn;
 
   EventModal({
     this.eventId,
@@ -36,6 +38,8 @@ class EventModal {
     this.eventApproval,
     this.userName,
     this.isMultiDay = false,
+    this.statusText,
+    this.eventCheckIn,
   });
 
   EventModal copyWith({
@@ -54,6 +58,8 @@ class EventModal {
     int? eventApproval,
     String? userName,
     bool? isMultiDay,
+    String? statusText,
+    DateTime? eventCheckIn,
   }) => EventModal(
     eventId: eventId ?? this.eventId,
     eventName: eventName ?? this.eventName,
@@ -70,6 +76,7 @@ class EventModal {
     eventApproval: eventApproval ?? this.eventApproval,
     userName: userName ?? this.userName,
     isMultiDay: isMultiDay ?? false,
+    statusText: statusText ?? this.statusText,
   );
 
   factory EventModal.fromJson(Map<String, dynamic> json) {
@@ -96,6 +103,10 @@ class EventModal {
       eventApproval: json["eventApproval"],
       userName: json["userName"],
       isMultiDay: json['isMultiDay'] ?? false,
+      statusText: json['status'] ?? "UPCOMING",
+      eventCheckIn: json["eventCheckIn"] == null
+          ? null
+          : _parseDateTime(json["eventCheckIn"])
     );
   }
 
@@ -130,6 +141,8 @@ class EventModal {
     "eventApproval": eventApproval,
     "userName": userName,
     "isMultiDay": isMultiDay,
+    "status": statusText,
+    "eventCheckIn": eventCheckIn?.toIso8601String(),
   };
 
   factory EventModal.empty() => EventModal(
@@ -148,6 +161,8 @@ class EventModal {
     eventApproval: 0,
     userName: "",
     isMultiDay: false,
+    statusText: "UPCOMING",
+    eventCheckIn: null,
   );
 }
 

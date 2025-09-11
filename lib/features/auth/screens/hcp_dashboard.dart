@@ -118,10 +118,10 @@ class _HCPDashboardState extends State<HCPDashboard> {
               ],
               showCheckIn: true,
               onSeeAll: () {
-                Provider.of<TopNavProvider>(
-                  context,
-                  listen: false,
-                ).navigateTo(TopNavScreen.eventHistory);
+                Provider.of<TopNavProvider>(context, listen: false).navigateTo(
+                  TopNavScreen.eventHistory,
+                  argument: {"fromDashboard": true},
+                );
               },
             ),
 
@@ -163,7 +163,12 @@ class _HCPDashboardState extends State<HCPDashboard> {
                   ...{},
               ],
 
-              onSeeAll: () {},
+              onSeeAll: () {
+                Provider.of<TopNavProvider>(context, listen: false).navigateTo(
+                  TopNavScreen.eventHistory,
+                  argument: {"isPending": true},
+                );
+              },
             ),
           },
         ],

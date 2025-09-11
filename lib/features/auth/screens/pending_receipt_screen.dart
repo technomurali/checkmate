@@ -38,7 +38,23 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
     // });
     await _eventController.fetchEventAttachments(eventId).then((value) {
       if (value.statusCode == AppApiStatusCodes.success) {
-        jsonDecode(value.body).forEach((attachment) {
+        var body = jsonDecode(value.body);
+        print("${body.length}");
+        List attachments = [];
+        for (var attachment in body) {
+          attachments.add(attachment['base64']);
+          setState(() {
+            eventAttachments = attachments
+                .map<Uint8List>(
+                  (base64Str) =>
+                      base64Decode(base64Str.toString().split(',').last),
+                )
+                .toList();
+            print("${eventAttachments.length}");
+          });
+        }
+        /*
+        .forEach((attachment) {
           List attachments = [];
           attachments.add(attachment['base64']);
           setState(() {
@@ -50,6 +66,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                 .toList();
           });
         });
+         */
       } else {
         debugPrint("Failed to load attachments");
       }
@@ -231,7 +248,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                       children: [
                         Text("Per Hcp "),
                         Text(
-                          "${((event.amount ?? 1) / (event.numberOfStaff! + event.contactDtos!.length)).toStringAsFixed(2)}",
+                          ((event.amount ?? 1) / (event.numberOfStaff! + event.contactDtos!.length)).toStringAsFixed(2),
                         ),
                       ],
                     ),
@@ -325,15 +342,60 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                     },
                   ],
                 ),
-                for (var i = 0; i < eventAttachments.length; i++) ...{
-                  Image.memory(
-                    eventAttachments[i],
-                    height: 100,
-                    width: 100,
-                    fit: BoxFit.cover,
-                  ),
-                  SizedBox(height: 10),
-                },
+                Row(
+                  children: [
+                    for (var i = 0; i < eventAttachments.length; i++) ...{
+                      InkWell(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (context) => StatefulBuilder(
+                              builder: (context, setState) {
+                                return Container(
+                                  color: Colors.black,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.75,
+                                  child: Column(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.topRight,
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: InteractiveViewer(
+                                          child: Image.memory(
+                                            eventAttachments[i],
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                        child: Image.memory(
+                          eventAttachments[i],
+                          height: 50,
+                          width: 50,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                    },
+                  ],
+                ),
+                SizedBox(height: 20),
                 if (userModal.role == UserType.pharmaRep) ...{
                   Button(text: AppStrings.sendRequest, onPressed: () {}),
                 } else if (userModal.role == UserType.hcp) ...{

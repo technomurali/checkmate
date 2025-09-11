@@ -253,7 +253,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                               controller: textEditingController,
                               focusNode: focusNode,
                               decoration: InputDecoration(
-                                labelText: "Search HCO",
+                                labelText: AppStrings.searchHCO,
                                 suffixIcon: Icon(Icons.search),
                               ),
                             );
@@ -629,7 +629,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                   controller: textEditingController,
                                   focusNode: focusNode,
                                   decoration: InputDecoration(
-                                    labelText: "Search HCP Practitioners",
+                                    labelText: AppStrings.searchHcpPractitioners,
                                     suffixIcon: Icon(Icons.search),
                                   ),
                                 );
@@ -759,7 +759,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           searchFieldProps: TextFieldProps(
                             // customise it if you like
                             decoration: InputDecoration(
-                              labelText: "Select HCP Practitioners",
+                              labelText: AppStrings.selectHcpPractitioners,
                               prefixIcon: Icon(Icons.search),
                             ),
                           ),

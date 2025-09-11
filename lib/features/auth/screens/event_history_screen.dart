@@ -40,7 +40,8 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     'All',
     "DISPUTED",
     'UPCOMING',
-    'PAST',
+    'IN COMPLETE',
+    'COMPLETED',
     'TERMINATED',
     'APPROVED',
     'IN REVIEW',
@@ -53,11 +54,12 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     fetchAllEvents();
     if (widget.fromDashboard) {
       _selectedStatus = 'UPCOMING';
-      _filterEvents();
+      fetchAllEvents();
     }
     if (widget.isPending) {
-      _selectedStatus = 'PENDING';
-      _filterEvents();
+      _selectedStatus = 'IN REVIEW';
+      // _filterEvents();
+      fetchAllEvents();
     }
     // Initialize controller
     _slidableController = SlidableController(this);
@@ -85,9 +87,11 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
           'code': 'B',
           'statusId': BasicCodesFromCrm.upcoming,
         };
-      case 'PAST':
+      case 'IN COMPLETE':
+        return {'status': 'IN COMPLETE', 'code': 'B', 'statusId': '123'};
+      case 'COMPLETED':
         return {
-          'status': 'PAST',
+          'status': 'COMPLETED',
           'code': 'B',
           'statusId': BasicCodesFromCrm.completed,
         };
@@ -124,6 +128,29 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     }
   }
 
+  caseofINReview(
+    eventStatus,
+    selectedStatus,
+    eventApproval, {
+    EventModal? event,
+  }) {
+    if (selectedStatus == "IN REVIEW") {
+      return eventApproval == BasicCodesFromCrm.pending &&
+          eventStatus != BasicCodesFromCrm.upcoming;
+    } else if (selectedStatus == "IN COMPLETE") {
+      return event?.eventCheckIn == null &&
+          event?.statusText!.toUpperCase() == "PAST";
+    } else if (selectedStatus == "COMPLETED") {
+      return event?.eventCheckIn != null &&
+          event?.statusText!.toUpperCase() == "PAST";
+    } else if (selectedStatus == "UPCOMING") {
+      return eventStatus == BasicCodesFromCrm.upcoming &&
+          event?.statusText!.toUpperCase() != "PAST";
+    } else {
+      return false;
+    }
+  }
+
   void _filterEvents() {
     setState(() {
       isLoading = true;
@@ -131,67 +158,30 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
         final matchesQuery = event.eventName!.toLowerCase().contains(
           _searchQuery.toLowerCase(),
         );
-        // Map<String, String> statusCodeFor(String status) {
-        //   switch (status) {
-        //     case 'APPROVED':
-        //       return {
-        //         'status': 'APPROVED',
-        //         'code': 'A',
-        //         'statusId': "546170000",
-        //       };
-        //     case 'UPCOMING':
-        //       return {
-        //         'status': 'UPCOMING',
-        //         'code': 'B',
-        //         'statusId': "546170003",
-        //       };
-        //     case 'COMPLETED':
-        //       return {
-        //         'status': 'COMPLETED',
-        //         'code': 'B',
-        //         'statusId': "546170004",
-        //       };
-        //     case 'TERMINATED':
-        //       return {
-        //         'status': 'TERMINATED',
-        //         'code': 'B',
-        //         'statusId': "546170005",
-        //       };
-        //     case 'PENDING':
-        //       return {
-        //         'status': 'PENDING',
-        //         'code': 'A',
-        //         'statusId': "546170001",
-        //       };
-        //     case 'REJECTED':
-        //       return {
-        //         'status': 'REJECTED',
-        //         'code': 'A',
-        //         'statusId': "546170002",
-        //       };
-        //     default:
-        //       return {
-        //         'status': 'UPCOMING',
-        //         'code': 'B',
-        //         'statusId': "546170003",
-        //       };
-        //   }
-        // }
-
-        // Debug print for status comparison
         debugPrint('Selected status: ${userModal.kiosk}');
-        final matchesStatus =
-            _selectedStatus == null || _selectedStatus == 'All'
-            ? true
-            : statusCodeFor(_selectedStatus!)['code'] == 'B'
-            ? event.eventStatus.toString() ==
-                  statusCodeFor(_selectedStatus!)['statusId']
-            : event.eventApproval.toString() ==
-                  statusCodeFor(_selectedStatus!)['statusId'];
-        // final matchesApproval =
-        //     _selectedApproval == null || _selectedApproval == 'All'
-        //     ? true
-        //     : event.isApproved == _selectedApproval;
+        bool matchesStatus;
+
+        if (_selectedStatus == null || _selectedStatus == 'All') {
+          matchesStatus = true;
+        } else if (_selectedStatus == "IN REVIEW" ||
+            _selectedStatus == "IN COMPLETE" ||
+            _selectedStatus == "COMPLETED" ||
+            _selectedStatus == "UPCOMING") {
+          matchesStatus = caseofINReview(
+            event.eventStatus.toString(),
+            _selectedStatus!,
+            event.eventApproval.toString(),
+            event: event,
+          );
+        } else if (statusCodeFor(_selectedStatus!)['code'] == 'B') {
+          matchesStatus =
+              event.eventStatus.toString() ==
+              statusCodeFor(_selectedStatus!)['statusId'];
+        } else {
+          matchesStatus =
+              event.eventApproval.toString() ==
+              statusCodeFor(_selectedStatus!)['statusId'];
+        }
 
         return matchesQuery && matchesStatus;
       }).toList();
@@ -207,43 +197,45 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     setState(() {
       isLoading = true;
     });
-  if (userModal.role == UserType.hcp) {
+    if (userModal.role == UserType.hcp) {
       _eventController.fetchHcpEvents().then(
-      (v) => {
-        setState(() {
-          events = v;
-          filteredEvents = v;
-          isLoading = false;
-        }),
+        (v) => {
+          setState(() {
+            events = v;
+            filteredEvents = v;
+            isLoading = false;
+          }),
 
-        _filterEvents(),
-      },
-    );
-  } else if (userModal.role == UserType.pharmaRep) {
-      _eventController.fetchOfficeuserEvents().then(
-      (v) => {
-        setState(() {
-          events = v;
-          filteredEvents = v;
-          isLoading = false;
-        }),
-
-        _filterEvents(),
-      },
-    );
-  }else{
+          _filterEvents(),
+        },
+      );
+    } else if (userModal.role == UserType.pharmaRep) {
       _eventController.fetchEvents().then(
-      (v) => {
-        setState(() {
-          events = v;
-          filteredEvents = v;
-          isLoading = false;
-        }),
+        (v) => {
+          setState(() {
+            events = v;
+            filteredEvents = v;
+            isLoading = false;
+          }),
 
-        _filterEvents(),
-      },
-    );
-  }
+          _filterEvents(),
+        },
+      );
+    } else if (userModal.role == UserType.hco) {
+      _eventController
+          .fetchOfficeuserEvents(userModal.pharmaCompany)
+          .then(
+            (v) => {
+              setState(() {
+                events = v;
+                filteredEvents = v;
+                isLoading = false;
+              }),
+
+              _filterEvents(),
+            },
+          );
+    }
   }
 
   deleteEvent(String eventId) {
@@ -295,20 +287,20 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
             ),
             Row(
               children: [
-                if (userModal.role != UserType.hcp) 
-                InkWell(
-                  onTap: () {
-                    Provider.of<TopNavProvider>(
-                      context,
-                      listen: false,
-                    ).navigateTo(TopNavScreen.newEvent);
-                  },
-                  child: Icon(
-                    Icons.add,
-                    size: 24,
-                    color: AppColors.eventTitleIconColor,
+                if (userModal.role != UserType.hcp)
+                  InkWell(
+                    onTap: () {
+                      Provider.of<TopNavProvider>(
+                        context,
+                        listen: false,
+                      ).navigateTo(TopNavScreen.newEvent);
+                    },
+                    child: Icon(
+                      Icons.add,
+                      size: 24,
+                      color: AppColors.eventTitleIconColor,
+                    ),
                   ),
-                ),
 
                 // SizedBox(width: 10),
                 // Icon(
