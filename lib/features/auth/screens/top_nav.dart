@@ -87,7 +87,8 @@ class TopNav extends StatelessWidget {
                         ),
                       ],
                     ),
-                    if (userModal.role == UserType.pharmaRep)
+                    if (userModal.role == UserType.pharmaRep ||
+                        userModal.role == UserType.hco)
                       Column(
                         children: [
                           InkWell(

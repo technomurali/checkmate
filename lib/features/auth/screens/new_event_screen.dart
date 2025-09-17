@@ -1,11 +1,11 @@
 // ignore_for_file: deprecated_member_use
-
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
+import 'package:checkmate/features/auth/controllers/profile_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +25,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
   bool _isLoading = false;
   late TextEditingController _autocompleteController;
   late TextEditingController _autocompleteControllerHCO;
+  TextEditingController hcoNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   DateTime startDatePicked = DateTime.now();
   DateTime endDatePicked = DateTime.now();
@@ -36,6 +37,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
   String? _selectedEventType;
   int remainingStaff = 0;
   final NewEventController _newEventController = NewEventController();
+  final ProfileController _eventController = ProfileController();
   List<Map<String, dynamic>> _hcos = [];
   List<Map<String, dynamic>> _hcps = [];
   List<Map<String, dynamic>> eventTypes = [];
@@ -72,17 +74,67 @@ class _NewEventScreenState extends State<NewEventScreen> {
     setState(() {
       _isLoading = true;
     });
-    final result = await _newEventController.getHCO();
-    if (result['success'] == true && result['data'] != null) {
-      setState(() {
-        _hcos = List<Map<String, dynamic>>.from(result['data']);
-        _isLoading = false;
-      });
+    if (userModal.role == UserType.hco) {
+      //final result = await _newEventController.getHCO();
+
+      // if (result['success'] == true && result['data'] != null) {
+
+      //setState(() {
+
+      //_hcos = List<Map<String, dynamic>>.from(result['data']);
+
+      //_isLoading = false;
+
+      //});
+
+      // } else {
+
+      //setState(() {
+
+      //_isLoading = false;
+
+      //_hcos = [];
+
+      //});
+
+      // }
+
+      await _eventController
+          .getCompanyName(userModal.pharmaCompany ?? "")
+          .then(
+            (v) => {
+              setState(() {
+                _hcos = [
+                  {"id": userModal.pharmaCompany, "accountName": v},
+                ];
+
+                _selectedHCOId = userModal.pharmaCompany;
+
+                _selectedHCOName = v;
+
+                hcoNameController.text = v;
+
+                _isLoading = false;
+              }),
+              fetchHCPbyHCO(_selectedHCOId),
+            },
+          );
     } else {
-      setState(() {
-        _isLoading = false;
-        _hcos = [];
-      });
+      final result = await _newEventController.getHCO();
+
+      if (result['success'] == true && result['data'] != null) {
+        setState(() {
+          _hcos = List<Map<String, dynamic>>.from(result['data']);
+
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+
+          _hcos = [];
+        });
+      }
     }
   }
 
@@ -136,10 +188,12 @@ class _NewEventScreenState extends State<NewEventScreen> {
   }
 
   List<Map<String, dynamic>> hcpContactDto = [];
+
   void _submitForm() {
     setState(() {
       _isLoading = true;
     });
+
     if (_formKey.currentState!.validate()) {
       var testData = {
         "eventName": NewEventTextControllers.eventNameController.text,
@@ -162,6 +216,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
         "userName": "/contacts(${userModal.kiosk})",
         "isMultiDay": isMultiDay,
       };
+
       _newEventController.createEvent(testData).then((value) {
         if (value['success']) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -169,19 +224,33 @@ class _NewEventScreenState extends State<NewEventScreen> {
           );
 
           _formKey.currentState!.reset();
+
           NewEventTextControllers.eventNameController.clear();
+
           NewEventTextControllers.startDateController.clear();
+
           NewEventTextControllers.endDateController.clear();
+
           NewEventTextControllers.numberOfStaffController.clear();
+
           NewEventTextControllers.amountController.clear();
+
           NewEventTextControllers.eventDescriptionController.clear();
-          _autocompleteControllerHCO.clear();
+
+          userModal.role == UserType.pharmaRep
+              ? _autocompleteControllerHCO.clear()
+              : hcoNameController.clear();
+
           setState(() {
             _selectedHCOId = null;
+
             _selectedHCOName = null;
+
             _selectedHCP = [];
+
             _isLoading = false;
           });
+
           Provider.of<TopNavProvider>(
             context,
             listen: false,
@@ -190,6 +259,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
           setState(() {
             _isLoading = false;
           });
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text(AppStrings.eventCreatedFailed)),
           );
@@ -214,95 +284,74 @@ class _NewEventScreenState extends State<NewEventScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Autocomplete<Map<String, dynamic>>(
-                      displayStringForOption: (option) => option['accountName'],
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text == '') {
-                          return Iterable.empty();
-                        } else {
-                          return _hcos.where((ele) {
-                            return ele['accountName'].toLowerCase().contains(
-                              textEditingValue.text.toLowerCase(),
-                            );
-                          });
-                        }
-                      },
-                      onSelected: (selection) {
-                        setState(() {
-                          _selectedHCOName = selection['accountName'];
-                          _selectedHCOId = selection['id']?.toString();
-                          _selectedHCP = [];
-                          // print("selected hcps: ${selected['hcps']}");
-                          if (_selectedHCOId != null) {
-                            _hcps = [];
-                            fetchHCPbyHCO(_selectedHCOId!);
+                    if (userModal.role == UserType.pharmaRep) ...{
+                      Autocomplete<Map<String, dynamic>>(
+                        displayStringForOption: (option) =>
+                            option['accountName'],
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          if (textEditingValue.text == '') {
+                            return Iterable.empty();
+                          } else {
+                            return _hcos.where((ele) {
+                              return ele['accountName'].toLowerCase().contains(
+                                textEditingValue.text.toLowerCase(),
+                              );
+                            });
                           }
-                          // _hcps = List<Map<String, dynamic>>.from(selected['hcps']);
-                        });
-                      },
-                      fieldViewBuilder:
-                          (
-                            context,
-                            textEditingController,
-                            focusNode,
-                            onFieldSubmitted,
-                          ) {
-                            _autocompleteControllerHCO = textEditingController;
-                            return TextField(
-                              controller: textEditingController,
-                              focusNode: focusNode,
-                              decoration: InputDecoration(
-                                labelText: AppStrings.searchHCO,
-                                suffixIcon: Icon(Icons.search),
-                              ),
-                            );
-                          },
-                    ),
+                        },
+                        onSelected: (selection) {
+                          setState(() {
+                            _selectedHCOName = selection['accountName'];
 
-                    /// HCO Dropdown
-                    // DropdownSearch<String>(
-                    //   popupProps: const PopupProps.menu(
-                    //     showSearchBox: true, // <- this brings the search field
-                    //     searchFieldProps: TextFieldProps(
-                    //       // customise it if you like
-                    //       decoration: InputDecoration(
-                    //         labelText: 'Search HCO',
-                    //         prefixIcon: Icon(Icons.search),
-                    //       ),
-                    //     ),
-                    //   ),
+                            _selectedHCOId = selection['id']?.toString();
 
-                    //   items: (filter, loadProps) {
-                    //     return _hcos
-                    //         .map((hco) => hco['accountName'] as String)
-                    //         .toList();
-                    //   },
-                    //   selectedItem: _selectedHCOName,
-                    //   decoratorProps: const DropDownDecoratorProps(
-                    //     decoration: InputDecoration(labelText: AppStrings.labelHCO),
-                    //   ),
-                    //   onChanged: (value) {
-                    //     final selected = _hcos.firstWhere(
-                    //       (hco) => hco['accountName'] == value,
-                    //       orElse: () => {},
-                    //     );
-                    //     setState(() {
-                    //       _selectedHCOName = value;
-                    //       _selectedHCOId = selected['id']?.toString();
-                    //       _selectedHCP = [];
-                    //       // print("selected hcps: ${selected['hcps']}");
-                    //       if (_selectedHCOId != null) {
-                    //         _hcps = [];
-                    //         fetchHCPbyHCO(_selectedHCOId!);
-                    //       }
-                    //       // _hcps = List<Map<String, dynamic>>.from(selected['hcps']);
-                    //     });
-                    //   },
-                    //   validator: (value) => value == null || value.isEmpty
-                    //       ? AppStrings.selectHCO
-                    //       : null,
-                    // ),
+                            _selectedHCP = [];
+
+                            // print("selected hcps: ${selected['hcps']}");
+
+                            if (_selectedHCOId != null) {
+                              _hcps = [];
+
+                              fetchHCPbyHCO(_selectedHCOId!);
+                            }
+
+                            // _hcps = List<Map<String, dynamic>>.from(selected['hcps']);
+                          });
+                        },
+                        fieldViewBuilder:
+                            (
+                              context,
+                              textEditingController,
+                              focusNode,
+                              onFieldSubmitted,
+                            ) {
+                              _autocompleteControllerHCO =
+                                  textEditingController;
+
+                              return TextField(
+                                controller: textEditingController,
+                                focusNode: focusNode,
+                                decoration: InputDecoration(
+                                  labelText: AppStrings.searchHCO,
+                                  suffixIcon: Icon(Icons.search),
+                                ),
+                              );
+                            },
+                      ),
+                    } else ...{
+                      TextFormField(
+                        // initialValue: _selectedHCOName,
+                        controller: hcoNameController,
+                        enabled: false,
+                        readOnly: true,
+
+                        decoration: InputDecoration(
+                          labelText: AppStrings.labelHCO,
+                        ),
+                      ),
+                    },
                     const SizedBox(height: 10),
 
                     /// Event Type Dropdown
@@ -323,6 +372,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           ? AppStrings.selectEventType
                           : null,
                     ),
+
                     const SizedBox(height: 10),
 
                     /// Event Name TextField
@@ -335,6 +385,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           ? AppStrings.requiredField
                           : null,
                     ),
+
                     const SizedBox(height: 10),
 
                     /// Event Description TextField
@@ -350,41 +401,75 @@ class _NewEventScreenState extends State<NewEventScreen> {
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                     ),
+
                     SizedBox(height: 10),
 
                     /// Multi-day Event Checkbox
+
                     // CheckboxListTile(
-                    //   contentPadding: EdgeInsets.zero,
-                    //   title: Text(AppStrings.multiDayEvent),
-                    //   value: isMultiDay,
-                    //   onChanged: (val) {
-                    //     setState(() {
-                    //       isMultiDay = val ?? false;
-                    //       if (!isMultiDay) {
-                    //         NewEventTextControllers.endDateController.clear();
-                    //       }
-                    //     });
-                    //   },
-                    //   controlAffinity: ListTileControlAffinity.leading,
+
+                    //contentPadding: EdgeInsets.zero,
+
+                    //title: Text(AppStrings.multiDayEvent),
+
+                    //value: isMultiDay,
+
+                    //onChanged: (val) {
+
+                    //setState(() {
+
+                    //isMultiDay = val ?? false;
+
+                    //if (!isMultiDay) {
+
+                    //NewEventTextControllers.endDateController.clear();
+
+                    //}
+
+                    //});
+
+                    //},
+
+                    //controlAffinity: ListTileControlAffinity.leading,
+
                     // ),
+
                     // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.start,
-                    //   children: [
-                    //     Switch(
-                    //       value: isMultiDay,
-                    //       onChanged: (v) {
-                    //         setState(() {
-                    //           isMultiDay = !isMultiDay;
-                    //           if (!isMultiDay) {
-                    //             NewEventTextControllers.endDateController
-                    //                 .clear();
-                    //           }
-                    //         });
-                    //       },
-                    //     ),
-                    //     SizedBox(width: 10),
-                    //     Text(AppStrings.multiDayEvent),
-                    //   ],
+
+                    //mainAxisAlignment: MainAxisAlignment.start,
+
+                    //children: [
+
+                    //Switch(
+
+                    //value: isMultiDay,
+
+                    //onChanged: (v) {
+
+                    //setState(() {
+
+                    //isMultiDay = !isMultiDay;
+
+                    //if (!isMultiDay) {
+
+                    //NewEventTextControllers.endDateController
+
+                    //.clear();
+
+                    //}
+
+                    //});
+
+                    //},
+
+                    //),
+
+                    //SizedBox(width: 10),
+
+                    //Text(AppStrings.multiDayEvent),
+
+                    //],
+
                     // ),
 
                     // const SizedBox(height: 10),
@@ -405,9 +490,11 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           firstDate: DateTime.now(),
                           lastDate: DateTime(2030),
                         );
+
                         if (pickedDate != null) {
                           NewEventTextControllers.startDateController.text =
                               "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+
                           startDatePicked = pickedDate;
                         }
                       },
@@ -415,6 +502,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           ? AppStrings.requiredField
                           : null,
                     ),
+
                     const SizedBox(height: 10),
 
                     /// Multi-day Event Start Date
@@ -432,9 +520,11 @@ class _NewEventScreenState extends State<NewEventScreen> {
                             firstDate: startDatePicked,
                             lastDate: DateTime(2030),
                           );
+
                           if (pickedDate != null) {
                             NewEventTextControllers.endDateController.text =
                                 "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+
                             endDatePicked = pickedDate;
                           }
                         },
@@ -446,22 +536,9 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
                     /// Multi-day Event End Date
                     if (isMultiDay) const SizedBox(height: 10),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller:
-                          NewEventTextControllers.numberOfStaffController,
-                      decoration: const InputDecoration(
-                        labelText: AppStrings.labelNumberOfStaff,
-                      ),
-                      validator: (value) => value == null || value.isEmpty
-                          ? AppStrings.requiredField
-                          : null,
-                    ),
+
                     const SizedBox(height: 10),
-                    if (_selectedHCP.isNotEmpty) ...{
-                      Text("Total HCP's in Event: ${_selectedHCP.length}"),
-                      const SizedBox(height: 10),
-                    },
+
                     Container(
                       width: double.infinity,
                       height: 40,
@@ -490,7 +567,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-
                                 child: Center(
                                   child: Text(
                                     "HCP in HCO",
@@ -538,7 +614,9 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         ],
                       ),
                     ),
+
                     const SizedBox(height: 10),
+
                     if (_selectedHCP.isNotEmpty) ...{
                       Text(
                         'Selected HCP Practitioners',
@@ -547,6 +625,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                       const SizedBox(height: 8),
                       TextFormField(
                         readOnly: true, // Optional: disable manual typing
+
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 10,
@@ -557,7 +636,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-
                           prefixIconConstraints: const BoxConstraints(
                             minHeight: 48,
                             minWidth: 0,
@@ -594,7 +672,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           ),
                         ),
                       ),
-
                       SizedBox(height: 10),
                     },
 
@@ -611,6 +688,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                               return _hcps.where((ele) {
                                 String name =
                                     "${ele['firstName']} ${ele['lastName']}";
+
                                 return name.toLowerCase().contains(
                                   textEditingValue.text.toLowerCase(),
                                 );
@@ -625,21 +703,24 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                 onFieldSubmitted,
                               ) {
                                 _autocompleteController = textEditingController;
+
                                 return TextField(
                                   controller: textEditingController,
                                   focusNode: focusNode,
                                   decoration: InputDecoration(
-                                    labelText: AppStrings.searchHcpPractitioners,
+                                    labelText:
+                                        AppStrings.searchHcpPractitioners,
                                     suffixIcon: Icon(Icons.search),
                                   ),
                                 );
                               },
-
                           onSelected: (selection) {
                             var a = FocusScope.of(context).focusedChild;
+
                             if (a != null) {
                               a.unfocus();
                             }
+
                             if (!_selectedHCP.any(
                               (hcp) => hcp['id'] == selection['id'],
                             )) {
@@ -650,6 +731,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                       "${selection['firstName']} ${selection['lastName']}",
                                 });
                               });
+
                               Future.delayed(Duration(milliseconds: 100), () {
                                 _autocompleteController.clear();
                               });
@@ -661,6 +743,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           popupProps: const PopupPropsMultiSelection.menu(
                             showSearchBox:
                                 true, // <- this brings the search field
+
                             searchFieldProps: TextFieldProps(
                               // customise it if you like
                               decoration: InputDecoration(
@@ -675,7 +758,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                   (e) => {
                                     HCPModalKeys.hcpId: (e['id']).toString(),
                                     HCPModalKeys.hcpName:
-                                        "${e['firstName']}  ${e['lastName']}",
+                                        "${e['firstName']}  ${e['lastName']}",
                                   },
                                 )
                                 .toList();
@@ -710,10 +793,13 @@ class _NewEventScreenState extends State<NewEventScreen> {
                               : SizedBox(),
                           onChanged: (value) {
                             var a = FocusScope.of(context).focusedChild;
+
                             if (a != null) {
                               a.unfocus();
                             }
+
                             int noOfselecteHcps = value.length;
+
                             int noOfStaff = int.parse(
                               NewEventTextControllers
                                       .numberOfStaffController
@@ -724,27 +810,17 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                         .text
                                   : '0',
                             );
-                            if (noOfselecteHcps > noOfStaff) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'You can select only $noOfStaff HCPs as per number of staff entered',
-                                  ),
-                                ),
-                              );
-                              return;
-                            } else {
-                              setState(() {
-                                _selectedHCP = value;
 
-                                hcpContactDto = value.map((e) {
-                                  return {
-                                    HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
-                                    "": "",
-                                  };
-                                }).toList();
-                              });
-                            }
+                            setState(() {
+                              _selectedHCP = value;
+
+                              hcpContactDto = value.map((e) {
+                                return {
+                                  HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
+                                  "": "",
+                                };
+                              }).toList();
+                            });
                           },
                           validator: (value) => value == null || value.isEmpty
                               ? AppStrings.selectHCP
@@ -756,6 +832,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         popupProps: const PopupPropsMultiSelection.menu(
                           showSearchBox:
                               true, // <- this brings the search field
+
                           searchFieldProps: TextFieldProps(
                             // customise it if you like
                             decoration: InputDecoration(
@@ -770,7 +847,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                 HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
                                     .toString(),
                                 HCPModalKeys.hcpName:
-                                    "${e['firstName']}  ${e['lastName']}",
+                                    "${e['firstName']}  ${e['lastName']}",
                               },
                             )
                             .toList(),
@@ -789,7 +866,6 @@ class _NewEventScreenState extends State<NewEventScreen> {
                               },
                             )
                             .toList(),
-
                         dropdownBuilder: (context, selectedItems) =>
                             _selectedHCP.isNotEmpty
                             ? SizedBox(child: Text('Select HCP Practitioners'))
@@ -811,10 +887,13 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         ),
                         onChanged: (value) {
                           var a = FocusScope.of(context).focusedChild;
+
                           if (a != null) {
                             a.unfocus();
                           }
+
                           int noOfselecteHcps = value.length;
+
                           int noOfStaff = int.parse(
                             NewEventTextControllers
                                     .numberOfStaffController
@@ -825,33 +904,51 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                       .text
                                 : '0',
                           );
-                          if (noOfselecteHcps > noOfStaff) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'You can select only $noOfStaff HCPs as per number of staff entered',
-                                ),
-                              ),
-                            );
-                            return;
-                          } else {
-                            setState(() {
-                              _selectedHCP = value;
-                              hcpContactDto = value.map((e) {
-                                return {
-                                  HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
-                                };
-                              }).toList();
-                            });
-                          }
+
+                          setState(() {
+                            _selectedHCP = value;
+                            hcpContactDto = value.map((e) {
+                              return {
+                                HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
+                              };
+                            }).toList();
+                          });
                         },
                         validator: (value) => value == null || value.isEmpty
                             ? AppStrings.selectHCP
                             : null,
                       ),
                     },
-
+                    SizedBox(height: 10),
+                    TextFormField(
+                      keyboardType: TextInputType.number,
+                      controller:
+                          NewEventTextControllers.numberOfStaffController,
+                      decoration: const InputDecoration(
+                        labelText: AppStrings.labelNumberOfStaff,
+                      ),
+                      validator: (value) => value == null || value.isEmpty
+                          ? AppStrings.requiredField
+                          : null,
+                      onChanged: (value) {
+                        setState(() {});
+                      },
+                    ),
                     const SizedBox(height: 10),
+                    // if (_selectedHCP.isNotEmpty &&
+                    //     NewEventTextControllers
+                    //         .numberOfStaffController
+                    //         .text
+                    //         .isNotEmpty) ...{
+                    //   Text(
+                    //     "Total Participants in Event: ${_selectedHCP.length + int.parse(NewEventTextControllers.numberOfStaffController.text)}",
+                    //   ),
+                    //   const SizedBox(height: 10),
+                    // },
+                    // if (_selectedHCP.isNotEmpty) ...{
+                    //   Text("Total HCP's in Event: ${_selectedHCP.length}"),
+                    //   const SizedBox(height: 10),
+                    // },
                   ],
                 ),
 

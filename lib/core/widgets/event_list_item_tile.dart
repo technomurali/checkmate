@@ -42,6 +42,13 @@ class EventListItemTile extends StatelessWidget {
         'code': 'B',
         'statusId': BasicCodesFromCrm.completed,
       };
+    } else if (event.statusText!.toUpperCase() == "UPCOMING" &&
+        event.eventCheckIn != null) {
+      return {
+        'status': 'COMPLETED',
+        'code': 'B',
+        'statusId': BasicCodesFromCrm.completed,
+      };
     } else if (status == BasicCodesFromCrm.upcoming) {
       return {
         'status': 'UPCOMING',

@@ -7,6 +7,7 @@ import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
+import 'package:checkmate/core/widgets/approval_dialog.dart';
 import 'package:checkmate/core/widgets/confirm_alert_dialog.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
@@ -15,6 +16,7 @@ import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/event_modal.dart';
 import 'package:checkmate/features/auth/model/hcp_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
+import 'package:checkmate/firebase/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
@@ -166,6 +168,27 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     ) {
       if (response.statusCode == AppApiStatusCodes.success) {
         fetchEvent();
+        setState(() {
+          isLoading = false;
+        });
+        final navProvider = Provider.of<TopNavProvider>(context, listen: false);
+        navProvider.goBack();
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
+  }
+
+  eventParticipantRejection(String doctorId, String remarks) {
+    setState(() {
+      isLoading = true;
+    });
+    _eventController.reject(event.eventId ?? '', doctorId, remarks).then((
+      response,
+    ) {
+      if (response.statusCode == AppApiStatusCodes.success) {
         setState(() {
           isLoading = false;
         });
@@ -354,6 +377,19 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     });
   }
 
+  String ifPastStatusText() {
+    if (event.statusText != null) {
+      if (event.eventCheckIn == null &&
+          event.statusText!.toUpperCase() == "PAST") {
+        return "IN-COMPLETE EVENT";
+      } else {
+        return "COMPLETED EVENT";
+      }
+    } else {
+      return "${eventStatusCodeToText(event.eventStatus.toString())} EVENT";
+    }
+  }
+
   String eventStatusCodeToText(String statusCode) {
     if (statusCode == BasicCodesFromCrm.upcoming) {
       return "UPCOMING";
@@ -398,6 +434,31 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     );
   }
 
+  checkinDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(AppStrings.submitCheckIn),
+        content: Text(AppStrings.submitCheckinMessage),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              submitCheckIn();
+            },
+            child: Text('Proceed'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint(widget.eventId);
@@ -414,17 +475,23 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 children: [
                   event.eventStatus != null
                       ? Text(
-                          "${eventStatusCodeToText(event.eventStatus.toString())} EVENT",
+                          event.statusText != null
+                              ? event.statusText!.toLowerCase() == "past"
+                                    ? ifPastStatusText()
+                                    : "${eventStatusCodeToText(event.eventStatus.toString())} EVENT"
+                              : "${eventStatusCodeToText(event.eventStatus.toString())} EVENT",
                         )
                       : SizedBox(),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (event.eventStatus.toString() ==
                               BasicCodesFromCrm.upcoming &&
                           !isCheckedIn &&
-                          userModal.role == UserType.pharmaRep) ...{
+                          ((userModal.role == UserType.pharmaRep ||
+                                  userModal.role == UserType.hco) ||
+                              userModal.role == UserType.hco)) ...{
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -446,24 +513,27 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               ),
                             },
                             SizedBox(width: 10),
-                            InkWell(
-                              onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (ctx) => ConfirmAlertDialog(
-                                    title: AppStrings.deleteEvent,
-                                    content: AppStrings.deleteEventContent,
-                                    onConfirm: () {
-                                      deleteEvent(event.eventId!);
-                                    },
-                                  ),
-                                );
-                              },
-                              child: Icon(
-                                Icons.delete,
-                                color: AppColors.accentError,
+                            if (isPastEventDate(
+                              event.startDate ?? DateTime.now(),
+                            ))
+                              InkWell(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => ConfirmAlertDialog(
+                                      title: AppStrings.deleteEvent,
+                                      content: AppStrings.deleteEventContent,
+                                      onConfirm: () {
+                                        deleteEvent(event.eventId!);
+                                      },
+                                    ),
+                                  );
+                                },
+                                child: Icon(
+                                  Icons.delete,
+                                  color: AppColors.accentError,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       },
@@ -496,7 +566,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       Divider(),
                       SizedBox(height: 16),
                       TextFormField(
-                        enabled: userModal.role == UserType.pharmaRep && isEdit,
+                        enabled:
+                            ((userModal.role == UserType.pharmaRep ||
+                                    userModal.role == UserType.hco) ||
+                                userModal.role == UserType.hco) &&
+                            isEdit,
                         controller: EventTextControllers.eventNameController,
                         decoration: InputDecoration(
                           labelText: AppStrings.labelEventName,
@@ -510,7 +584,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       Divider(),
                       TextField(
                         enabled:
-                            (userModal.role == UserType.pharmaRep) && isEdit,
+                            ((userModal.role == UserType.pharmaRep ||
+                                userModal.role == UserType.hco)) &&
+                            isEdit,
                         autocorrect: true,
                         minLines: AppSizes().eventDescriptionMinLines,
                         controller:
@@ -581,25 +657,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               },
                             )
                           : SizedBox(),
-                      Divider(),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        enabled:
-                            (userModal.role == UserType.pharmaRep) && isEdit,
-                        controller:
-                            EventTextControllers.numberOfStaffController,
-                        decoration: InputDecoration(
-                          labelText: AppStrings.labelNumberOfStaff,
-                        ),
-                        onChanged: (val) {
-                          setState(() {
-                            event = event.copyWith(
-                              numberOfStaff: int.parse(val),
-                            );
-                          });
-                        },
-                      ),
                       Divider(),
                       SizedBox(height: 16),
 
@@ -704,7 +761,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               ),
                             ),
                             enabled:
-                                (userModal.role == UserType.pharmaRep) &&
+                                ((userModal.role == UserType.pharmaRep ||
+                                    userModal.role == UserType.hco)) &&
                                 isEdit,
                             items: (filter, loadProps) => hcpList
                                 .map<Map<String, dynamic>>(
@@ -731,6 +789,22 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               ),
                             ),
                             onChanged: (value) {
+                              var a = FocusScope.of(context).focusedChild;
+                              if (a != null) {
+                                a.unfocus();
+                              }
+                              int noOfselecteHcps = value.length;
+                              int noOfStaff = int.parse(
+                                EventTextControllers
+                                        .numberOfStaffController
+                                        .text
+                                        .isNotEmpty
+                                    ? EventTextControllers
+                                          .numberOfStaffController
+                                          .text
+                                    : '0',
+                              );
+
                               setState(() {
                                 event = event.copyWith(
                                   contactDtos: value
@@ -776,7 +850,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               ),
                             ),
                             enabled:
-                                (userModal.role == UserType.pharmaRep) &&
+                                ((userModal.role == UserType.pharmaRep ||
+                                    userModal.role == UserType.hco)) &&
                                 isEdit,
                             items: (filter, loadProps) =>
                                 hcpPractioners.map<Map<String, dynamic>>((e) {
@@ -802,6 +877,38 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               ),
                             ),
                             onChanged: (value) {
+                              var a = FocusScope.of(context).focusedChild;
+                              if (a != null) {
+                                a.unfocus();
+                              }
+                              int noOfselecteHcps = value.length;
+                              int noOfStaff = int.parse(
+                                EventTextControllers
+                                        .numberOfStaffController
+                                        .text
+                                        .isNotEmpty
+                                    ? EventTextControllers
+                                          .numberOfStaffController
+                                          .text
+                                    : '0',
+                              );
+
+                              /*else {
+                              setState(() {
+                                _selectedHCP = value;
+
+                                hcpContactDto = value.map((e) {
+                                  return {
+                                    HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
+                                    "": "",
+                                  };
+                                }).toList();
+                              });
+                            }
+                          },
+                         
+                              */
+
                               setState(() {
                                 event = event.copyWith(
                                   contactDtos: value
@@ -833,16 +940,41 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 : null,
                           ),
                       },
+                      Divider(),
+                      SizedBox(height: 16),
+                      TextFormField(
+                        keyboardType: TextInputType.number,
+                        enabled:
+                            ((userModal.role == UserType.pharmaRep ||
+                                userModal.role == UserType.hco)) &&
+                            isEdit,
+                        controller:
+                            EventTextControllers.numberOfStaffController,
+                        decoration: InputDecoration(
+                          labelText: AppStrings.labelNumberOfStaff,
+                        ),
+                        onChanged: (val) {
+                          setState(() {
+                            event = event.copyWith(
+                              numberOfStaff: int.parse(val),
+                            );
+                          });
+                        },
+                      ),
+                      // Divider(),
+                      // SizedBox(height: 16),
                       if (event.eventStatus !=
                           int.parse(BasicCodesFromCrm.completed))
                         Divider(),
                       if (event.eventStatus ==
                           int.parse(BasicCodesFromCrm.completed)) ...{
+                        SizedBox(height: 16),
                         TextFormField(
                           keyboardType: TextInputType.number,
                           controller: EventTextControllers.amountController,
                           decoration: InputDecoration(
                             labelText: '${AppStrings.amount} *',
+                            prefixIcon: Icon(Icons.monetization_on_outlined),
                           ),
                           enabled: false,
                           onChanged: (val) {
@@ -911,17 +1043,75 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                     ),
                                   if (contact.approval.toString() ==
                                           BasicCodesFromCrm.pending &&
-                                      userModal.role == UserType.pharmaRep)
+                                      (userModal.role == UserType.pharmaRep ||
+                                          userModal.role == UserType.hco))
                                     ElevatedButton(
                                       style: ButtonStyle(
                                         backgroundColor:
-                                            MaterialStateProperty.all(
+                                            WidgetStateProperty.all(
                                               AppColors.upcomingStatusBadge,
                                             ),
                                       ),
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        setState(() {
+                                          isLoading = true;
+                                        });
+                                        NotificationsController()
+                                            .sendApprovalNotification(
+                                              contact.id ?? '',
+                                              event.eventId ?? '',
+                                            )
+                                            .then((result) {
+                                              setState(() {
+                                                isLoading = false;
+                                              });
+                                              showGeneralDialog(
+                                                context: context,
+                                                barrierDismissible: false,
+                                                barrierLabel:
+                                                    'Submission Status',
+                                                barrierColor: Colors.black54,
+                                                transitionDuration:
+                                                    const Duration(
+                                                      milliseconds: 240,
+                                                    ),
+                                                pageBuilder: (_, __, ___) =>
+                                                    const SizedBox.shrink(),
+                                                transitionBuilder: (ctx, anim, _, __) {
+                                                  final curved =
+                                                      CurvedAnimation(
+                                                        parent: anim,
+                                                        curve:
+                                                            Curves.easeOutBack,
+                                                      );
+                                                  return Transform.scale(
+                                                    scale:
+                                                        0.95 +
+                                                        0.05 * curved.value,
+                                                    child: Opacity(
+                                                      opacity: anim.value,
+                                                      child: ApprovalDialog(
+                                                        contactDto: contact,
+                                                        event: event,
+                                                        secondaryLabel:
+                                                            result.body,
+                                                        success:
+                                                            result.statusCode ==
+                                                            AppApiStatusCodes
+                                                                .success, // adjust to your return type
+                                                        onPrimary: () =>
+                                                            Navigator.of(
+                                                              ctx,
+                                                            ).pop(),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            });
+                                      },
                                       child: Text(
-                                        "Send for Approval",
+                                        AppStrings.sendForApproval,
                                         style: TextStyle(
                                           color: AppColors
                                               .upcomingStatusBadgeTextColor,
@@ -930,42 +1120,146 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                     ),
                                   if (contact.approval.toString() ==
                                           BasicCodesFromCrm.pending &&
-                                      userModal.role != UserType.pharmaRep)
-                                    ElevatedButton(
-                                      style: ButtonStyle(
-                                        backgroundColor:
-                                            contact.id == userModal.kiosk
-                                            ? MaterialStateProperty.all(
-                                                AppColors.successGreen,
-                                              )
-                                            : MaterialStateProperty.all(
-                                                AppColors.border,
-                                              ),
-                                      ),
-                                      onPressed: contact.id == userModal.kiosk
-                                          ? () {
-                                              eventParticipantApproval(
-                                                contact.id,
-                                                "",
-                                              );
-                                            }
-                                          : null,
-                                      child: Text(
-                                        "Approve",
-                                        style: TextStyle(
-                                          color: AppColors.background,
+                                      (userModal.role == UserType.hcp ||
+                                          userModal.role == UserType.hco))
+                                    Column(
+                                      children: [
+                                        ElevatedButton(
+                                          style: ButtonStyle(
+                                            backgroundColor:
+                                                (contact.id ==
+                                                        userModal.kiosk ||
+                                                    userModal.role ==
+                                                        UserType.hco)
+                                                ? WidgetStateProperty.all(
+                                                    AppColors.successGreen,
+                                                  )
+                                                : WidgetStateProperty.all(
+                                                    AppColors.border,
+                                                  ),
+                                          ),
+                                          onPressed:
+                                              (contact.id == userModal.kiosk ||
+                                                  userModal.role ==
+                                                      UserType.hco)
+                                              ? () {
+                                                  eventParticipantApproval(
+                                                    contact.id,
+                                                    "",
+                                                  );
+                                                }
+                                              : null,
+                                          child: Text(
+                                            "Approve",
+                                            style: TextStyle(
+                                              color: AppColors.background,
+                                            ),
+                                          ),
                                         ),
-                                      ),
+
+                                        ElevatedButton(
+                                          style: ButtonStyle(
+                                            backgroundColor:
+                                                (contact.id ==
+                                                        userModal.kiosk ||
+                                                    userModal.role ==
+                                                        UserType.hco)
+                                                ? WidgetStateProperty.all(
+                                                    AppColors.rejectedRed,
+                                                  )
+                                                : WidgetStateProperty.all(
+                                                    AppColors.border,
+                                                  ),
+                                          ),
+                                          onPressed:
+                                              (contact.id == userModal.kiosk ||
+                                                  userModal.role ==
+                                                      UserType.hco)
+                                              ? () {
+                                                  eventParticipantApproval(
+                                                    contact.id,
+                                                    "",
+                                                  );
+                                                }
+                                              : null,
+                                          child: Text(
+                                            "Reject",
+                                            style: TextStyle(
+                                              color: AppColors.background,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
 
                                   SizedBox(width: 8),
                                 ],
                               ),
+
                               SizedBox(height: 16),
                             },
                           ],
                         ),
-
+                      if (event.eventApproval !=
+                              int.parse(BasicCodesFromCrm.approval) &&
+                          event.eventStatus !=
+                              int.parse(BasicCodesFromCrm.upcoming) &&
+                          (userModal.role == UserType.hco)) ...{
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                isLoading = true;
+                              });
+                              for (var contact in event.contactDtos ?? []) {
+                                if (contact.approval.toString() ==
+                                    BasicCodesFromCrm.pending) {
+                                  eventParticipantApproval(
+                                    contact.id,
+                                    "Approved By Office User ${userModal.firstName} ${userModal.lastName} working for ${EventTextControllers.hcoController.text} ",
+                                  );
+                                }
+                              }
+                              setState(() {
+                                isLoading = false;
+                              });
+                              Provider.of<TopNavProvider>(
+                                context,
+                                listen: false,
+                              ).goBack();
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all(
+                                AppColors.successGreen,
+                              ),
+                            ),
+                            child: const Text(
+                              "Approve All",
+                              style: TextStyle(color: AppColors.background),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                isLoading = true;
+                              });
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all(
+                                AppColors.rejectedRed,
+                              ),
+                            ),
+                            child: const Text(
+                              "Reject All",
+                              style: TextStyle(color: AppColors.background),
+                            ),
+                          ),
+                        ),
+                      },
                       SizedBox(height: 16),
                       if (isCheckedIn && _checkInDateTime != null)
                         Container(
@@ -987,6 +1281,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           controller: EventTextControllers.amountController,
                           decoration: InputDecoration(
                             labelText: '${AppStrings.amount} *',
+                            prefixIcon: Icon(Icons.monetization_on_outlined),
                           ),
                           enabled: isCheckedIn,
                           onChanged: (val) {
@@ -1114,6 +1409,26 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           ),
                         SizedBox(height: 16),
                       },
+
+                      Divider(),
+                      if (event.contactDtos != null) ...{
+                        if (event.contactDtos!.isNotEmpty) ...{
+                          Text(
+                            "Total HCP's in Event: ${event.contactDtos!.length}",
+                          ),
+                          const SizedBox(height: 10),
+                        },
+                        if (event.contactDtos!.isNotEmpty &&
+                            EventTextControllers
+                                .numberOfStaffController
+                                .text
+                                .isNotEmpty) ...{
+                          Text(
+                            "Total Participants in Event: ${event.contactDtos!.length + int.parse(EventTextControllers.numberOfStaffController.text)}",
+                          ),
+                          const SizedBox(height: 10),
+                        },
+                      },
                     ],
                   ),
                   if (isEdit)
@@ -1133,7 +1448,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         });
                       },
                     ),
-                  if (userModal.role == UserType.pharmaRep &&
+                  if ((userModal.role == UserType.pharmaRep ||
+                          userModal.role == UserType.hco) &&
                       // ignore: unrelated_type_equality_checks
                       event.eventStatus ==
                           int.parse(BasicCodesFromCrm.upcoming) &&
@@ -1151,7 +1467,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         text: AppStrings.submitCheckIn,
                         onPressed: () {
                           debugPrint("Submit Check-In ${json.encode(event)}");
-                          submitCheckIn();
+                          checkinDialog();
                         },
                       ),
                     },
@@ -1206,9 +1522,17 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                     SizedBox(height: 10),
                     Row(
                       children: [
+                        SizedBox(width: 10),
                         for (var i = 0; i < eventAttachments.length; i++) ...{
-                          InkWell(
-                            onTap: () {
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              // shape: RoundedRectangleBorder(
+                              //   borderRadius: BorderRadius.circular(8),
+                              // ),
+                              shape: LinearBorder(),
+                            ),
+                            onPressed: () {
                               showModalBottomSheet(
                                 context: context,
                                 builder: (context) => StatefulBuilder(

@@ -29,14 +29,25 @@ class AppApi {
   static const String getHcpsWithHcoId = 'Contact/getHCPs/';
   static String buildAttachmentsUrl(String eventId) {
     return '${AppApi.baseUrl1}EventAttachments/$eventId/attachments';
-  
   }
-  static String buildApprovalUrl(String eventId, String doctorId, String remarks) {
+
+  static String buildApprovalUrl(
+    String eventId,
+    String doctorId,
+    String remarks,
+  ) {
     return '$baseUrl1$events/update-participant?eventId=$eventId&doctorId=$doctorId&approval=${BasicCodesFromCrm.approval}&remarks=$remarks';
   }
-  static String buildRejectionUrl(String eventId, String doctorId, String remarks) {
+
+  static String buildRejectionUrl(
+    String eventId,
+    String doctorId,
+    String remarks,
+  ) {
     return '$baseUrl1$events/update-participant?eventId=$eventId&doctorId=$doctorId&approval=${BasicCodesFromCrm.rejected}&remarks=$remarks';
   }
+
+  static const String sendNotification = 'Notifications/send';
 }
 
 class AppApiStatusCodes {

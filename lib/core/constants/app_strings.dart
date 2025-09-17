@@ -51,7 +51,7 @@ class AppStrings {
   static const String labelEventName = "Event Name *";
   static const String labelStartDate = "Event Date *";
   static const String labelEndDate = "Event End Date";
-  static const String labelNumberOfStaff = "Number of Staff *";
+  static const String labelNumberOfStaff = "Number of staff *";
   static const String labelHCO = "HCO";
   static const String labelHCOOfficeUser = "OFFICE USER";
   static const String labelHCP = "HCP";
@@ -141,6 +141,8 @@ class AppStrings {
   static const String searchHcpPractitioners = "Search HCP Practitioners *";
   static const String selectHcpPractitioners = "Select HCP Practitioners *";
   static const String amountPerHcp = "Amount per HCP:";
+  static const String sendForApproval = "Send for Approval";
+  static const String submitCheckinMessage = "Once submitted, check-in cannot be modified";
 }
 
 class ErrorText {

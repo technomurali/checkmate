@@ -24,7 +24,7 @@ class SigninController {
       var data = {
         SigninModalKeys.signinEmail: email,
         SigninModalKeys.signinPassword: password,
-        SigninModalKeys.fcmToken: prefs.getString('fcmToken') ?? '',
+        SigninModalKeys.fcmToken: prefs.getString('fcmToken') ?? 'No token',
       };
       final response = await http.post(
         url,
@@ -46,7 +46,7 @@ class SigninController {
           pharmaCompany: data['result']["companyId"],
           role: data['result']["userRoleId"],
           kiosk: data['result']["kiosk"].toString(),
-          token: data["token"] ?? '',
+          token: data["accessToken"] ?? '',
         );
         prefs.setString('user', jsonEncode(user.toJson()));
         return {
@@ -61,10 +61,18 @@ class SigninController {
         };
       }
     } catch (e) {
-      return {
-        SigninModalKeys.signinSuccess: false,
-        SigninModalKeys.signinMessage: e.toString(),
-      };
+      print(e);
+      if (e.toString().contains('SocketException')) {
+        return {
+          SigninModalKeys.signinSuccess: false,
+          SigninModalKeys.signinMessage: 'No Internet connection',
+        };
+      } else {
+        return {
+          SigninModalKeys.signinSuccess: false,
+          SigninModalKeys.signinMessage: 'An error occurred. Please try again.',
+        };
+      }
     }
   }
 }

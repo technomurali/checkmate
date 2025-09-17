@@ -142,7 +142,8 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
           event?.statusText!.toUpperCase() == "PAST";
     } else if (selectedStatus == "COMPLETED") {
       return event?.eventCheckIn != null &&
-          event?.statusText!.toUpperCase() == "PAST";
+          (event?.statusText!.toUpperCase() == "PAST" ||
+              event?.statusText!.toUpperCase() == "UPCOMING");
     } else if (selectedStatus == "UPCOMING") {
       return eventStatus == BasicCodesFromCrm.upcoming &&
           event?.statusText!.toUpperCase() != "PAST";

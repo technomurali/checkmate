@@ -1,6 +1,5 @@
 import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
-import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/core/widgets/events_recipts_card.dart';
 import 'package:checkmate/features/auth/controllers/events_controller.dart';
 import 'package:checkmate/features/auth/controllers/profile_controller.dart';

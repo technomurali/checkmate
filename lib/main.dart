@@ -37,7 +37,10 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TopNavProvider()),
         ChangeNotifierProvider(create: (_) => SignupScreenLogic()),
       ],
-      child: const MyApp(),
+      child: ChangeNotifierProvider(
+        create: (_) => TopNavProvider(),
+        child: MyApp(),
+      ),
     ),
   );
 }

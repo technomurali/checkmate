@@ -5,6 +5,7 @@ import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
+import 'package:checkmate/firebase/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
@@ -248,7 +249,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                       children: [
                         Text("Per Hcp "),
                         Text(
-                          ((event.amount ?? 1) / (event.numberOfStaff! + event.contactDtos!.length)).toStringAsFixed(2),
+                         "\$ ${((event.amount ?? 1) / (event.numberOfStaff! + event.contactDtos!.length)).toStringAsFixed(2)}",
                         ),
                       ],
                     ),
@@ -292,13 +293,19 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                 userModal.role == UserType.pharmaRep)
                               ElevatedButton(
                                 style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(
+                                  backgroundColor: WidgetStateProperty.all(
                                     AppColors.upcomingStatusBadge,
                                   ),
                                 ),
-                                onPressed: () {},
+                                onPressed: () {
+                                  NotificationsController().sendApprovalNotification(
+                                    
+                                    event.contactDtos![i].id ?? '',
+                                  event.eventId ?? widget.eventId
+                                  );
+                                },
                                 child: Text(
-                                  "Send for Approval",
+                                  AppStrings.sendForApproval,
                                   style: TextStyle(
                                     color:
                                         AppColors.upcomingStatusBadgeTextColor,
@@ -313,10 +320,10 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                   backgroundColor:
                                       event.contactDtos![i].id ==
                                           userModal.kiosk
-                                      ? MaterialStateProperty.all(
+                                      ? WidgetStateProperty.all(
                                           AppColors.successGreen,
                                         )
-                                      : MaterialStateProperty.all(
+                                      : WidgetStateProperty.all(
                                           AppColors.border,
                                         ),
                                 ),
@@ -458,7 +465,6 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                       },
                                     ),
                                     TextButton(
-                                      child: Text('Reject'),
                                       onPressed:
                                           ReceiptRejectionTextController
                                               .remarksController
@@ -487,6 +493,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                               // Navigator.of(context).pop();
                                             }
                                           : null,
+                                      child: Text('Reject'),
                                     ),
                                   ],
                                 );

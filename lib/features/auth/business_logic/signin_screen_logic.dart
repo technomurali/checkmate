@@ -13,45 +13,61 @@ class SigninScreenLogic extends ChangeNotifier {
   String? passwordError;
   SigninScreenLogic([SigninController? controller])
     : _signinController = controller ?? SigninController() {
-    SigninTextControllers.email.addListener(validateEmail);
-    SigninTextControllers.password.addListener(validatePassword);
+    SigninTextControllers.email.addListener(updateButtonState);
+    SigninTextControllers.password.addListener(updateButtonState);
     SigninTextControllers.email.clear();
     SigninTextControllers.password.clear();
   }
 
   bool isButtonEnabled = false;
-  void validateEmail() {
+  bool validateEmail() {
     final email = SigninTextControllers.email.text.trim();
     if (SigninTextControllers.email.text.trim() != "") {
       if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
         emailError = "Enter a valid email";
+        notifyListeners();
+        return false;
       } else {
         emailError = null;
+        notifyListeners();
+        return true;
       }
+    } else {
+      emailError = "Email can't be empty";
+      notifyListeners();
+      return false;
     }
-    updateButtonState();
-    notifyListeners();
+    // updateButtonState();.co
+    // notifyListeners();
   }
 
-  void validatePassword() {
+  bool validatePassword() {
     final password = SigninTextControllers.password.text.trim();
     if (!isValidPassword(password)) {
       passwordError = "Must be 6+ chars, include upper, lower, digit, special";
+      notifyListeners();
+      return false;
     } else {
       passwordError = null;
+      notifyListeners();
+      return true;
     }
-    updateButtonState();
-    notifyListeners();
+    // updateButtonState();
   }
 
   void updateButtonState() {
     final enabled =
-        emailError == null &&
-        passwordError == null &&
         SigninTextControllers.email.text.trim().isNotEmpty &&
         SigninTextControllers.password.text.trim().isNotEmpty;
+    print(
+      SigninTextControllers.email.text.trim().isNotEmpty &&
+          SigninTextControllers.password.text.trim().isNotEmpty,
+    );
+    print("Email : ${SigninTextControllers.email.text.trim().isNotEmpty}");
+    print("Password ${SigninTextControllers.password.text.trim().isNotEmpty}");
     if (enabled != isButtonEnabled) {
       isButtonEnabled = enabled;
+      notifyListeners();
     }
   }
 
@@ -67,6 +83,9 @@ class SigninScreenLogic extends ChangeNotifier {
   }
 
   Future<UserModal?> signinUser(BuildContext context) async {
+    if (!validateEmail() | !validatePassword()) {
+      return null;
+    }
     try {
       isLoading = true;
       notifyListeners();

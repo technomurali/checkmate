@@ -205,7 +205,7 @@ class EventController {
   }) async {
     try {
       final uri = Uri.parse(
-        "${AppApi.baseUrl1}${AppApi.events}/getEventsByHcoAndStatus/${hcoId}/$status",
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByHcoAndStatus/$hcoId/$status",
       );
 
       final response = await http.get(
@@ -235,7 +235,7 @@ class EventController {
   }) async {
     try {
       final uri = Uri.parse(
-        "${AppApi.baseUrl1}${AppApi.events}/getEventsByHcoAndApproval/${hcoId}/$status",
+        "${AppApi.baseUrl1}${AppApi.events}/getEventsByHcoAndApproval/$hcoId/$status",
       );
 
       final response = await http.get(

@@ -92,6 +92,7 @@ class NewEventController {
         body: jsonWalaBody,
         headers: {'Content-Type': 'application/json'},
       );
+      debugPrint("response: ${response.body}");
       if (response.statusCode == AppApiStatusCodes.postSuccess) {
         return {'success': true};
       } else {
