@@ -23,6 +23,22 @@ class TopNavProvider extends ChangeNotifier {
   TopNavScreen get currentScreen => _currentScreen;
   Object? get argument => _argument;
 
+  set currentScreen(TopNavScreen value) {
+    _currentScreen = value;
+    notifyListeners();
+  }
+
+  set argument(Object? value) {
+    _argument = value;
+    notifyListeners();
+  }
+
+  set history(TopNavScreen value) {
+    _history
+      .add(value);
+    notifyListeners();
+  }
+
   void navigateTo(TopNavScreen screen, {Object? argument}) {
     if (_currentScreen != screen) {
       _history.add(_currentScreen);
@@ -31,6 +47,7 @@ class TopNavProvider extends ChangeNotifier {
     _argument = argument;
     notifyListeners();
   }
+
   bool _isOnLogin = false;
 
   bool get isOnLogin => _isOnLogin;
