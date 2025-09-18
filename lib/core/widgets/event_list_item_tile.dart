@@ -20,6 +20,18 @@ class EventListItemTile extends StatelessWidget {
         'code': 'A',
         'statusId': BasicCodesFromCrm.approval,
       };
+    } else if (status == BasicCodesFromCrm.terminated) {
+      return {
+        'status': 'TERMINATED',
+        'code': 'B',
+        'statusId': BasicCodesFromCrm.terminated,
+      };
+    } else if (status == BasicCodesFromCrm.pending) {
+      return {
+        'status': 'IN REVIEW',
+        'code': 'A',
+        'statusId': BasicCodesFromCrm.pending,
+      };
     }
     // else if (status == BasicCodesFromCrm.completed) {
     //   return {
@@ -54,12 +66,6 @@ class EventListItemTile extends StatelessWidget {
         'status': 'UPCOMING',
         'code': 'B',
         'statusId': BasicCodesFromCrm.upcoming,
-      };
-    } else if (status == BasicCodesFromCrm.terminated) {
-      return {
-        'status': 'TERMINATED',
-        'code': 'B',
-        'statusId': BasicCodesFromCrm.terminated,
       };
     } else if (status == BasicCodesFromCrm.pending) {
       return {
@@ -115,17 +121,39 @@ class EventListItemTile extends StatelessWidget {
             Positioned(
               right: -1,
               top: 0,
-              child: Tooltip(
-                message: codeForTextOutput(
-                  status: event.eventStatus.toString(),
-                )['status'],
-                child: FilterIcon(
-                  status:
-                      codeForTextOutput(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Tooltip(
+                    message: codeForTextOutput(
+                      status: event.eventStatus.toString(),
+                    )['status'],
+                    child: FilterIcon(
+                      status:
+                          codeForTextOutput(
+                            status: event.eventStatus.toString(),
+                          )['status'] ??
+                          '',
+                    ),
+                  ),
+                  if (codeForTextOutput(
                         status: event.eventStatus.toString(),
-                      )['status'] ??
-                      '',
-                ),
+                      )['status'] ==
+                      "COMPLETED")
+                    Tooltip(
+                      message: codeForTextOutput(
+                        status: event.eventApproval.toString(),
+                      )['status'],
+                      child: FilterIcon(
+                        showApproval: true,
+                        status:
+                            codeForTextOutput(
+                              status: event.eventApproval.toString(),
+                            )['status'] ??
+                            '',
+                      ),
+                    ),
+                ],
               ),
             ),
 

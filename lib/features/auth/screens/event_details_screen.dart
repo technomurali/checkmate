@@ -207,7 +207,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       isLoading = true;
     });
     _eventController.deleteEvent(eventId).then((value) {
-      if (value == AppApiStatusCodes.deleteSuccess) {
+      if (value == AppApiStatusCodes.success) {
         final navProvider = Provider.of<TopNavProvider>(context, listen: false);
         setState(() {
           isLoading = false;
@@ -382,8 +382,12 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       if (event.eventCheckIn == null &&
           event.statusText!.toUpperCase() == "PAST") {
         return "IN-COMPLETE EVENT";
+      } else if (event.eventCheckIn == null &&
+          event.statusText!.toUpperCase() == "UPCOMING") {
+        return "${eventStatusCodeToText(event.eventStatus.toString())}-EVENT";
       } else {
-        return "COMPLETED EVENT";
+        return "${eventStatusCodeToText(event.eventStatus.toString())}-${eventApprovalCodeToText(event.eventApproval.toString())}-EVENT";
+        //"${eventStatusCodeToText(event.eventStatus.toString())}-${eventApprovalCodeToText(event.eventApproval.toString())}-EVENT"
       }
     } else {
       return "${eventStatusCodeToText(event.eventStatus.toString())} EVENT";
@@ -400,7 +404,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     } else if (statusCode == BasicCodesFromCrm.disputed) {
       return "DISPUTED";
     } else {
-      return "Unknown";
+      return "";
     }
   }
 
@@ -408,11 +412,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     if (statusCode == BasicCodesFromCrm.approval) {
       return "Approved";
     } else if (statusCode == BasicCodesFromCrm.pending) {
-      return "Pending";
+      return "In Review";
     } else if (statusCode == BasicCodesFromCrm.rejected) {
       return "Rejected";
     } else {
-      return "Unknown";
+      return "";
     }
   }
 
@@ -476,10 +480,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   event.eventStatus != null
                       ? Text(
                           event.statusText != null
-                              ? event.statusText!.toLowerCase() == "past"
+                              ? !(event.statusText!.toLowerCase() == "past")
                                     ? ifPastStatusText()
-                                    : "${eventStatusCodeToText(event.eventStatus.toString())} EVENT"
-                              : "${eventStatusCodeToText(event.eventStatus.toString())} EVENT",
+                                    : "${eventStatusCodeToText(event.eventStatus.toString())}-${eventApprovalCodeToText(event.eventApproval.toString())}-EVENT"
+                              : "${eventStatusCodeToText(event.eventStatus.toString())}-${eventApprovalCodeToText(event.eventApproval.toString())}-EVENT",
                         )
                       : SizedBox(),
                   Column(
@@ -547,7 +551,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           ),
                         ),
 
-                        Divider(),
                         SizedBox(height: 10),
                       },
                       SizedBox(height: 16),
@@ -563,7 +566,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           });
                         },
                       ),
-                      Divider(),
+
                       SizedBox(height: 16),
                       TextFormField(
                         enabled:
@@ -581,7 +584,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           });
                         },
                       ),
-                      Divider(),
+
                       TextField(
                         enabled:
                             ((userModal.role == UserType.pharmaRep ||
@@ -657,7 +660,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               },
                             )
                           : SizedBox(),
-                      Divider(),
+
                       SizedBox(height: 16),
 
                       // Text(AppStrings.hcpInEvent),
@@ -940,7 +943,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 : null,
                           ),
                       },
-                      Divider(),
+
                       SizedBox(height: 16),
                       TextFormField(
                         keyboardType: TextInputType.number,
@@ -961,47 +964,67 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           });
                         },
                       ),
-                      // Divider(),
-                      // SizedBox(height: 16),
+                      //
+                      SizedBox(height: 16),
+                      if (event.contactDtos != null) ...{
+                        if (event.contactDtos!.isNotEmpty) ...{
+                          Text(
+                            "Total HCP's in Event: ${event.contactDtos!.length}",
+                          ),
+                          const SizedBox(height: 10),
+                        },
+                        if (event.contactDtos!.isNotEmpty &&
+                            EventTextControllers
+                                .numberOfStaffController
+                                .text
+                                .isNotEmpty) ...{
+                          Text(
+                            "Total Participants in Event: ${event.contactDtos!.length + int.parse(EventTextControllers.numberOfStaffController.text)}",
+                          ),
+                          const SizedBox(height: 10),
+                        },
+                      },
+
                       if (event.eventStatus !=
                           int.parse(BasicCodesFromCrm.completed))
-                        Divider(),
-                      if (event.eventStatus ==
-                          int.parse(BasicCodesFromCrm.completed)) ...{
-                        SizedBox(height: 16),
-                        TextFormField(
-                          keyboardType: TextInputType.number,
-                          controller: EventTextControllers.amountController,
-                          decoration: InputDecoration(
-                            labelText: '${AppStrings.amount} *',
-                            prefixIcon: Icon(Icons.monetization_on_outlined),
+                        if (event.eventStatus ==
+                            int.parse(BasicCodesFromCrm.completed)) ...{
+                          SizedBox(height: 16),
+                          TextFormField(
+                            keyboardType: TextInputType.number,
+                            controller: EventTextControllers.amountController,
+                            decoration: InputDecoration(
+                              labelText: '${AppStrings.amount} *',
+                              prefixIcon: Icon(Icons.monetization_on_outlined),
+                            ),
+                            enabled: false,
+                            onChanged: (val) {
+                              setState(() {
+                                event = event.copyWith(
+                                  amount: double.parse(val),
+                                );
+                              });
+                            },
                           ),
-                          enabled: false,
-                          onChanged: (val) {
-                            setState(() {
-                              event = event.copyWith(amount: double.parse(val));
-                            });
-                          },
-                        ),
-                        if (EventTextControllers
-                            .amountController
-                            .text
-                            .isNotEmpty) ...{
-                          SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              "${AppStrings.amountPerHcp} ${event.contactDtos != null && event.contactDtos!.isNotEmpty ? (double.parse(EventTextControllers.amountController.text) / (event.contactDtos!.length + double.parse(EventTextControllers.numberOfStaffController.text))).toStringAsFixed(2) : '0.00'}",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
+                          if (EventTextControllers
+                              .amountController
+                              .text
+                              .isNotEmpty) ...{
+                            SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "${AppStrings.amountPerHcp} ${event.contactDtos != null && event.contactDtos!.isNotEmpty ? (double.parse(EventTextControllers.amountController.text) / (event.contactDtos!.length + double.parse(EventTextControllers.numberOfStaffController.text))).toStringAsFixed(2) : '0.00'}",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ),
-                          ),
+                          },
+
+                          SizedBox(height: 16),
                         },
-                        Divider(),
-                        SizedBox(height: 16),
-                      },
 
                       if (event.eventStatus ==
                           int.parse(BasicCodesFromCrm.completed))
@@ -1043,8 +1066,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                     ),
                                   if (contact.approval.toString() ==
                                           BasicCodesFromCrm.pending &&
-                                      (userModal.role == UserType.pharmaRep ||
-                                          userModal.role == UserType.hco))
+                                      (userModal.role == UserType.pharmaRep))
                                     ElevatedButton(
                                       style: ButtonStyle(
                                         backgroundColor:
@@ -1126,6 +1148,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                       children: [
                                         ElevatedButton(
                                           style: ButtonStyle(
+                                            fixedSize: WidgetStateProperty.all(
+                                              Size(110, 40),
+                                            ),
                                             backgroundColor:
                                                 (contact.id ==
                                                         userModal.kiosk ||
@@ -1159,6 +1184,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
                                         ElevatedButton(
                                           style: ButtonStyle(
+                                            fixedSize: WidgetStateProperty.all(
+                                              Size(110, 40),
+                                            ),
                                             backgroundColor:
                                                 (contact.id ==
                                                         userModal.kiosk ||
@@ -1202,8 +1230,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         ),
                       if (event.eventApproval !=
                               int.parse(BasicCodesFromCrm.approval) &&
-                          event.eventStatus !=
-                              int.parse(BasicCodesFromCrm.upcoming) &&
+                          event.eventStatus ==
+                              int.parse(BasicCodesFromCrm.completed) &&
                           (userModal.role == UserType.hco)) ...{
                         SizedBox(
                           width: double.infinity,
@@ -1408,26 +1436,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             ),
                           ),
                         SizedBox(height: 16),
-                      },
-
-                      Divider(),
-                      if (event.contactDtos != null) ...{
-                        if (event.contactDtos!.isNotEmpty) ...{
-                          Text(
-                            "Total HCP's in Event: ${event.contactDtos!.length}",
-                          ),
-                          const SizedBox(height: 10),
-                        },
-                        if (event.contactDtos!.isNotEmpty &&
-                            EventTextControllers
-                                .numberOfStaffController
-                                .text
-                                .isNotEmpty) ...{
-                          Text(
-                            "Total Participants in Event: ${event.contactDtos!.length + int.parse(EventTextControllers.numberOfStaffController.text)}",
-                          ),
-                          const SizedBox(height: 10),
-                        },
                       },
                     ],
                   ),

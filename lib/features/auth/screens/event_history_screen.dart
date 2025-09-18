@@ -244,7 +244,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
       isLoading = true;
     });
     _eventController.deleteEvent(eventId).then((value) {
-      if (value == AppApiStatusCodes.deleteSuccess) {
+      if (value == AppApiStatusCodes.success) {
         fetchAllEvents();
         setState(() {
           isLoading = false;

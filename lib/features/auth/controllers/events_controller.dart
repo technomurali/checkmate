@@ -347,8 +347,8 @@ class EventController {
   Future<int> deleteEvent(String eventId) async {
     try {
       //https://checkmate-qa-aggnd3ahabbudhdm.canadacentral-01.azurewebsites.net/api/Events/40272d55-267c-f011-b4cc-6045bd0460f1
-      final uri = Uri.parse("${AppApi.baseUrl1}${AppApi.events}/$eventId");
-      final responce = await http.delete(uri);
+      final uri = Uri.parse("${AppApi.baseUrl1}${AppApi.events}/terminate-event/$eventId");
+      final responce = await http.post(uri);
       return responce.statusCode;
     } catch (e) {
       debugPrint("Error Deleting Event $e");
@@ -422,7 +422,7 @@ class EventController {
   }
 
   Future<Response> approve(eventId, doctorId, remarks) async {
-    var url = Uri.parse(AppApi.buildApprovalUrl(eventId, doctorId, "remarks"));
+    var url = Uri.parse(AppApi.buildApprovalUrl(eventId, doctorId, "$remarks."));
     try {
       final response = await http.post(
         url,
@@ -440,7 +440,7 @@ class EventController {
 
   Future<Response> reject(eventId, doctorId, remarks) async {
     var url = Uri.parse(
-      AppApi.buildRejectionUrl(eventId, doctorId, "$remarks"),
+      AppApi.buildRejectionUrl(eventId, doctorId, "$remarks."),
     );
     try {
       final response = await http.post(

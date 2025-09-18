@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 
 class FilterIcon extends StatelessWidget {
   final String status;
-  const FilterIcon({super.key, required this.status});
+  final bool showApproval;
+  const FilterIcon({
+    super.key,
+    required this.status,
+    this.showApproval = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +58,10 @@ class FilterIcon extends StatelessWidget {
         //shape: BoxShape.circle,
         color: color,
       ),
-      child: Text(status, style: TextStyle(color: textColor, fontSize: 12)),
+      child: Text(
+        status,
+        style: TextStyle(color: textColor, fontSize: showApproval ? 8 : 12),
+      ),
     );
   }
 }

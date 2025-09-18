@@ -4,6 +4,7 @@ import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
+import 'package:checkmate/features/auth/model/hcp_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:checkmate/firebase/notifications.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,28 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
   void initState() {
     super.initState();
     fetchEvent();
+  }
+
+  eventParticipantApproval(String doctorId, String remarks) {
+    setState(() {
+      isLoading = true;
+    });
+    _eventController.approve(event.eventId ?? '', doctorId, remarks).then((
+      response,
+    ) {
+      if (response.statusCode == AppApiStatusCodes.success) {
+        fetchEvent();
+        setState(() {
+          isLoading = false;
+        });
+        final navProvider = Provider.of<TopNavProvider>(context, listen: false);
+        navProvider.goBack();
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
   }
 
   fetchImagesOfEvent(String eventId) async {
@@ -178,21 +201,23 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                       ),
                       Divider(),
                       SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(AppStrings.labelEndDate),
-                          Text(
-                            event.endDate!
-                                .toLocal()
-                                .toString()
-                                .split(' ')
-                                .first,
-                          ),
-                        ],
-                      ),
-                      Divider(),
-                      SizedBox(height: 16),
+                      if (event.isMultiDay) ...{
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(AppStrings.labelEndDate),
+                            Text(
+                              event.endDate!
+                                  .toLocal()
+                                  .toString()
+                                  .split(' ')
+                                  .first,
+                            ),
+                          ],
+                        ),
+                        Divider(),
+                        SizedBox(height: 16),
+                      },
                     } else ...{
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -224,7 +249,12 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                     if (event.hco != null) ...{
                       Row(
                         children: [
-                          Text(EventTextControllers.hcoController.text),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.91,
+                            child: Text(
+                              EventTextControllers.hcoController.text,
+                            ),
+                          ),
                         ],
                       ),
                       Divider(),
@@ -249,7 +279,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                       children: [
                         Text("Per Hcp "),
                         Text(
-                         "\$ ${((event.amount ?? 1) / (event.numberOfStaff! + event.contactDtos!.length)).toStringAsFixed(2)}",
+                          "\$ ${((event.amount ?? 1) / (event.numberOfStaff! + event.contactDtos!.length)).toStringAsFixed(2)}",
                         ),
                       ],
                     ),
@@ -264,6 +294,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                             Text(
                               "${i + 1}. ${event.contactDtos![i].firstName} ${event.contactDtos![i].lastName}",
                             ),
+
                             if (event.contactDtos![i].approval.toString() !=
                                 BasicCodesFromCrm.pending)
                               Container(
@@ -290,19 +321,22 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                               ),
                             if (event.contactDtos![i].approval.toString() ==
                                     BasicCodesFromCrm.pending &&
-                                userModal.role == UserType.pharmaRep)
+                                ((userModal.role == UserType.pharmaRep)))
                               ElevatedButton(
                                 style: ButtonStyle(
+                                  fixedSize: WidgetStateProperty.all(
+                                    Size(110, 40),
+                                  ),
                                   backgroundColor: WidgetStateProperty.all(
                                     AppColors.upcomingStatusBadge,
                                   ),
                                 ),
                                 onPressed: () {
-                                  NotificationsController().sendApprovalNotification(
-                                    
-                                    event.contactDtos![i].id ?? '',
-                                  event.eventId ?? widget.eventId
-                                  );
+                                  NotificationsController()
+                                      .sendApprovalNotification(
+                                        event.contactDtos![i].id ?? '',
+                                        event.eventId ?? widget.eventId,
+                                      );
                                 },
                                 child: Text(
                                   AppStrings.sendForApproval,
@@ -314,12 +348,16 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                               ),
                             if (event.contactDtos![i].approval.toString() ==
                                     BasicCodesFromCrm.pending &&
-                                userModal.role != UserType.pharmaRep)
+                                userModal.role != UserType.pharmaRep) ...{
                               ElevatedButton(
                                 style: ButtonStyle(
+                                  fixedSize: WidgetStateProperty.all(
+                                    Size(110, 40),
+                                  ),
                                   backgroundColor:
-                                      event.contactDtos![i].id ==
-                                          userModal.kiosk
+                                      ((event.contactDtos![i].id ==
+                                              userModal.kiosk) ||
+                                          userModal.role == UserType.hco)
                                       ? WidgetStateProperty.all(
                                           AppColors.successGreen,
                                         )
@@ -328,12 +366,14 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                         ),
                                 ),
                                 onPressed:
-                                    event.contactDtos![i].id == userModal.kiosk
+                                    (event.contactDtos![i].id ==
+                                            userModal.kiosk ||
+                                        userModal.role == UserType.hco)
                                     ? () {
-                                        // eventParticipantApproval(
-                                        //   event.contactDtos![i].id,
-                                        //   "",
-                                        // );
+                                        eventParticipantApproval(
+                                          event.contactDtos![i].id ?? '',
+                                          "",
+                                        );
                                       }
                                     : null,
                                 child: Text(
@@ -341,6 +381,39 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                   style: TextStyle(color: AppColors.background),
                                 ),
                               ),
+                              ElevatedButton(
+                                style: ButtonStyle(
+                                  fixedSize: WidgetStateProperty.all(
+                                    Size(110, 40),
+                                  ),
+                                  backgroundColor:
+                                      ((event.contactDtos![i].id ==
+                                              userModal.kiosk) ||
+                                          userModal.role == UserType.hco)
+                                      ? WidgetStateProperty.all(
+                                          AppColors.rejectedRed,
+                                        )
+                                      : WidgetStateProperty.all(
+                                          AppColors.border,
+                                        ),
+                                ),
+                                onPressed:
+                                    (event.contactDtos![i].id ==
+                                            userModal.kiosk ||
+                                        userModal.role == UserType.hco)
+                                    ? () {
+                                        eventParticipantApproval(
+                                          event.contactDtos![i].id ?? '',
+                                          "",
+                                        );
+                                      }
+                                    : null,
+                                child: Text(
+                                  "  Reject  ",
+                                  style: TextStyle(color: AppColors.background),
+                                ),
+                              ),
+                            },
                           ],
                         ),
                       },
@@ -404,27 +477,42 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                 ),
                 SizedBox(height: 20),
                 if (userModal.role == UserType.pharmaRep) ...{
-                  Button(text: AppStrings.sendRequest, onPressed: () {}),
-                } else if (userModal.role == UserType.hcp) ...{
+                  // Button(text: AppStrings.sendRequest, onPressed: () {}),
+                } else if ((userModal.role == UserType.hcp) ||
+                    (userModal.role == UserType.hco)) ...{
                   if (event.eventStatus.toString() ==
                       BasicCodesFromCrm.completed) ...{
                     Button(
                       text: AppStrings.approve,
                       onPressed: () {
-                        _eventController
-                            .approve(
+                        if (userModal.role == UserType.hco) {
+                          for (var hcp in event.contactDtos!) {
+                            _eventController.approve(
                               event.eventId,
-                              userModal.kiosk,
-                              "No remarks",
-                            )
-                            .then(
-                              (v) => {
-                                Provider.of<TopNavProvider>(
-                                  context,
-                                  listen: false,
-                                )..goBack(),
-                              },
+                              hcp.id,
+                              "Approved by ${userModal.firstName} ${userModal.lastName} of ${EventTextControllers.hcoController.text}",
                             );
+                            Provider.of<TopNavProvider>(
+                              context,
+                              listen: false,
+                            ).goBack();
+                          }
+                        } else {
+                          _eventController
+                              .approve(
+                                event.eventId,
+                                userModal.kiosk,
+                                "No remarks",
+                              )
+                              .then(
+                                (v) => {
+                                  Provider.of<TopNavProvider>(
+                                    context,
+                                    listen: false,
+                                  )..goBack(),
+                                },
+                              );
+                        }
                       },
                     ),
                     SizedBox(height: 10),
