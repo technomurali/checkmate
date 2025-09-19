@@ -55,6 +55,27 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
     });
   }
 
+  eventParticipantRejection(String doctorId, String remarks) {
+    setState(() {
+      isLoading = true;
+    });
+    _eventController.reject(event.eventId ?? '', doctorId, remarks).then((
+      response,
+    ) {
+      if (response.statusCode == AppApiStatusCodes.success) {
+        setState(() {
+          isLoading = false;
+        });
+        final navProvider = Provider.of<TopNavProvider>(context, listen: false);
+        navProvider.goBack();
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
+  }
+
   fetchImagesOfEvent(String eventId) async {
     // setState(() {
     //   isLoading = true;
@@ -348,8 +369,11 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                 userModal.role != UserType.pharmaRep) ...{
                               ElevatedButton(
                                 style: ButtonStyle(
+                                  padding: WidgetStateProperty.all(
+                                    EdgeInsets.zero,
+                                  ),
                                   fixedSize: WidgetStateProperty.all(
-                                    Size(110, 40),
+                                    Size(70, 40),
                                   ),
                                   backgroundColor:
                                       ((event.contactDtos![i].id ==
@@ -374,14 +398,17 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                       }
                                     : null,
                                 child: Text(
-                                  "Approve",
+                                  AppStrings.approve,
                                   style: TextStyle(color: AppColors.background),
                                 ),
                               ),
                               ElevatedButton(
                                 style: ButtonStyle(
+                                  padding: WidgetStateProperty.all(
+                                    EdgeInsets.zero,
+                                  ),
                                   fixedSize: WidgetStateProperty.all(
-                                    Size(110, 40),
+                                    Size(70, 40),
                                   ),
                                   backgroundColor:
                                       ((event.contactDtos![i].id ==
@@ -399,14 +426,95 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                             userModal.kiosk ||
                                         userModal.role == UserType.hco)
                                     ? () {
-                                        eventParticipantApproval(
-                                          event.contactDtos![i].id ?? '',
-                                          "",
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return StatefulBuilder(
+                                              builder: (context, setState) {
+                                                return AlertDialog(
+                                                  title: Text(
+                                                    'Confirm Rejection',
+                                                  ),
+                                                  content: SizedBox(
+                                                    height: 220,
+                                                    child: Column(
+                                                      children: [
+                                                        Text(
+                                                          AppStrings
+                                                              .rejectMessage,
+                                                        ),
+                                                        SizedBox(height: 20),
+                                                        TextField(
+                                                          controller:
+                                                              ReceiptRejectionTextController
+                                                                  .remarksController,
+                                                          decoration:
+                                                              InputDecoration(
+                                                                labelText:
+                                                                    'Remarks',
+                                                              ),
+                                                          onChanged: (value) =>
+                                                              setState(() {}),
+                                                          maxLines: 3,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      child: Text('Cancel'),
+                                                      onPressed: () {
+                                                        Navigator.of(
+                                                          context,
+                                                        ).pop();
+                                                      },
+                                                    ),
+                                                    TextButton(
+                                                      onPressed:
+                                                          ReceiptRejectionTextController
+                                                              .remarksController
+                                                              .text
+                                                              .isNotEmpty
+                                                          ? () {
+                                                              _eventController
+                                                                  .reject(
+                                                                    event
+                                                                        .eventId,
+                                                                    userModal
+                                                                        .kiosk,
+                                                                    ReceiptRejectionTextController
+                                                                        .remarksController
+                                                                        .text,
+                                                                  )
+                                                                  .then(
+                                                                    (v) => {
+                                                                      Provider.of<
+                                                                          TopNavProvider
+                                                                        >(
+                                                                          context,
+                                                                          listen:
+                                                                              false,
+                                                                        )
+                                                                        ..goBack(),
+                                                                      Navigator.of(
+                                                                        context,
+                                                                      ).pop(),
+                                                                    },
+                                                                  );
+                                                            }
+                                                          : null,
+                                                      child: Text('Reject'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          },
                                         );
                                       }
                                     : null,
                                 child: Text(
-                                  "  Reject  ",
+                                  AppStrings.reject,
                                   style: TextStyle(color: AppColors.background),
                                 ),
                               ),
@@ -475,8 +583,8 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                 SizedBox(height: 20),
                 if (userModal.role == UserType.pharmaRep) ...{
                   // Button(text: AppStrings.sendRequest, onPressed: () {}),
-                } else if ((userModal.role == UserType.hcp) ||
-                    (userModal.role == UserType.hco)) ...{
+                } else if ((userModal.role == UserType.hco) &&
+                    event.contactDtos!.length > 3) ...{
                   if (event.eventStatus.toString() ==
                       BasicCodesFromCrm.completed) ...{
                     Button(
@@ -573,6 +681,9 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                                           listen: false,
                                                         )
                                                         ..goBack(),
+                                                      Navigator.of(
+                                                        context,
+                                                      ).pop(),
                                                     },
                                                   );
                                               // Navigator.of(context).pop();

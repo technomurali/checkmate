@@ -136,7 +136,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
   }) {
     if (selectedStatus == "IN REVIEW") {
       return eventApproval == BasicCodesFromCrm.pending &&
-          eventStatus != BasicCodesFromCrm.upcoming;
+          eventStatus == BasicCodesFromCrm.completed;
     } else if (selectedStatus == "IN COMPLETE") {
       return event?.eventCheckIn == null &&
           event?.statusText!.toUpperCase() == "PAST";
@@ -416,7 +416,18 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
         if (!isLoading) ...{
           if (filteredEvents.isNotEmpty) ...{
             for (var i = 0; i < filteredEvents.length; i++) ...{
-              historyItemBuilder(i),
+              EventListItemTile(
+                event: filteredEvents[i],
+                onTap: () {
+                  Provider.of<TopNavProvider>(
+                    context,
+                    listen: false,
+                  ).navigateTo(
+                    TopNavScreen.eventDetails,
+                    argument: filteredEvents[i].eventId,
+                  );
+                },
+              ),
             },
           } else ...{
             Center(child: Text("NO Events With the Selected Filter")),

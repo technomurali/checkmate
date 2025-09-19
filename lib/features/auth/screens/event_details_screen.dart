@@ -247,7 +247,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       "eventDescription":
           NewEventTextControllers.eventDescriptionController.text,
       "eventApproval": int.parse(BasicCodesFromCrm.pending),
-      "userName": "/contacts(${userModal.kiosk})",
+      "userName": "/contacts(${event.userName})",
       "isMultiDay": event.isMultiDay,
     };
     debugPrint("Test Data for Update Event ${jsonEncode(testData)}");
@@ -383,10 +383,12 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           event.statusText!.toUpperCase() == "PAST") {
         return "IN-COMPLETE EVENT";
       } else if (event.eventCheckIn == null &&
-          event.statusText!.toUpperCase() == "UPCOMING") {
-        return "${eventStatusCodeToText(event.eventStatus.toString())}-EVENT";
+          event.statusText!.toUpperCase() == "UPCOMING" &&
+          event.eventStatus == int.parse(BasicCodesFromCrm.terminated) &&
+          event.eventStatus == int.parse(BasicCodesFromCrm.upcoming)) {
+        return "${eventStatusCodeToText(event.eventStatus.toString())} EVENT";
       } else {
-        return "${eventStatusCodeToText(event.eventStatus.toString())}-${eventApprovalCodeToText(event.eventApproval.toString())}-EVENT";
+        return "${eventStatusCodeToText(event.eventStatus.toString())} & ${eventApprovalCodeToText(event.eventApproval.toString()).toUpperCase()} EVENT";
         //"${eventStatusCodeToText(event.eventStatus.toString())}-${eventApprovalCodeToText(event.eventApproval.toString())}-EVENT"
       }
     } else {
@@ -482,14 +484,36 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           event.statusText != null
                               ? !(event.statusText!.toLowerCase() == "past")
                                     ? ifPastStatusText()
-                                    : "${eventStatusCodeToText(event.eventStatus.toString())}-${eventApprovalCodeToText(event.eventApproval.toString())}-EVENT"
-                              : "${eventStatusCodeToText(event.eventStatus.toString())}-${eventApprovalCodeToText(event.eventApproval.toString())}-EVENT",
+                                    : "${eventStatusCodeToText(event.eventStatus.toString())} & ${eventApprovalCodeToText(event.eventApproval.toString()).toUpperCase()} EVENT"
+                              : "${eventStatusCodeToText(event.eventStatus.toString())} & ${eventApprovalCodeToText(event.eventApproval.toString()).toUpperCase()} EVENT",
                         )
                       : SizedBox(),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (event.statusText!.toLowerCase() == "past" &&
+                          event.eventCheckIn == null &&
+                          userModal.role == UserType.hco) ...{
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  isEdit = !isEdit;
+                                });
+                              },
+                              child: Icon(
+                                Icons.edit,
+                                color: !isEdit
+                                    ? AppColors.blue
+                                    : AppColors.border,
+                              ),
+                            ),
+                          ],
+                        ),
+                      },
                       if (event.eventStatus.toString() ==
                               BasicCodesFromCrm.upcoming &&
                           !isCheckedIn &&
@@ -584,7 +608,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           });
                         },
                       ),
-
+                      SizedBox(height: 16),
                       TextField(
                         enabled:
                             ((userModal.role == UserType.pharmaRep ||
@@ -1044,23 +1068,35 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                   //contact.approval.toString() == BasicCodesFromCrm.pending
                                   if (contact.approval.toString() !=
                                       BasicCodesFromCrm.pending)
-                                    Container(
-                                      alignment: Alignment.center,
-                                      padding: EdgeInsets.only(right: 24),
-                                      child: Text(
-                                        eventApprovalCodeToText(
-                                          contact.approval ?? '0',
-                                        ),
-                                        style: TextStyle(
-                                          color:
-                                              contact.approval.toString() ==
-                                                  BasicCodesFromCrm.approval
-                                              ? AppColors.successGreen
-                                              : contact.approval.toString() ==
-                                                    BasicCodesFromCrm.rejected
-                                              ? AppColors.accentError
-                                              : AppColors.pending,
-                                          fontWeight: FontWeight.w500,
+                                    InkWell(
+                                      onTap: () {
+                                        if (userModal.role == UserType.hco &&
+                                            contact.approval.toString() ==
+                                                BasicCodesFromCrm.rejected) {
+                                          eventParticipantApproval(
+                                            contact.id,
+                                            "",
+                                          );
+                                        }
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        padding: EdgeInsets.only(right: 24),
+                                        child: Text(
+                                          eventApprovalCodeToText(
+                                            contact.approval ?? '0',
+                                          ),
+                                          style: TextStyle(
+                                            color:
+                                                contact.approval.toString() ==
+                                                    BasicCodesFromCrm.approval
+                                                ? AppColors.successGreen
+                                                : contact.approval.toString() ==
+                                                      BasicCodesFromCrm.rejected
+                                                ? AppColors.accentError
+                                                : AppColors.pending,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -1148,8 +1184,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                       children: [
                                         ElevatedButton(
                                           style: ButtonStyle(
+                                            padding: WidgetStateProperty.all(
+                                              EdgeInsets.zero,
+                                            ),
                                             fixedSize: WidgetStateProperty.all(
-                                              Size(110, 40),
+                                              Size(70, 40),
                                             ),
                                             backgroundColor:
                                                 (contact.id ==
@@ -1184,8 +1223,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
                                         ElevatedButton(
                                           style: ButtonStyle(
+                                            padding: WidgetStateProperty.all(
+                                              EdgeInsets.zero,
+                                            ),
                                             fixedSize: WidgetStateProperty.all(
-                                              Size(110, 40),
+                                              Size(70, 40),
                                             ),
                                             backgroundColor:
                                                 (contact.id ==
@@ -1204,9 +1246,97 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                   userModal.role ==
                                                       UserType.hco)
                                               ? () {
-                                                  eventParticipantApproval(
-                                                    contact.id,
-                                                    "",
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext context) {
+                                                      return StatefulBuilder(
+                                                        builder: (context, setState) {
+                                                          return AlertDialog(
+                                                            title: Text(
+                                                              'Confirm Rejection',
+                                                            ),
+                                                            content: SizedBox(
+                                                              height: 220,
+                                                              child: Column(
+                                                                children: [
+                                                                  Text(
+                                                                    AppStrings
+                                                                        .rejectMessage,
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 20,
+                                                                  ),
+                                                                  TextField(
+                                                                    controller:
+                                                                        ReceiptRejectionTextController
+                                                                            .remarksController,
+                                                                    decoration: InputDecoration(
+                                                                      labelText:
+                                                                          'Remarks',
+                                                                    ),
+                                                                    onChanged:
+                                                                        (
+                                                                          value,
+                                                                        ) => setState(
+                                                                          () {},
+                                                                        ),
+                                                                    maxLines: 3,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            actions: <Widget>[
+                                                              TextButton(
+                                                                child: Text(
+                                                                  'Cancel',
+                                                                ),
+                                                                onPressed: () {
+                                                                  Navigator.of(
+                                                                    context,
+                                                                  ).pop();
+                                                                },
+                                                              ),
+                                                              TextButton(
+                                                                onPressed:
+                                                                    ReceiptRejectionTextController
+                                                                        .remarksController
+                                                                        .text
+                                                                        .isNotEmpty
+                                                                    ? () {
+                                                                        Navigator.of(
+                                                                          context,
+                                                                        ).pop();
+                                                                        _eventController
+                                                                            .reject(
+                                                                              event.eventId,
+                                                                              userModal.kiosk,
+                                                                              ReceiptRejectionTextController.remarksController.text,
+                                                                            )
+                                                                            .then(
+                                                                              (
+                                                                                v,
+                                                                              ) => {
+                                                                                Provider.of<
+                                                                                    TopNavProvider
+                                                                                  >(
+                                                                                    context,
+                                                                                    listen: false,
+                                                                                  )
+                                                                                  ..goBack(),
+                                                                              },
+                                                                            );
+                                                                        // Navigator.of(context).pop();
+                                                                      }
+                                                                    : null,
+                                                                child: Text(
+                                                                  'Reject',
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    },
                                                   );
                                                 }
                                               : null,
@@ -1228,66 +1358,228 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             },
                           ],
                         ),
-                      if (event.eventApproval !=
-                              int.parse(BasicCodesFromCrm.approval) &&
-                          event.eventStatus ==
-                              int.parse(BasicCodesFromCrm.completed) &&
-                          (userModal.role == UserType.hco)) ...{
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                isLoading = true;
-                              });
-                              for (var contact in event.contactDtos ?? []) {
-                                if (contact.approval.toString() ==
-                                    BasicCodesFromCrm.pending) {
-                                  eventParticipantApproval(
-                                    contact.id,
-                                    "Approved By Office User ${userModal.firstName} ${userModal.lastName} working for ${EventTextControllers.hcoController.text} ",
-                                  );
+                      if (event.contactDtos!.length > 3)
+                        if (event.eventApproval !=
+                                int.parse(BasicCodesFromCrm.approval) &&
+                            event.eventStatus ==
+                                int.parse(BasicCodesFromCrm.completed) &&
+                            (userModal.role == UserType.hco)) ...{
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  isLoading = true;
+                                });
+                                for (var contact in event.contactDtos ?? []) {
+                                  if (contact.approval.toString() ==
+                                      BasicCodesFromCrm.pending) {
+                                    eventParticipantApproval(
+                                      contact.id,
+                                      "Approved By Office User ${userModal.firstName} ${userModal.lastName} working for ${EventTextControllers.hcoController.text} ",
+                                    );
+                                  }
                                 }
-                              }
-                              setState(() {
-                                isLoading = false;
-                              });
-                              Provider.of<TopNavProvider>(
-                                context,
-                                listen: false,
-                              ).goBack();
-                            },
-                            style: ButtonStyle(
-                              backgroundColor: WidgetStateProperty.all(
-                                AppColors.successGreen,
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                Provider.of<TopNavProvider>(
+                                  context,
+                                  listen: false,
+                                ).goBack();
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all(
+                                  AppColors.successGreen,
+                                ),
+                              ),
+                              child: const Text(
+                                "Approve All",
+                                style: TextStyle(color: AppColors.background),
                               ),
                             ),
-                            child: const Text(
-                              "Approve All",
-                              style: TextStyle(color: AppColors.background),
-                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                isLoading = true;
-                              });
-                            },
-                            style: ButtonStyle(
-                              backgroundColor: WidgetStateProperty.all(
-                                AppColors.rejectedRed,
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return StatefulBuilder(
+                                      builder: (context, setState) {
+                                        return AlertDialog(
+                                          title: Text('Confirm Rejection'),
+                                          content: SizedBox(
+                                            height: 220,
+                                            child: Column(
+                                              children: [
+                                                Text(AppStrings.rejectMessage),
+                                                SizedBox(height: 20),
+                                                TextField(
+                                                  controller:
+                                                      ReceiptRejectionTextController
+                                                          .remarksController,
+                                                  decoration: InputDecoration(
+                                                    labelText: 'Remarks',
+                                                  ),
+                                                  onChanged: (value) =>
+                                                      setState(() {}),
+                                                  maxLines: 3,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              child: Text('Cancel'),
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                            TextButton(
+                                              onPressed:
+                                                  ReceiptRejectionTextController
+                                                      .remarksController
+                                                      .text
+                                                      .isNotEmpty
+                                                  ? () {
+                                                      // _eventController
+                                                      //     .reject(
+                                                      //       event.eventId,
+                                                      //       userModal.kiosk,
+                                                      //       ReceiptRejectionTextController
+                                                      //           .remarksController
+                                                      //           .text,
+                                                      //     )
+                                                      //     .then(
+                                                      //       (v) => {
+                                                      //         Provider.of<
+                                                      //             TopNavProvider
+                                                      //           >(
+                                                      //             context,
+                                                      //             listen: false,
+                                                      //           )
+                                                      //           ..goBack(),
+                                                      //       },
+                                                      //     );
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext context) {
+                                                          return StatefulBuilder(
+                                                            builder: (context, setState) {
+                                                              return AlertDialog(
+                                                                title: Text(
+                                                                  'Confirm Rejection',
+                                                                ),
+                                                                content: SizedBox(
+                                                                  height: 220,
+                                                                  child: Column(
+                                                                    children: [
+                                                                      Text(
+                                                                        AppStrings
+                                                                            .rejectMessage,
+                                                                      ),
+                                                                      SizedBox(
+                                                                        height:
+                                                                            20,
+                                                                      ),
+                                                                      TextField(
+                                                                        controller:
+                                                                            ReceiptRejectionTextController.remarksController,
+                                                                        decoration: InputDecoration(
+                                                                          labelText:
+                                                                              'Remarks',
+                                                                        ),
+                                                                        onChanged:
+                                                                            (
+                                                                              value,
+                                                                            ) => setState(
+                                                                              () {},
+                                                                            ),
+                                                                        maxLines:
+                                                                            3,
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                actions: <Widget>[
+                                                                  TextButton(
+                                                                    child: Text(
+                                                                      'Cancel',
+                                                                    ),
+                                                                    onPressed: () {
+                                                                      Navigator.of(
+                                                                        context,
+                                                                      ).pop();
+                                                                    },
+                                                                  ),
+                                                                  TextButton(
+                                                                    onPressed:
+                                                                        ReceiptRejectionTextController
+                                                                            .remarksController
+                                                                            .text
+                                                                            .isNotEmpty
+                                                                        ? () {
+                                                                            Navigator.of(
+                                                                              context,
+                                                                            ).pop();
+                                                                            _eventController
+                                                                                .reject(
+                                                                                  event.eventId,
+                                                                                  userModal.kiosk,
+                                                                                  ReceiptRejectionTextController.remarksController.text,
+                                                                                )
+                                                                                .then(
+                                                                                  (
+                                                                                    v,
+                                                                                  ) => {
+                                                                                    Provider.of<
+                                                                                        TopNavProvider
+                                                                                      >(
+                                                                                        context,
+                                                                                        listen: false,
+                                                                                      )
+                                                                                      ..goBack(),
+                                                                                  },
+                                                                                );
+                                                                          }
+                                                                        : null,
+                                                                    child: Text(
+                                                                      'Reject',
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              );
+                                                            },
+                                                          );
+                                                        },
+                                                      );
+
+                                                      // Navigator.of(context).pop();
+                                                    }
+                                                  : null,
+                                              child: Text('Reject'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all(
+                                  AppColors.rejectedRed,
+                                ),
+                              ),
+                              child: const Text(
+                                "Reject All",
+                                style: TextStyle(color: AppColors.background),
                               ),
                             ),
-                            child: const Text(
-                              "Reject All",
-                              style: TextStyle(color: AppColors.background),
-                            ),
                           ),
-                        ),
-                      },
+                        },
                       SizedBox(height: 16),
                       if (isCheckedIn && _checkInDateTime != null)
                         Container(
