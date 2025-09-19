@@ -476,6 +476,13 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                                               .text
                                                               .isNotEmpty
                                                           ? () {
+                                                              final dialogContext =
+                                                                  context;
+                                                              Navigator.of(
+                                                                dialogContext,
+                                                                rootNavigator:
+                                                                    true,
+                                                              ).pop();
                                                               _eventController
                                                                   .reject(
                                                                     event
@@ -486,21 +493,25 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                                                         .remarksController
                                                                         .text,
                                                                   )
-                                                                  .then(
-                                                                    (v) => {
-                                                                      Provider.of<
+                                                                  .then((v) {
+                                                                    final navProvider =
+                                                                        Provider.of<
                                                                           TopNavProvider
                                                                         >(
-                                                                          context,
+                                                                          this.context,
                                                                           listen:
                                                                               false,
-                                                                        )
-                                                                        ..goBack(),
-                                                                      Navigator.of(
-                                                                        context,
-                                                                      ).pop(),
-                                                                    },
-                                                                  );
+                                                                        );
+                                                                    final didGoBack =
+                                                                        navProvider
+                                                                            .goBack();
+                                                                    if (!didGoBack) {
+                                                                      //murali_rejection_close_back
+                                                                      Navigator.maybePop(
+                                                                        this.context,
+                                                                      );
+                                                                    }
+                                                                  });
                                                             }
                                                           : null,
                                                       child: Text('Reject'),
@@ -664,6 +675,11 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                               .text
                                               .isNotEmpty
                                           ? () {
+                                              final dialogContext = context;
+                                              Navigator.of(
+                                                dialogContext,
+                                                rootNavigator: true,
+                                              ).pop();
                                               _eventController
                                                   .reject(
                                                     event.eventId,
@@ -672,21 +688,16 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                                         .remarksController
                                                         .text,
                                                   )
-                                                  .then(
-                                                    (v) => {
-                                                      Provider.of<
+                                                  .then((v) {
+                                                    final navProvider =
+                                                        Provider.of<
                                                           TopNavProvider
                                                         >(
-                                                          context,
+                                                          this.context,
                                                           listen: false,
-                                                        )
-                                                        ..goBack(),
-                                                      Navigator.of(
-                                                        context,
-                                                      ).pop(),
-                                                    },
-                                                  );
-                                              // Navigator.of(context).pop();
+                                                        );
+                                                    navProvider.goBack();
+                                                  });
                                             }
                                           : null,
                                       child: Text('Reject'),

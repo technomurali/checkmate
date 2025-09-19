@@ -1246,6 +1246,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                   userModal.role ==
                                                       UserType.hco)
                                               ? () {
+                                                  //murali_clear_rejection_remarks
+                                                  ReceiptRejectionTextController
+                                                      .remarksController
+                                                      .clear();
                                                   showDialog(
                                                     context: context,
                                                     builder: (BuildContext context) {
@@ -1303,8 +1307,13 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                                         .text
                                                                         .isNotEmpty
                                                                     ? () {
+                                                                        //murali rejection confirmation issue fix
+                                                                        final dialogContext =
+                                                                            context;
                                                                         Navigator.of(
-                                                                          context,
+                                                                          dialogContext,
+                                                                          rootNavigator:
+                                                                              true,
                                                                         ).pop();
                                                                         _eventController
                                                                             .reject(
@@ -1312,19 +1321,24 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                                               userModal.kiosk,
                                                                               ReceiptRejectionTextController.remarksController.text,
                                                                             )
-                                                                            .then(
-                                                                              (
-                                                                                v,
-                                                                              ) => {
-                                                                                Provider.of<
+                                                                            .then((
+                                                                              v,
+                                                                            ) {
+                                                                              final navProvider =
+                                                                                  Provider.of<
                                                                                     TopNavProvider
                                                                                   >(
-                                                                                    context,
+                                                                                    this.context,
                                                                                     listen: false,
-                                                                                  )
-                                                                                  ..goBack(),
-                                                                              },
-                                                                            );
+                                                                                  );
+                                                                              final didGoBack = navProvider.goBack();
+                                                                              if (!didGoBack) {
+                                                                                //murali_rejection_close_back
+                                                                                Navigator.maybePop(
+                                                                                  this.context,
+                                                                                );
+                                                                              }
+                                                                            });
                                                                         // Navigator.of(context).pop();
                                                                       }
                                                                     : null,
@@ -1403,6 +1417,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () {
+                                //murali_clear_rejection_remarks
+                                ReceiptRejectionTextController.remarksController
+                                    .clear();
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -1444,119 +1461,32 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                       .text
                                                       .isNotEmpty
                                                   ? () {
-                                                      // _eventController
-                                                      //     .reject(
-                                                      //       event.eventId,
-                                                      //       userModal.kiosk,
-                                                      //       ReceiptRejectionTextController
-                                                      //           .remarksController
-                                                      //           .text,
-                                                      //     )
-                                                      //     .then(
-                                                      //       (v) => {
-                                                      //         Provider.of<
-                                                      //             TopNavProvider
-                                                      //           >(
-                                                      //             context,
-                                                      //             listen: false,
-                                                      //           )
-                                                      //           ..goBack(),
-                                                      //       },
-                                                      //     );
-                                                      showDialog(
-                                                        context: context,
-                                                        builder: (BuildContext context) {
-                                                          return StatefulBuilder(
-                                                            builder: (context, setState) {
-                                                              return AlertDialog(
-                                                                title: Text(
-                                                                  'Confirm Rejection',
-                                                                ),
-                                                                content: SizedBox(
-                                                                  height: 220,
-                                                                  child: Column(
-                                                                    children: [
-                                                                      Text(
-                                                                        AppStrings
-                                                                            .rejectMessage,
-                                                                      ),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            20,
-                                                                      ),
-                                                                      TextField(
-                                                                        controller:
-                                                                            ReceiptRejectionTextController.remarksController,
-                                                                        decoration: InputDecoration(
-                                                                          labelText:
-                                                                              'Remarks',
-                                                                        ),
-                                                                        onChanged:
-                                                                            (
-                                                                              value,
-                                                                            ) => setState(
-                                                                              () {},
-                                                                            ),
-                                                                        maxLines:
-                                                                            3,
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                actions: <Widget>[
-                                                                  TextButton(
-                                                                    child: Text(
-                                                                      'Cancel',
-                                                                    ),
-                                                                    onPressed: () {
-                                                                      Navigator.of(
-                                                                        context,
-                                                                      ).pop();
-                                                                    },
-                                                                  ),
-                                                                  TextButton(
-                                                                    onPressed:
-                                                                        ReceiptRejectionTextController
-                                                                            .remarksController
-                                                                            .text
-                                                                            .isNotEmpty
-                                                                        ? () {
-                                                                            Navigator.of(
-                                                                              context,
-                                                                            ).pop();
-                                                                            _eventController
-                                                                                .reject(
-                                                                                  event.eventId,
-                                                                                  userModal.kiosk,
-                                                                                  ReceiptRejectionTextController.remarksController.text,
-                                                                                )
-                                                                                .then(
-                                                                                  (
-                                                                                    v,
-                                                                                  ) => {
-                                                                                    Provider.of<
-                                                                                        TopNavProvider
-                                                                                      >(
-                                                                                        context,
-                                                                                        listen: false,
-                                                                                      )
-                                                                                      ..goBack(),
-                                                                                  },
-                                                                                );
-                                                                          }
-                                                                        : null,
-                                                                    child: Text(
-                                                                      'Reject',
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              );
-                                                            },
-                                                          );
-                                                        },
-                                                      );
-
-                                                      // Navigator.of(context).pop();
+                                                      //murali rejection confirmation issue fix
+                                                      final dialogContext =
+                                                          context;
+                                                      Navigator.of(
+                                                        dialogContext,
+                                                        rootNavigator: true,
+                                                      ).pop();
+                                                      _eventController
+                                                          .reject(
+                                                            event.eventId,
+                                                            userModal.kiosk,
+                                                            ReceiptRejectionTextController
+                                                                .remarksController
+                                                                .text,
+                                                          )
+                                                          .then((v) {
+                                                            final navProvider =
+                                                                Provider.of<
+                                                                  TopNavProvider
+                                                                >(
+                                                                  this.context,
+                                                                  listen: false,
+                                                                );
+                                                            navProvider
+                                                                .goBack();
+                                                          });
                                                     }
                                                   : null,
                                               child: Text('Reject'),
