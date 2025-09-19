@@ -59,12 +59,6 @@ class SigninScreenLogic extends ChangeNotifier {
     final enabled =
         SigninTextControllers.email.text.trim().isNotEmpty &&
         SigninTextControllers.password.text.trim().isNotEmpty;
-    print(
-      SigninTextControllers.email.text.trim().isNotEmpty &&
-          SigninTextControllers.password.text.trim().isNotEmpty,
-    );
-    print("Email : ${SigninTextControllers.email.text.trim().isNotEmpty}");
-    print("Password ${SigninTextControllers.password.text.trim().isNotEmpty}");
     if (enabled != isButtonEnabled) {
       isButtonEnabled = enabled;
       notifyListeners();

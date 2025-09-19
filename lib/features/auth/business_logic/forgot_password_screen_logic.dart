@@ -39,7 +39,6 @@ class ForgotPasswordScreenLogic extends ChangeNotifier {
   }
 
   void sendVerificationCode() {
-    //TODO: Add API call to send verification code
     isLoading = true;
     notifyListeners();
     _resetController

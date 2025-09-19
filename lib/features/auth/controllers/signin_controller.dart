@@ -61,7 +61,6 @@ class SigninController {
         };
       }
     } catch (e) {
-      print(e);
       if (e.toString().contains('SocketException')) {
         return {
           SigninModalKeys.signinSuccess: false,

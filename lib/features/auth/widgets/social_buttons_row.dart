@@ -92,7 +92,7 @@ class _SocialIconState extends State<_SocialIcon> {
               if (widget.onDisabledTap != null) widget.onDisabledTap!();
             }
           : () async {
-              // TODO: Implement actual social signin
+              
               if (widget.icon == SocialSvg.windowsSvg) {
                 bool success = await MsalLogin().signIn(pca);
                 if (success) {

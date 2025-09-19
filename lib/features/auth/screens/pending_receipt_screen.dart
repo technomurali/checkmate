@@ -4,7 +4,6 @@ import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
-import 'package:checkmate/features/auth/model/hcp_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:checkmate/firebase/notifications.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +62,6 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
     await _eventController.fetchEventAttachments(eventId).then((value) {
       if (value.statusCode == AppApiStatusCodes.success) {
         var body = jsonDecode(value.body);
-        print("${body.length}");
         List attachments = [];
         for (var attachment in body) {
           attachments.add(attachment['base64']);
@@ -74,7 +72,6 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                       base64Decode(base64Str.toString().split(',').last),
                 )
                 .toList();
-            print("${eventAttachments.length}");
           });
         }
         /*
@@ -302,7 +299,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                 padding: EdgeInsets.only(right: 24),
                                 child: Text(
                                   eventApprovalCodeToText(
-                                    event.contactDtos![i].approval ?? '0',
+                                    event.contactDtos![i].approval,
                                   ),
                                   style: TextStyle(
                                     color:

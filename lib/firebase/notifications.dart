@@ -4,7 +4,6 @@ import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
 import 'package:checkmate/features/auth/controllers/interceptor.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
-import 'package:checkmate/features/auth/screens/event_details_screen.dart';
 import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:checkmate/main.dart';
 import 'package:flutter/material.dart';
@@ -213,7 +212,7 @@ class FirebaseNotifications {
     final body = notif?.body ?? message.data['body'] ?? '';
     if (message.data.containsKey("eventId")) {
       final eventId = message.data["eventId"];
-      print("Event ID: $eventId"); // 👈 Access hidden eventId
+      // 👈 Access hidden eventId
     }
     final details = NotificationDetails(
       android: AndroidNotificationDetails(

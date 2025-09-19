@@ -8,6 +8,7 @@ import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/dispute_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 
 class DisputeDetailsScreen extends StatefulWidget {
   const DisputeDetailsScreen({super.key, required this.disputeId});
@@ -368,8 +369,36 @@ class _DisputeDetailsScreenState extends State<DisputeDetailsScreen> {
             ),
             if (!isEdit)
               ElevatedButton(
-                onPressed: () {
-                  // TODO: Add file picker logic
+                onPressed: () async {
+                  try {
+                    final result = await FilePicker.platform.pickFiles(
+                      allowMultiple: false,
+                    );
+
+                    if (!mounted) return;
+
+                    if (result != null && result.files.isNotEmpty) {
+                      final count = result.files.length;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            count == 1
+                                ? '1 file selected: ${result.files.first.name}'
+                                : '$count files selected',
+                          ),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('No file selected')),
+                      );
+                    }
+                  } catch (e) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('File pick failed: $e')),
+                    );
+                  }
                 },
                 child: Text(AppStrings.uploadLabel),
               ),
