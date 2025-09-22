@@ -72,7 +72,9 @@ class SignupScreenLogic extends ChangeNotifier {
 
   void _checkFormValidity() {
     final allValid = isValid.values.every((e) => e);
-    isSignUpDisabled = !((allValid || true) && !isOptedForSocialSignUp);
+    // Disable sign up unless all required fields are valid
+    // When social sign up is selected, this flag is handled separately
+    isSignUpDisabled = !(allValid && !isOptedForSocialSignUp);
     notifyListeners();
   }
 
