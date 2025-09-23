@@ -83,7 +83,10 @@ class EventModal {
     debugPrint("EventModal.fromJson: ${jsonEncode(json)}");
     return EventModal(
       eventId: json["eventId"],
-      eventName: json["eventName"],
+      eventName: (json["eventName"] as String?)?.isNotEmpty == true
+          ? json["eventName"][0].toUpperCase() +
+                json["eventName"].substring(1).toLowerCase()
+          : json["eventName"],
       startDate: json["startDate"] == null
           ? null
           : _parseDateTime(json["startDate"]),
@@ -106,7 +109,7 @@ class EventModal {
       statusText: json['status'] ?? "UPCOMING",
       eventCheckIn: json["eventCheckIn"] == null
           ? null
-          : _parseDateTime(json["eventCheckIn"])
+          : _parseDateTime(json["eventCheckIn"]),
     );
   }
 

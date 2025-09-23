@@ -24,7 +24,8 @@ import 'package:provider/provider.dart';
 
 class EventDetailsScreen extends StatefulWidget {
   final String eventId;
-  const EventDetailsScreen({super.key, required this.eventId});
+  final String? eventType; // optional additional argument
+  const EventDetailsScreen({super.key, required this.eventId, this.eventType});
 
   @override
   State<EventDetailsScreen> createState() => _EventDetailsScreenState();
@@ -479,7 +480,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  event.eventStatus != null
+                  widget.eventType == "PASTED"
+                      ? Text("IN-COMPLETE EVENT")
+                      : widget.eventType == "UPCOMING"
+                      ? Text("UPCOMING EVENT")
+                      : event.eventStatus != null
                       ? Text(
                           event.statusText != null
                               ? !(event.statusText!.toLowerCase() == "past")
@@ -1529,6 +1534,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         TextFormField(
                           keyboardType: TextInputType.number,
                           controller: EventTextControllers.amountController,
+                          maxLength: 5,
                           decoration: InputDecoration(
                             labelText: '${AppStrings.amount} *',
                             prefixIcon: Icon(Icons.monetization_on_outlined),
@@ -1727,6 +1733,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             setState(() {
                               isCheckedIn = true;
                               _checkInDateTime = DateTime.now();
+                              EventTextControllers.amountController.text = "";
                             });
                           }
                         },

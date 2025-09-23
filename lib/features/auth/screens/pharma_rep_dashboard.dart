@@ -62,9 +62,7 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
     if (!mounted) return;
     setState(() {
       pendingEvents = v
-          .where(
-            (e) => e.eventApproval == int.parse(BasicCodesFromCrm.pending),
-          )
+          .where((e) => e.eventApproval == int.parse(BasicCodesFromCrm.pending))
           .take(3)
           .toList();
     });
@@ -168,7 +166,23 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
                                 listen: false,
                               ).navigateTo(
                                 TopNavScreen.eventDetails,
-                                argument: upcomingEvents[i].eventId!,
+                                argument: {
+                                  'eventId': events[i].eventId,
+                                  'eventType':
+                                      events[i].statusText
+                                                  .toString()
+                                                  .toUpperCase() ==
+                                              "PAST" &&
+                                          events[i].eventCheckIn == null
+                                      ? "PASTED"
+                                      : events[i].statusText
+                                                    .toString()
+                                                    .toUpperCase() ==
+                                                "UPCOMING" &&
+                                            events[i].eventCheckIn == null
+                                      ? "UPCOMING"
+                                      : "",
+                                },
                               );
                             },
                           },

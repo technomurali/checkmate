@@ -21,35 +21,29 @@ class _HCPDashboardState extends State<HCPDashboard> {
   bool isLoading = false;
   List<EventModal> events = [];
   List<EventModal> pendingEvents = [];
-  fetchUpcomingEvents() async {
+  Future<void> fetchUpcomingEvents() async {
     setState(() {
       isLoading = true;
     });
-    _eventController
-        .fetchHcpEventsWithStatus(status: BasicCodesFromCrm.upcoming)
-        .then(
-          (v) => {
-            setState(() {
-              events = v.take(3).toList();
-              debugPrint("Events ::: $events");
-            }),
-          },
-        );
-    fetchPENDINGEvents();
+    final v = await _eventController.fetchHcpEventsWithStatus(
+      status: BasicCodesFromCrm.upcoming,
+    );
+    setState(() {
+      events = v.take(3).toList();
+      debugPrint("Events ::: $events");
+    });
+    await fetchPENDINGEvents();
   }
 
-  fetchPENDINGEvents() async {
-    _eventController
-        .fetchHcpEventsWithPending(status: BasicCodesFromCrm.pending)
-        .then(
-          (v) => {
-            setState(() {
-              pendingEvents = v.take(3).toList();
-              debugPrint("Events ::: $pendingEvents");
-              isLoading = false;
-            }),
-          },
-        );
+  Future<void> fetchPENDINGEvents() async {
+    final v = await _eventController.fetchHcpEventsWithPending(
+      status: BasicCodesFromCrm.pending,
+    );
+    setState(() {
+      pendingEvents = v.take(3).toList();
+      debugPrint("Events ::: $pendingEvents");
+      isLoading = false;
+    });
   }
 
   @override
@@ -60,118 +54,159 @@ class _HCPDashboardState extends State<HCPDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Welcome Text
-          Text(
-            " ${AppStrings.helloUser} ${widget.user.firstName}",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+    return RefreshIndicator(
+      color: Colors.blue, // loader color
+      backgroundColor: Colors.white, // background of loader
+      displacement: 40,
+      onRefresh: fetchUpcomingEvents,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: SizedBox(
+          width: isLoading ? double.infinity : null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// Welcome Text
+              Text(
+                " ${AppStrings.helloUser} ${widget.user.firstName}",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+
+              /// User Role Text
+              const Text(
+                " ${AppStrings.labelHCP}",
+                style: TextStyle(fontSize: 16),
+              ),
+
+              const SizedBox(height: 20),
+              if (isLoading) ...{
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              } else ...{
+                /// Upcoming Events Text
+                Text(
+                  " ${AppStrings.upcomingEvents}",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                /// Upcoming Events Card
+                EventsReciptsCard(
+                  items: [
+                    if (events.isNotEmpty) ...{
+                      for (var i = 0; i < events.length; i++) ...{
+                        {
+                          "title": events[i].eventName!,
+                          "date": events[i].startDate!
+                              .toLocal()
+                              .toString()
+                              .split(' ')
+                              .first,
+                          "id": events[i].eventId!,
+                          "onTap": () {
+                            Provider.of<TopNavProvider>(
+                              context,
+                              listen: false,
+                            ).navigateTo(
+                              TopNavScreen.eventDetails,
+                              argument: {
+                                'eventId': events[i].eventId,
+                                'eventType':
+                                    events[i].statusText
+                                                .toString()
+                                                .toUpperCase() ==
+                                            "PAST" &&
+                                        events[i].eventCheckIn == null
+                                    ? "PASTED"
+                                    : events[i].statusText
+                                                  .toString()
+                                                  .toUpperCase() ==
+                                              "UPCOMING" &&
+                                          events[i].eventCheckIn == null
+                                    ? "UPCOMING"
+                                    : "",
+                              },
+                            );
+                          },
+                        },
+                      },
+                    } else
+                      ...{},
+                  ],
+                  showCheckIn: true,
+                  onSeeAll: () {
+                    Provider.of<TopNavProvider>(
+                      context,
+                      listen: false,
+                    ).navigateTo(
+                      TopNavScreen.eventHistory,
+                      argument: {"fromDashboard": true},
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                /// Receipts for Approval Text
+                Text(
+                  " ${AppStrings.receiptForApproval}",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                /// Receipts for Approval Card
+                EventsReciptsCard(
+                  isPending: true,
+                  items: [
+                    if (pendingEvents.isNotEmpty) ...{
+                      for (var i = 0; i < pendingEvents.length; i++) ...{
+                        {
+                          "title": pendingEvents[i].eventName!,
+                          "date": pendingEvents[i].startDate!
+                              .toLocal()
+                              .toString()
+                              .split(' ')
+                              .first,
+                          "id": pendingEvents[i].eventId!,
+                          "onTap": () {
+                            Provider.of<TopNavProvider>(
+                              context,
+                              listen: false,
+                            ).navigateTo(
+                              TopNavScreen.pendingReceipt,
+                              argument: pendingEvents[i].eventId!,
+                            );
+                          },
+                        },
+                      },
+                    } else
+                      ...{},
+                  ],
+
+                  onSeeAll: () {
+                    Provider.of<TopNavProvider>(
+                      context,
+                      listen: false,
+                    ).navigateTo(
+                      TopNavScreen.eventHistory,
+                      argument: {"isPending": true},
+                    );
+                  },
+                ),
+              },
+            ],
           ),
-          const SizedBox(height: 4),
-
-          /// User Role Text
-          const Text(" ${AppStrings.labelHCP}", style: TextStyle(fontSize: 16)),
-
-          const SizedBox(height: 20),
-          if (isLoading) ...{
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          } else ...{
-            /// Upcoming Events Text
-            Text(
-              " ${AppStrings.upcomingEvents}",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-
-            /// Upcoming Events Card
-            EventsReciptsCard(
-              items: [
-                if (events.isNotEmpty) ...{
-                  for (var i = 0; i < events.length; i++) ...{
-                    {
-                      "title": events[i].eventName!,
-                      "date": events[i].startDate!
-                          .toLocal()
-                          .toString()
-                          .split(' ')
-                          .first,
-                      "id": events[i].eventId!,
-                      "onTap": () {
-                        Provider.of<TopNavProvider>(
-                          context,
-                          listen: false,
-                        ).navigateTo(
-                          TopNavScreen.eventDetails,
-                          argument: events[i].eventId!,
-                        );
-                      },
-                    },
-                  },
-                } else
-                  ...{},
-              ],
-              showCheckIn: true,
-              onSeeAll: () {
-                Provider.of<TopNavProvider>(context, listen: false).navigateTo(
-                  TopNavScreen.eventHistory,
-                  argument: {"fromDashboard": true},
-                );
-              },
-            ),
-
-            const SizedBox(height: 16),
-
-            /// Receipts for Approval Text
-            Text(
-              " ${AppStrings.receiptForApproval}",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-
-            /// Receipts for Approval Card
-            EventsReciptsCard(
-              isPending: true,
-              items: [
-                if (pendingEvents.isNotEmpty) ...{
-                  for (var i = 0; i < pendingEvents.length; i++) ...{
-                    {
-                      "title": pendingEvents[i].eventName!,
-                      "date": pendingEvents[i].startDate!
-                          .toLocal()
-                          .toString()
-                          .split(' ')
-                          .first,
-                      "id": pendingEvents[i].eventId!,
-                      "onTap": () {
-                        Provider.of<TopNavProvider>(
-                          context,
-                          listen: false,
-                        ).navigateTo(
-                          TopNavScreen.pendingReceipt,
-                          argument: pendingEvents[i].eventId!,
-                        );
-                      },
-                    },
-                  },
-                } else
-                  ...{},
-              ],
-
-              onSeeAll: () {
-                Provider.of<TopNavProvider>(context, listen: false).navigateTo(
-                  TopNavScreen.eventHistory,
-                  argument: {"isPending": true},
-                );
-              },
-            ),
-          },
-        ],
+        ),
       ),
     );
   }

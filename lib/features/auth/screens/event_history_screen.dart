@@ -380,35 +380,6 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
                 ),
               ),
               const SizedBox(width: 12),
-
-              // PopupMenuButton<String>(
-              //   enabled: !widget.fromDashboard && !widget.isPending,
-              //   icon: FilterIcon(status: _selectedStatus!),
-              //   tooltip: 'Filter',
-              //   shape: RoundedRectangleBorder(
-              //     borderRadius: BorderRadius.circular(16),
-              //   ),
-              //   onSelected: (value) {
-              //     setState(() {
-              //       _selectedStatus = value;
-              //     });
-              //     _filterEvents();
-              //   },
-              //   itemBuilder: (context) => _statusOptions
-              //       .map(
-              //         (status) => PopupMenuItem<String>(
-              //           value: status,
-              //           child: Row(
-              //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //             children: [
-              //               FilterIcon(status: status),
-              //               Text(status),
-              //             ],
-              //           ),
-              //         ),
-              //       )
-              //       .toList(),
-              // ),
             ],
           ),
         ),
@@ -424,13 +395,27 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
                     listen: false,
                   ).navigateTo(
                     TopNavScreen.eventDetails,
-                    argument: filteredEvents[i].eventId,
+                    argument: {
+                      'eventId': filteredEvents[i].eventId,
+                      'eventType':
+                          filteredEvents[i].statusText
+                                      .toString()
+                                      .toUpperCase() ==
+                                  "PAST" &&
+                              filteredEvents[i].eventCheckIn == null
+                          ? "PASTED" 
+                          :filteredEvents[i].statusText
+                                      .toString()
+                                      .toUpperCase() ==
+                                  "UPCOMING" &&
+                              filteredEvents[i].eventCheckIn == null ?"UPCOMING": "",
+                    },
                   );
                 },
               ),
             },
           } else ...{
-            Center(child: Text("NO Events With the Selected Filter")),
+            Center(child: Text("No Events With the Selected Filter")),
           },
         } else ...{
           CircularProgressIndicator(),

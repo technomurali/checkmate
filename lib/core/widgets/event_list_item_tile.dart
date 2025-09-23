@@ -93,7 +93,27 @@ class EventListItemTile extends StatelessWidget {
       };
     }
   }
-
+ Map<String, String> codeForApprovalTextOutput({String? status}) {
+   if (status == BasicCodesFromCrm.approval) {
+      return {
+        'status': 'APPROVED',
+        'code': 'A',
+        'statusId': BasicCodesFromCrm.approval,
+      };
+    }else if (status == BasicCodesFromCrm.pending) {
+      return {
+        'status': 'IN REVIEW',
+        'code': 'A',
+        'statusId': BasicCodesFromCrm.pending,
+      };
+    } else   {
+      return {
+        'status': 'REJECTED',
+        'code': 'A',
+        'statusId': BasicCodesFromCrm.rejected,
+      };
+    }
+ }
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -141,13 +161,13 @@ class EventListItemTile extends StatelessWidget {
                       )['status'] ==
                       "COMPLETED")
                     Tooltip(
-                      message: codeForTextOutput(
+                      message: codeForApprovalTextOutput(
                         status: event.eventApproval.toString(),
                       )['status'],
                       child: FilterIcon(
                         showApproval: true,
                         status:
-                            codeForTextOutput(
+                            codeForApprovalTextOutput(
                               status: event.eventApproval.toString(),
                             )['status'] ??
                             '',

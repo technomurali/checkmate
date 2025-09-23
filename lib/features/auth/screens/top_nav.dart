@@ -272,7 +272,15 @@ class TopNav extends StatelessWidget {
       case TopNavScreen.profile:
         return UserProfileScreen();
       case TopNavScreen.eventDetails:
-        return EventDetailsScreen(eventId: argument as String);
+        if (argument is String) {
+          return EventDetailsScreen(eventId: argument);
+        } else if (argument is Map<String, dynamic>) {
+          final String eventId = (argument['eventId'] ?? '') as String;
+          final String? eventType = argument['eventType'] as String?;
+          return EventDetailsScreen(eventId: eventId, eventType: eventType);
+        } else {
+          return EventDetailsScreen(eventId: '');
+        }
       case TopNavScreen.disputeDetails:
         return DisputeDetailsScreen(disputeId: argument as String);
       case TopNavScreen.pendingReceipt:
