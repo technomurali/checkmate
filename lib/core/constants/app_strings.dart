@@ -142,7 +142,9 @@ class AppStrings {
   static const String selectHcpPractitioners = "Select HCP Practitioners *";
   static const String amountPerHcp = "Amount per HCP:";
   static const String sendForApproval = "Send for Approval";
-  static const String submitCheckinMessage = "Once submitted, check-in cannot be modified";
+  static const String submitCheckinMessage =
+      "Once submitted, check-in cannot be modified";
+  static const String cancel = "Cancel";
 }
 
 class ErrorText {

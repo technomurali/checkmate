@@ -170,6 +170,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   ///Pharma Company Selection TextField Search Button
                   CustomTextField(
+                    isRequired: true,
                     suffixIcon: IconButton(
                       onPressed: () {},
                       icon: const Icon(Icons.search),
@@ -219,46 +220,49 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 16),
 
                   ///Terms and Conditions button
-                  Align(
-                    alignment: Alignment.center,
-                    child: TextButton(
-                      onPressed: () async {
-                        final accepted = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TermsAndConditionsScreen(),
-                          ),
-                        );
-                        if (accepted == true) {
-                          setState(() {
-                            _acceptedTerms = true;
-                          });
-                        } else if (accepted == false) {
-                          setState(() {
-                            _acceptedTerms = false;
-                          });
-                        }
-                      },
-                      // child: Text(
-                      //   "${AppStrings.signupTerms} ${AppStrings.termsAndConditions}",
-                      // ),
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "${AppStrings.signupTerms} ",
-                              style: TextStyle(color: Colors.black),
-                            ),
-                            TextSpan(
-                              text: AppStrings.termsAndConditions,
-                              style: TextStyle(
-                                color: AppColors.termsColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                  InkWell(
+                    onTap: () async {
+                      final accepted = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TermsAndConditionsScreen(),
                         ),
-                      ),
+                      );
+                      if (accepted == true) {
+                        setState(() {
+                          _acceptedTerms = true;
+                        });
+                      } else if (accepted == false) {
+                        setState(() {
+                          _acceptedTerms = false;
+                        });
+                      }
+                    },
+                    child: Row(
+                      children: [
+                        Checkbox(value: _acceptedTerms, onChanged: null),
+
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "${AppStrings.signupTerms} ",
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                                TextSpan(
+                                  text: AppStrings.termsAndConditions,
+                                  style: TextStyle(
+                                    color: AppColors.termsColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 16),

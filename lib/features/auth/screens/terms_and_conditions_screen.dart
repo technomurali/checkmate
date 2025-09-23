@@ -86,25 +86,37 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accentSuccess,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context, true);
-                      },
-                      child: Text(
-                        AppStrings.accept,
-                        style: TextStyle(color: AppColors.background),
-                      ),
-                    ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 1),
+              child: Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accentSuccess,
                   ),
-                ],
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: Text(
+                    AppStrings.accept,
+                    style: TextStyle(color: AppColors.background),
+                  ),
+                ),
+              ),
+            ),
+             Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+              child: Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accentError,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: Text(
+                    AppStrings.cancel,
+                    style: TextStyle(color: AppColors.background),
+                  ),
+                ),
               ),
             ),
           ],

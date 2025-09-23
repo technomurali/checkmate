@@ -14,6 +14,7 @@ class SignupScreenLogic extends ChangeNotifier {
   bool isLoading = false;
   String? passwordError;
   String? emailError;
+  
 
   List<Map> filteredCompanies = [];
   List<Map> allCompanies = [];
