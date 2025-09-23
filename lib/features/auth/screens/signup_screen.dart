@@ -69,7 +69,7 @@ class _SignupScreenState extends State<SignupScreen> {
               //   ],
               // ),
               // const SizedBox(height: 16),
-      
+
               // Social or normal form
               if (signupScreenLogic.isOptedForSocialSignUp) ...[
                 SocialButtonsRow(
@@ -77,9 +77,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   onDisabledTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text(
-                          AppStrings.enterTheCompanyNameWarning,
-                        ),
+                        content: Text(AppStrings.enterTheCompanyNameWarning),
                       ),
                     );
                   },
@@ -163,9 +161,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 //   },
                 // ),
               ],
-      
+
               const SizedBox(height: 16),
-      
+
               ///Pharma Company Selection TextField Search Button
               CustomTextField(
                 readOnly: signupScreenLogic.isLoading,
@@ -203,14 +201,13 @@ class _SignupScreenState extends State<SignupScreen> {
                             (entry) => Column(
                               children: [
                                 InkWell(
-                                  onTap: () => signupScreenLogic
-                                      .selectCompany(entry.value),
+                                  onTap: () => signupScreenLogic.selectCompany(
+                                    entry.value,
+                                  ),
                                   child: Text(entry.value['accountName']),
                                 ),
                                 if (entry.key !=
-                                    signupScreenLogic
-                                            .filteredCompanies
-                                            .length -
+                                    signupScreenLogic.filteredCompanies.length -
                                         1)
                                   const Divider(),
                               ],
@@ -222,7 +219,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ],
               const SizedBox(height: 16),
-      
+
               ///Terms and Conditions button
               InkWell(
                 onTap: () async {
@@ -245,7 +242,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: Row(
                   children: [
                     Checkbox(value: _acceptedTerms, onChanged: null),
-      
+
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.7,
                       child: RichText(
@@ -275,16 +272,13 @@ class _SignupScreenState extends State<SignupScreen> {
                   // color: Color(0xFF3C8AD0),
                   text: AppStrings.signup,
                   isDisabled:
-                      signupScreenLogic.isSignUpDisabled && !_acceptedTerms,
+                      signupScreenLogic.isSignUpDisabled || !_acceptedTerms,
                   onPressed: () {
                     signupScreenLogic.signupUser(() {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Signup successful!')),
                       );
-                      Navigator.pushReplacementNamed(
-                        context,
-                        RouteName.signIn,
-                      );
+                      Navigator.pushReplacementNamed(context, RouteName.signIn);
                     });
                   },
                 ),
