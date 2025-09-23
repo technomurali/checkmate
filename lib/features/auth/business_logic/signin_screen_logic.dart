@@ -61,6 +61,7 @@ class SigninScreenLogic extends ChangeNotifier {
         SigninTextControllers.password.text.trim().isNotEmpty;
     if (enabled != isButtonEnabled) {
       isButtonEnabled = enabled;
+      showError = false;
       notifyListeners();
     }
   }
