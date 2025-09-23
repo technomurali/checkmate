@@ -82,6 +82,7 @@ class SigninScreenLogic extends ChangeNotifier {
       return null;
     }
     try {
+      showError = false;
       isLoading = true;
       notifyListeners();
       final response = await _signinController.signin(
