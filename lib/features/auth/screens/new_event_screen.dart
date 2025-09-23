@@ -2,6 +2,7 @@
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/core/constants/app_text_themes.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
@@ -331,11 +332,20 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                   textEditingController;
 
                               return TextField(
+                                enabled: !_isLoading,
                                 controller: textEditingController,
                                 focusNode: focusNode,
                                 decoration: InputDecoration(
-                                  labelText: AppStrings.searchHCO,
-                                  suffixIcon: Icon(Icons.search),
+                                  label: AppTextThemes.labelWithImportant(
+                                    AppStrings.searchHCO,
+                                  ),
+                                  // labelText: AppStrings.searchHCO,
+                                  suffixIcon: _isLoading
+                                      ? Transform.scale(
+                                          scale: 0.5, // shrink proportionally
+                                          child: CircularProgressIndicator(),
+                                        )
+                                      : Icon(Icons.search),
                                 ),
                               );
                             },
@@ -348,7 +358,10 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         readOnly: true,
 
                         decoration: InputDecoration(
-                          labelText: AppStrings.labelHCO,
+                          // labelText: AppStrings.labelHCO,
+                          label: AppTextThemes.labelWithImportant(
+                            AppStrings.labelHCO,
+                          ),
                         ),
                       ),
                     },
@@ -356,9 +369,19 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
                     /// Event Type Dropdown
                     DropdownButtonFormField<String>(
+                      // hint: _isLoading ? Text("Loading....") : null,
+                      icon: _isLoading
+                          ? Transform.scale(
+                              scale: 0.5, // shrink proportionally
+                              child: CircularProgressIndicator(),
+                            )
+                          : null,
                       value: _selectedEventType,
                       decoration: InputDecoration(
-                        labelText: AppStrings.labelEventType,
+                        // labelText: AppStrings.labelEventType,
+                        label: AppTextThemes.labelWithImportant(
+                          AppStrings.labelEventType,
+                        ),
                       ),
                       items: eventTypes.map<DropdownMenuItem<String>>((event) {
                         return DropdownMenuItem<String>(
@@ -378,8 +401,11 @@ class _NewEventScreenState extends State<NewEventScreen> {
                     /// Event Name TextField
                     TextFormField(
                       controller: NewEventTextControllers.eventNameController,
-                      decoration: const InputDecoration(
-                        labelText: AppStrings.labelEventName,
+                      decoration: InputDecoration(
+                        // labelText: AppStrings.labelEventName,
+                        label: AppTextThemes.labelWithImportant(
+                          AppStrings.labelEventName,
+                        ),
                       ),
                       validator: (value) => value == null || value.isEmpty
                           ? AppStrings.requiredField
@@ -479,9 +505,16 @@ class _NewEventScreenState extends State<NewEventScreen> {
                       controller: NewEventTextControllers.startDateController,
                       readOnly: true,
                       decoration: InputDecoration(
-                        labelText: !!isMultiDay
-                            ? AppStrings.labelEventStartDate
-                            : AppStrings.labelStartDate,
+                        // labelText: !!isMultiDay
+                        //     ? AppStrings.labelEventStartDate
+                        //     : AppStrings.labelStartDate,
+                        label: !!isMultiDay
+                            ? AppTextThemes.labelWithImportant(
+                                AppStrings.labelEventStartDate,
+                              )
+                            : AppTextThemes.labelWithImportant(
+                                AppStrings.labelStartDate,
+                              ),
                       ),
                       onTap: () async {
                         final DateTime? pickedDate = await showDatePicker(
@@ -708,9 +741,18 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                   controller: textEditingController,
                                   focusNode: focusNode,
                                   decoration: InputDecoration(
-                                    labelText:
-                                        AppStrings.searchHcpPractitioners,
-                                    suffixIcon: Icon(Icons.search),
+                                    // labelText:
+                                    //     AppStrings.searchHcpPractitioners,
+                                    label: AppTextThemes.labelWithImportant(
+                                      AppStrings.searchHcpPractitioners,
+                                    ),
+                                    // suffixIcon: Icon(Icons.search),
+                                    suffixIcon: _isLoading
+                                        ? Transform.scale(
+                                            scale: 0.5, // shrink proportionally
+                                            child: CircularProgressIndicator(),
+                                          )
+                                        : Icon(Icons.search),
                                   ),
                                 );
                               },
@@ -752,6 +794,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                               ),
                             ),
                           ),
+
                           items: (filter, loadProps) {
                             return _hcps
                                 .map<Map<String, dynamic>>(
@@ -784,6 +827,12 @@ class _NewEventScreenState extends State<NewEventScreen> {
                             decoration: InputDecoration(
                               labelText: _selectedHCP.isEmpty
                                   ? "Select HCPs In HCO"
+                                  : null,
+                              suffixIcon: _isLoading
+                                  ? Transform.scale(
+                                      scale: 0.5, // shrink proportionally
+                                      child: CircularProgressIndicator(),
+                                    )
                                   : null,
                             ),
                           ),
@@ -829,14 +878,18 @@ class _NewEventScreenState extends State<NewEventScreen> {
                       },
                     } else ...{
                       DropdownSearch<Map<String, dynamic>>.multiSelection(
-                        popupProps: const PopupPropsMultiSelection.menu(
+                        popupProps: PopupPropsMultiSelection.menu(
                           showSearchBox:
                               true, // <- this brings the search field
 
                           searchFieldProps: TextFieldProps(
+                            enabled: !_isLoading,
                             // customise it if you like
                             decoration: InputDecoration(
-                              labelText: AppStrings.selectHcpPractitioners,
+                              // labelText: AppStrings.selectHcpPractitioners,
+                              label: AppTextThemes.labelWithImportant(
+                                AppStrings.selectHcpPractitioners,
+                              ),
                               prefixIcon: Icon(Icons.search),
                             ),
                           ),
@@ -868,7 +921,11 @@ class _NewEventScreenState extends State<NewEventScreen> {
                             .toList(),
                         dropdownBuilder: (context, selectedItems) =>
                             _selectedHCP.isNotEmpty
-                            ? SizedBox(child: Text('Select HCP Practitioners'))
+                            ? SizedBox(
+                                child: AppTextThemes.labelWithImportant(
+                                  AppStrings.selectHcpPractitioners,
+                                ),
+                              )
                             : SizedBox(),
                         itemAsString: (item) {
                           return item[HCPModalKeys.hcpName] ??
@@ -880,9 +937,20 @@ class _NewEventScreenState extends State<NewEventScreen> {
                             selectedItem[HCPModalKeys.hcpId],
                         decoratorProps: DropDownDecoratorProps(
                           decoration: InputDecoration(
-                            labelText: _selectedHCP.isEmpty
-                                ? "Select HCP Practitioners"
-                                : '',
+                            // labelText: _selectedHCP.isEmpty
+                            //     ? "Select HCP Practitioners"
+                            //     : '',\
+                            label: _selectedHCP.isEmpty
+                                ? AppTextThemes.labelWithImportant(
+                                    AppStrings.selectHcpPractitioners,
+                                  )
+                                : null,
+                            suffixIcon: _isLoading
+                                ? Transform.scale(
+                                    scale: 0.5, // shrink proportionally
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : null,
                           ),
                         ),
                         onChanged: (value) {
@@ -924,8 +992,11 @@ class _NewEventScreenState extends State<NewEventScreen> {
                       keyboardType: TextInputType.number,
                       controller:
                           NewEventTextControllers.numberOfStaffController,
-                      decoration: const InputDecoration(
-                        labelText: AppStrings.labelNumberOfStaff,
+                      decoration: InputDecoration(
+                        // labelText: AppStrings.labelNumberOfStaff,
+                        label: AppTextThemes.labelWithImportant(
+                          AppStrings.labelNumberOfStaff,
+                        ),
                       ),
                       validator: (value) => value == null || value.isEmpty
                           ? AppStrings.requiredField
@@ -958,14 +1029,14 @@ class _NewEventScreenState extends State<NewEventScreen> {
             ),
           ),
         ),
-        if (_isLoading) ...{
-          Positioned.fill(
-            child: Container(
-              color: Colors.white,
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          ),
-        },
+        // if (_isLoading) ...{
+        //   Positioned.fill(
+        //     child: Container(
+        //       color: Colors.white,
+        //       child: Center(child: CircularProgressIndicator()),
+        //     ),
+        //   ),
+        // },
       ],
     );
   }

@@ -194,48 +194,39 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     });
   }
 
-  fetchAllEvents() {
+  Future<void> fetchAllEvents() async {
     setState(() {
       isLoading = true;
     });
-    if (userModal.role == UserType.hcp) {
-      _eventController.fetchHcpEvents().then(
-        (v) => {
-          setState(() {
-            events = v;
-            filteredEvents = v;
-            isLoading = false;
-          }),
 
-          _filterEvents(),
-        },
-      );
-    } else if (userModal.role == UserType.pharmaRep) {
-      _eventController.fetchEvents().then(
-        (v) => {
-          setState(() {
-            events = v;
-            filteredEvents = v;
-            isLoading = false;
-          }),
+    try {
+      List<EventModal> v = [];
 
-          _filterEvents(),
-        },
-      );
-    } else if (userModal.role == UserType.hco) {
-      _eventController
-          .fetchOfficeuserEvents(userModal.pharmaCompany)
-          .then(
-            (v) => {
-              setState(() {
-                events = v;
-                filteredEvents = v;
-                isLoading = false;
-              }),
+      if (userModal.role == UserType.hcp) {
+        v = await _eventController.fetchHcpEvents();
+      } else if (userModal.role == UserType.pharmaRep) {
+        v = await _eventController.fetchEvents();
+      } else if (userModal.role == UserType.hco) {
+        v = await _eventController.fetchOfficeuserEvents(
+          userModal.pharmaCompany,
+        );
+      }
 
-              _filterEvents(),
-            },
-          );
+      setState(() {
+        events = v;
+        filteredEvents = v;
+        isLoading = false;
+      });
+
+      _filterEvents();
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      // Optionally show an error; keeping consistent with existing UX
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to load events')));
     }
   }
 
@@ -384,42 +375,47 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
           ),
         ),
         const SizedBox(height: 10),
-        if (!isLoading) ...{
-          if (filteredEvents.isNotEmpty) ...{
-            for (var i = 0; i < filteredEvents.length; i++) ...{
-              EventListItemTile(
-                event: filteredEvents[i],
-                onTap: () {
-                  Provider.of<TopNavProvider>(
-                    context,
-                    listen: false,
-                  ).navigateTo(
-                    TopNavScreen.eventDetails,
-                    argument: {
-                      'eventId': filteredEvents[i].eventId,
-                      'eventType':
-                          filteredEvents[i].statusText
-                                      .toString()
-                                      .toUpperCase() ==
-                                  "PAST" &&
-                              filteredEvents[i].eventCheckIn == null
-                          ? "PASTED" 
-                          :filteredEvents[i].statusText
-                                      .toString()
-                                      .toUpperCase() ==
-                                  "UPCOMING" &&
-                              filteredEvents[i].eventCheckIn == null ?"UPCOMING": "",
-                    },
-                  );
-                },
-              ),
+        SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: RefreshIndicator(
+            onRefresh: () async {
+              await fetchAllEvents();
             },
-          } else ...{
-            Center(child: Text("No Events With the Selected Filter")),
-          },
-        } else ...{
-          CircularProgressIndicator(),
-        },
+            child: Builder(
+              builder: (context) {
+                if (isLoading) {
+                  // Use a ListView with AlwaysScrollableScrollPhysics so pull-to-refresh works while loading
+                  return ListView(
+                    // physics: const AlwaysScrollableScrollPhysics(),
+                    physics: NeverScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 200),
+                      Center(child: CircularProgressIndicator()),
+                      SizedBox(height: 200),
+                    ],
+                  );
+                }
+
+                if (filteredEvents.isEmpty) {
+                  return ListView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    children: const [
+                      Center(child: Text('No Events With the Selected Filter')),
+                    ],
+                  );
+                }
+
+                return ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(top: 4, bottom: 24),
+                  itemCount: filteredEvents.length,
+                  itemBuilder: (context, i) => historyItemBuilder(i),
+                );
+              },
+            ),
+          ),
+        ),
       ],
     );
   }

@@ -48,10 +48,10 @@ class AppStrings {
   static const String numberOfStaff = "Number of staff";
   static const String hcpInEvent = "HCP's in the event";
   static const String hcoInEvent = "HCO in the event";
-  static const String labelEventName = "Event Name *";
-  static const String labelStartDate = "Event Date *";
+  static const String labelEventName = "Event Name";
+  static const String labelStartDate = "Event Date";
   static const String labelEndDate = "Event End Date";
-  static const String labelNumberOfStaff = "Number of staff *";
+  static const String labelNumberOfStaff = "Number of staff";
   static const String labelHCO = "HCO";
   static const String labelHCOOfficeUser = "OFFICE USER";
   static const String labelHCP = "HCP";
@@ -86,7 +86,7 @@ class AppStrings {
   static const String edit = "Edit";
   static const String pharmaCompany = "Pharma Company";
   static const String company = "Hco";
-  static const String labelEventType = "Event Type *";
+  static const String labelEventType = "Event Type";
   static const String selectEventType = "Please select event type";
   static const String multiDayEvent = "Multi-day Event";
   static const String disputeCategory = "Dispute Category";
@@ -137,14 +137,16 @@ class AppStrings {
   static const String reject = "Reject";
   static const String rejectMessage =
       "You are requested to review and confirm the event details. If rejecting, please provide a reason to complete compliance.";
-  static const String searchHCO = "Search HCO *";
-  static const String searchHcpPractitioners = "Search HCP Practitioners *";
-  static const String selectHcpPractitioners = "Select HCP Practitioners *";
+  static const String searchHCO = "Search HCO";
+  static const String searchHcpPractitioners = "Search HCP Practitioners";
+  static const String selectHcpPractitioners = "Select HCP Practitioners";
   static const String amountPerHcp = "Amount per HCP:";
   static const String sendForApproval = "Send for Approval";
   static const String submitCheckinMessage =
       "Once submitted, check-in cannot be modified";
   static const String cancel = "Cancel";
+  static const String remarks = "Remarks";
+  static const String confirmRejection = 'Confirm Rejection';
 }
 
 class ErrorText {

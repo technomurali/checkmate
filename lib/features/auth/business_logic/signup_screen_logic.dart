@@ -9,12 +9,11 @@ class SignupScreenLogic extends ChangeNotifier {
   final PharmaController _pharmaController = PharmaController();
   final SignupController _signupController = SignupController();
 
-  bool isSignUpDisabled = true;
+  bool isSignUpDisabled = false;
   bool isOptedForSocialSignUp = false;
   bool isLoading = false;
   String? passwordError;
   String? emailError;
-  
 
   List<Map> filteredCompanies = [];
   List<Map> allCompanies = [];
@@ -75,7 +74,7 @@ class SignupScreenLogic extends ChangeNotifier {
     final allValid = isValid.values.every((e) => e);
     // Disable sign up unless all required fields are valid
     // When social sign up is selected, this flag is handled separately
-    isSignUpDisabled = !(allValid && !isOptedForSocialSignUp);
+    isSignUpDisabled = allValid;
     notifyListeners();
   }
 

@@ -275,7 +275,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   // color: Color(0xFF3C8AD0),
                   text: AppStrings.signup,
                   isDisabled:
-                      signupScreenLogic.isSignUpDisabled || !_acceptedTerms,
+                      signupScreenLogic.isSignUpDisabled && !_acceptedTerms,
                   onPressed: () {
                     signupScreenLogic.signupUser(() {
                       ScaffoldMessenger.of(context).showSnackBar(

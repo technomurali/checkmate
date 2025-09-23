@@ -6,6 +6,7 @@ import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/core/constants/app_text_themes.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
 import 'package:checkmate/core/widgets/approval_dialog.dart';
 import 'package:checkmate/core/widgets/confirm_alert_dialog.dart';
@@ -1262,7 +1263,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                         builder: (context, setState) {
                                                           return AlertDialog(
                                                             title: Text(
-                                                              'Confirm Rejection',
+                                                              AppStrings
+                                                                  .confirmRejection,
                                                             ),
                                                             content: SizedBox(
                                                               height: 220,
@@ -1280,8 +1282,12 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                                         ReceiptRejectionTextController
                                                                             .remarksController,
                                                                     decoration: InputDecoration(
-                                                                      labelText:
-                                                                          'Remarks',
+                                                                      // labelText:
+                                                                      //     'Remarks',
+                                                                      label: AppTextThemes.labelWithImportant(
+                                                                        AppStrings
+                                                                            .remarks,
+                                                                      ),
                                                                     ),
                                                                     onChanged:
                                                                         (
@@ -1348,7 +1354,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                                       }
                                                                     : null,
                                                                 child: Text(
-                                                                  'Reject',
+                                                                  AppStrings
+                                                                      .reject,
                                                                 ),
                                                               ),
                                                             ],
@@ -1360,7 +1367,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                 }
                                               : null,
                                           child: Text(
-                                            "Reject",
+                                            AppStrings.reject,
                                             style: TextStyle(
                                               color: AppColors.background,
                                             ),
@@ -1431,7 +1438,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                     return StatefulBuilder(
                                       builder: (context, setState) {
                                         return AlertDialog(
-                                          title: Text('Confirm Rejection'),
+                                          title: Text(
+                                            AppStrings.confirmRejection,
+                                          ),
                                           content: SizedBox(
                                             height: 220,
                                             child: Column(
@@ -1443,7 +1452,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                       ReceiptRejectionTextController
                                                           .remarksController,
                                                   decoration: InputDecoration(
-                                                    labelText: 'Remarks',
+                                                    label:
+                                                        AppTextThemes.labelWithImportant(
+                                                          AppStrings.remarks,
+                                                        ),
                                                   ),
                                                   onChanged: (value) =>
                                                       setState(() {}),
