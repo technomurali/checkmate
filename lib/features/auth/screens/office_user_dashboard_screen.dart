@@ -107,7 +107,17 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
                   const SizedBox(height: 4),
 
                   /// HCO Name Text
-                  Text(" $hcoName", style: TextStyle(fontSize: 16)),
+                  Tooltip(
+                    message: "$hcoName",
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: Text(
+                        " $hcoName",
+                        style: TextStyle(fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 20),
 
                   /// Upcoming Events Text

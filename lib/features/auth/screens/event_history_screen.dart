@@ -139,7 +139,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
           eventStatus == BasicCodesFromCrm.completed;
     } else if (selectedStatus == "IN COMPLETE") {
       return event?.eventCheckIn == null &&
-          event?.statusText!.toUpperCase() == "PAST";
+          event?.statusText!.toUpperCase() == "PAST" && eventStatus == BasicCodesFromCrm.upcoming && eventStatus != BasicCodesFromCrm.terminated;
     } else if (selectedStatus == "COMPLETED") {
       return event?.eventCheckIn != null &&
           (event?.statusText!.toUpperCase() == "PAST" ||
@@ -410,7 +410,34 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.only(top: 4, bottom: 24),
                   itemCount: filteredEvents.length,
-                  itemBuilder: (context, i) => historyItemBuilder(i),
+                  itemBuilder: (context, i) => EventListItemTile(
+                    event: filteredEvents[i],
+                    onTap: () {
+                      Provider.of<TopNavProvider>(
+                        context,
+                        listen: false,
+                      ).navigateTo(
+                        TopNavScreen.eventDetails,
+                        argument: {
+                          'eventId': filteredEvents[i].eventId,
+                          'eventType':
+                              filteredEvents[i].statusText
+                                          .toString()
+                                          .toUpperCase() ==
+                                      "PAST" &&
+                                  filteredEvents[i].eventCheckIn == null
+                              ? "PASTED"
+                              : filteredEvents[i].statusText
+                                            .toString()
+                                            .toUpperCase() ==
+                                        "UPCOMING" &&
+                                    filteredEvents[i].eventCheckIn == null
+                              ? "UPCOMING"
+                              : "",
+                        },
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -453,10 +480,21 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
       child: EventListItemTile(
         event: event,
         onTap: () {
-          Provider.of<TopNavProvider>(
-            context,
-            listen: false,
-          ).navigateTo(TopNavScreen.eventDetails, argument: event.eventId);
+          Provider.of<TopNavProvider>(context, listen: false).navigateTo(
+            TopNavScreen.eventDetails,
+            argument: {
+              'eventId': events[i].eventId,
+              'eventType':
+                  events[i].statusText.toString().toUpperCase() == "PAST" &&
+                      events[i].eventCheckIn == null
+                  ? "PASTED"
+                  : events[i].statusText.toString().toUpperCase() ==
+                            "UPCOMING" &&
+                        events[i].eventCheckIn == null
+                  ? "UPCOMING"
+                  : "",
+            },
+          );
         },
       ),
     );

@@ -274,6 +274,19 @@ class _NewEventScreenState extends State<NewEventScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    NewEventTextControllers.eventNameController.text = "";
+    NewEventTextControllers.startDateController.text = "";
+    NewEventTextControllers.endDateController.text = "";
+    NewEventTextControllers.numberOfStaffController.text = "";
+    NewEventTextControllers.amountController.text = "";
+    NewEventTextControllers.pharmaRepController.text = "";
+    NewEventTextControllers.hcoController.text = "";
+    NewEventTextControllers.eventDescriptionController.text = "";
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
@@ -1024,7 +1037,11 @@ class _NewEventScreenState extends State<NewEventScreen> {
                 ),
 
                 /// Create Event Button
-                Button(onPressed: _submitForm, text: AppStrings.createEvent),
+                if (!_isLoading) ...{
+                  Button(onPressed: _submitForm, text: AppStrings.createEvent),
+                } else ...{
+                  Button(onPressed: null, text: AppStrings.createEvent),
+                },
               ],
             ),
           ),

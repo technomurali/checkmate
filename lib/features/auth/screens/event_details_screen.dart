@@ -47,10 +47,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   bool hcpInHcoSelected = true;
   bool isEdit = false;
   bool isLoading = false;
+  double amountPerHcp = 0;
   // HCO re-enable reason (for incomplete events)
-  final TextEditingController _reEnableReasonController = TextEditingController(
-    text: AppStrings.remarks,
-  );
+  final TextEditingController _reEnableReasonController =
+      TextEditingController();
   final FocusNode _reEnableReasonFocusNode = FocusNode();
   String? reEnableReason;
   bool isCheckinPossible = true;
@@ -95,7 +95,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       return;
     }
 
-    _reEnableReasonController.text = AppStrings.remarks;
     showDialog(
       context: context,
       builder: (ctx) {
@@ -108,6 +107,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
             return AlertDialog(
               title: Text(
                 "You are requested to enable the incomplete event. Please provide a reason for re-enabling the incomplete event for compliance.",
+                style: TextStyle(fontSize: 12),
               ),
               content: TextField(
                 controller: _reEnableReasonController,
@@ -344,8 +344,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       "eventDescription":
           NewEventTextControllers.eventDescriptionController.text,
       "eventApproval": int.parse(BasicCodesFromCrm.pending),
-      "userName": "/contacts(${event.userName})",
+      "userName": "/contacts(${event.userName ?? userModal.kiosk})",
       "isMultiDay": event.isMultiDay,
+      "remarks": _reEnableReasonController.text,
     };
     debugPrint("Test Data for Update Event ${jsonEncode(testData)}");
     _eventController.updateEvent(event.eventId ?? '', testData).then((value) {
@@ -366,6 +367,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   }
 
   fetchEvent() {
+    debugPrint(
+      'Event ID and Event wala :: ${widget.eventId} ${widget.eventType}',
+    );
     setState(() {
       isLoading = true;
     });
@@ -401,6 +405,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               isCheckinPossible = !(isPastDate(
                 event.startDate ?? DateTime.now(),
               ));
+              _reEnableReasonController.text = event.remarks;
               debugPrint(
                 "isCheckinPossible : $isCheckinPossible ${event.startDate!.isBefore(DateTime.now())} event.startDate : ${event.startDate!.isAtSameMomentAs(DateTime.now())} compare : ${event.startDate!.compareTo(DateTime.now())} compareCondition : ${event.startDate!.compareTo(DateTime.now()) > 0} isSameDay : ${isPastDate(event.startDate ?? DateTime.now())}",
               );
@@ -432,6 +437,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   }
 
   fetchHcpPractionners() async {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
@@ -442,6 +448,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
             result['data'],
           ).map((e) => Hcp.fromJson(e)),
         );
+        if (!mounted) return;
         setState(() {
           hcpPractioners = hcpPractionners;
           isLoading = false;
@@ -475,18 +482,16 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   }
 
   String ifPastStatusText() {
-    if (event.statusText != null) {
+    if (event.eventStatus.toString() == BasicCodesFromCrm.completed) {
+      return "${eventStatusCodeToText(event.eventStatus.toString())} & ${eventApprovalCodeToText(event.eventApproval.toString()).toUpperCase()} EVENT";
+    } else if (event.statusText != null) {
       if (event.eventCheckIn == null &&
-          event.statusText!.toUpperCase() == "PAST") {
+          event.statusText!.toUpperCase() == "PAST" &&
+          (event.eventStatus.toString() == BasicCodesFromCrm.upcoming ||
+              event.eventStatus == null)) {
         return "IN-COMPLETE EVENT";
-      } else if (event.eventCheckIn == null &&
-          event.statusText!.toUpperCase() == "UPCOMING" &&
-          event.eventStatus == int.parse(BasicCodesFromCrm.terminated) &&
-          event.eventStatus == int.parse(BasicCodesFromCrm.upcoming)) {
-        return "${eventStatusCodeToText(event.eventStatus.toString())} EVENT";
       } else {
-        return "${eventStatusCodeToText(event.eventStatus.toString())} & ${eventApprovalCodeToText(event.eventApproval.toString()).toUpperCase()} EVENT";
-        //"${eventStatusCodeToText(event.eventStatus.toString())}-${eventApprovalCodeToText(event.eventApproval.toString())}-EVENT"
+        return "${eventStatusCodeToText(event.eventStatus.toString())} EVENT";
       }
     } else {
       return "${eventStatusCodeToText(event.eventStatus.toString())} EVENT";
@@ -576,25 +581,13 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  widget.eventType == "PASTED"
-                      ? Text("IN-COMPLETE EVENT")
-                      : widget.eventType == "UPCOMING"
-                      ? Text("UPCOMING EVENT")
-                      : event.eventStatus != null
-                      ? Text(
-                          event.statusText != null
-                              ? !(event.statusText!.toLowerCase() == "past")
-                                    ? ifPastStatusText()
-                                    : "${eventStatusCodeToText(event.eventStatus.toString())} & ${eventApprovalCodeToText(event.eventApproval.toString()).toUpperCase()} EVENT"
-                              : "${eventStatusCodeToText(event.eventStatus.toString())} & ${eventApprovalCodeToText(event.eventApproval.toString()).toUpperCase()} EVENT",
-                        )
-                      : SizedBox(),
+                  Text(ifPastStatusText()),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (event.statusText!.toLowerCase() == "past" &&
-                          event.eventCheckIn == null &&
+                      if ((ifPastStatusText() == "IN-COMPLETE EVENT" ||
+                              ifPastStatusText() == "UPCOMING EVENT") &&
                           userModal.role == UserType.hco) ...{
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -614,9 +607,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       if (event.eventStatus.toString() ==
                               BasicCodesFromCrm.upcoming &&
                           !isCheckedIn &&
-                          ((userModal.role == UserType.pharmaRep ||
-                                  userModal.role == UserType.hco) ||
-                              userModal.role == UserType.hco)) ...{
+                          userModal.role == UserType.pharmaRep) ...{
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -1102,46 +1093,69 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         },
                       },
 
-                      if (event.eventStatus !=
-                          int.parse(BasicCodesFromCrm.completed))
-                        if (event.eventStatus ==
-                            int.parse(BasicCodesFromCrm.completed)) ...{
-                          SizedBox(height: 16),
-                          TextFormField(
-                            keyboardType: TextInputType.number,
-                            controller: EventTextControllers.amountController,
-                            decoration: InputDecoration(
-                              labelText: '${AppStrings.amount} *',
-                              prefixIcon: Icon(Icons.monetization_on_outlined),
-                            ),
-                            enabled: false,
-                            onChanged: (val) {
-                              setState(() {
+                      if (event.eventStatus ==
+                          int.parse(BasicCodesFromCrm.completed)) ...{
+                        SizedBox(height: 16),
+                        TextFormField(
+                          keyboardType: TextInputType.number,
+                          controller: EventTextControllers.amountController,
+                          decoration: InputDecoration(
+                            counter: SizedBox(),
+                            labelText: '${AppStrings.amount} *',
+                            prefixIcon: Icon(Icons.monetization_on_outlined),
+                          ),
+                          enabled: isCheckedIn,
+                          onChanged: (val) {
+                            setState(() {
+                              if (val.isNotEmpty) {
                                 event = event.copyWith(
                                   amount: double.parse(val),
                                 );
-                              });
-                            },
-                          ),
-                          if (EventTextControllers
-                              .amountController
-                              .text
-                              .isNotEmpty) ...{
-                            SizedBox(height: 8),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "${AppStrings.amountPerHcp} ${event.contactDtos != null && event.contactDtos!.isNotEmpty ? (double.parse(EventTextControllers.amountController.text) / (event.contactDtos!.length + double.parse(EventTextControllers.numberOfStaffController.text))).toStringAsFixed(2) : '0.00'}",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.textSecondary,
-                                ),
+                                if (event.contactDtos != null &&
+                                    event.contactDtos!.isNotEmpty &&
+                                    EventTextControllers
+                                        .numberOfStaffController
+                                        .text
+                                        .isNotEmpty) {
+                                  int numberOfStaff =
+                                      int.tryParse(
+                                        EventTextControllers
+                                            .numberOfStaffController
+                                            .text,
+                                      ) ??
+                                      0;
+                                  int totalParticipants =
+                                      event.contactDtos!.length + numberOfStaff;
+                                  final amount = double.tryParse(val) ?? 0.0;
+                                  amountPerHcp = totalParticipants > 0
+                                      ? amount / totalParticipants
+                                      : 0.0;
+                                } else {
+                                  amountPerHcp = 0.0;
+                                }
+                              } else {
+                                amountPerHcp = 0.0;
+                              }
+                            });
+                          },
+                        ),
+                        if (event.amount != null ) ...{
+                          SizedBox(height: 8),
+                          if(event.amount! > 0)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "${AppStrings.amountPerHcp} $amountPerHcp",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textSecondary,
                               ),
                             ),
-                          },
-
-                          SizedBox(height: 16),
+                          ),
                         },
+
+                        SizedBox(height: 16),
+                      },
 
                       if (event.eventStatus ==
                           int.parse(BasicCodesFromCrm.completed))
@@ -1635,25 +1649,51 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           controller: EventTextControllers.amountController,
                           maxLength: 5,
                           decoration: InputDecoration(
+                            counter: SizedBox(),
                             labelText: '${AppStrings.amount} *',
                             prefixIcon: Icon(Icons.monetization_on_outlined),
                           ),
                           enabled: isCheckedIn,
                           onChanged: (val) {
                             setState(() {
-                              event = event.copyWith(amount: double.parse(val));
+                              if (val.isNotEmpty) {
+                                event = event.copyWith(
+                                  amount: double.parse(val),
+                                );
+                                if (event.contactDtos != null &&
+                                    event.contactDtos!.isNotEmpty &&
+                                    EventTextControllers
+                                        .numberOfStaffController
+                                        .text
+                                        .isNotEmpty) {
+                                  int numberOfStaff =
+                                      int.tryParse(
+                                        EventTextControllers
+                                            .numberOfStaffController
+                                            .text,
+                                      ) ??
+                                      0;
+                                  int totalParticipants =
+                                      event.contactDtos!.length + numberOfStaff;
+                                  final amount = double.tryParse(val) ?? 0.0;
+                                  amountPerHcp = totalParticipants > 0
+                                      ? amount / totalParticipants
+                                      : 0.0;
+                                } else {
+                                  amountPerHcp = 0.0;
+                                }
+                              } else {
+                                amountPerHcp = 0.0;
+                              }
                             });
                           },
                         ),
-                        if (EventTextControllers
-                            .amountController
-                            .text
-                            .isNotEmpty) ...{
+                        if (amountPerHcp > 0) ...{
                           SizedBox(height: 8),
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              "${AppStrings.amountPerHcp} ${event.contactDtos != null && event.contactDtos!.isNotEmpty ? (double.parse(EventTextControllers.amountController.text) / (event.contactDtos!.length + double.parse(EventTextControllers.numberOfStaffController.text))).toStringAsFixed(2) : '0.00'}",
+                              "${AppStrings.amountPerHcp} $amountPerHcp",
                               style: TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.textSecondary,
@@ -1917,6 +1957,19 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           SizedBox(width: 10),
                         },
                       ],
+                    ),
+                  },
+                  if (_reEnableReasonController.text != '') ...{
+                    SizedBox(height: 10),
+                    TextField(
+                      enabled: false,
+                      controller: _reEnableReasonController,
+                      decoration: InputDecoration(
+                        label: AppTextThemes.labelWithImportant(
+                          AppStrings.remarks,
+                        ),
+                      ),
+                      maxLines: 3,
                     ),
                   },
                 ],
