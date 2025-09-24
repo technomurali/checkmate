@@ -47,6 +47,12 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   bool hcpInHcoSelected = true;
   bool isEdit = false;
   bool isLoading = false;
+  // HCO re-enable reason (for incomplete events)
+  final TextEditingController _reEnableReasonController = TextEditingController(
+    text: AppStrings.remarks,
+  );
+  final FocusNode _reEnableReasonFocusNode = FocusNode();
+  String? reEnableReason;
   bool isCheckinPossible = true;
   int amountForIndividualHcp = 0;
   List<Uint8List> eventAttachments = [];
@@ -60,6 +66,95 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     );
     EventTextControllers.endDateController = TextEditingController(
       text: event.endDate.toString(),
+    );
+  }
+
+  bool _isIncompleteForHco() {
+    final isPasted = (widget.eventType == "PASTED");
+    final isPastAndNotCheckedIn =
+        (event.statusText?.toLowerCase() == "past" &&
+        event.eventCheckIn == null);
+    return userModal.role == UserType.hco &&
+        (isPasted || isPastAndNotCheckedIn);
+  }
+
+  void _handleEditRequest() {
+    // If not HCO, or event is not incomplete, fall back to original toggle
+    if (!_isIncompleteForHco()) {
+      setState(() {
+        isEdit = !isEdit;
+      });
+      return;
+    }
+
+    // Guard: only prompt when enabling edit
+    if (isEdit) {
+      setState(() {
+        isEdit = false;
+      });
+      return;
+    }
+
+    _reEnableReasonController.text = AppStrings.remarks;
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            final String currentText = _reEnableReasonController.text.trim();
+            final bool canProceed =
+                currentText.isNotEmpty &&
+                currentText.toLowerCase() != AppStrings.remarks.toLowerCase();
+            return AlertDialog(
+              title: Text(
+                "You are requested to enable the incomplete event. Please provide a reason for re-enabling the incomplete event for compliance.",
+              ),
+              content: TextField(
+                controller: _reEnableReasonController,
+                focusNode: _reEnableReasonFocusNode,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  label: AppTextThemes.labelWithImportant(AppStrings.remarks),
+                ),
+                onTap: () {
+                  if (_reEnableReasonController.text == AppStrings.remarks) {
+                    setState(() {
+                      _reEnableReasonController.clear();
+                    });
+                  }
+                },
+                onChanged: (val) => setState(() {}),
+                onEditingComplete: () {
+                  if (_reEnableReasonController.text.trim().isEmpty) {
+                    setState(() {
+                      _reEnableReasonController.text = AppStrings.remarks;
+                    });
+                  }
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: Text(AppStrings.cancel),
+                ),
+                TextButton(
+                  onPressed: canProceed
+                      ? () {
+                          reEnableReason = _reEnableReasonController.text
+                              .trim();
+                          Navigator.of(ctx).pop();
+                          setState(() {
+                            isEdit = true;
+                          });
+                        }
+                      : null,
+                  child: const Text('Proceed'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -505,11 +600,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             InkWell(
-                              onTap: () {
-                                setState(() {
-                                  isEdit = !isEdit;
-                                });
-                              },
+                              onTap: _handleEditRequest,
                               child: Icon(
                                 Icons.edit,
                                 color: !isEdit
@@ -533,11 +624,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                               event.startDate ?? DateTime.now(),
                             )) ...{
                               InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    isEdit = !isEdit;
-                                  });
-                                },
+                                onTap: _handleEditRequest,
                                 child: Icon(
                                   Icons.edit,
                                   color: !isEdit
