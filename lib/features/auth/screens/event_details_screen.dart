@@ -1139,19 +1139,19 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             });
                           },
                         ),
-                        if (event.amount != null ) ...{
+                        if (event.amount != null) ...{
                           SizedBox(height: 8),
-                          if(event.amount! > 0)
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              "${AppStrings.amountPerHcp} $amountPerHcp",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
+                          if (event.amount! > 0)
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "${AppStrings.amountPerHcp} ${amountPerHcp.toStringAsFixed(3)}",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ),
-                          ),
                         },
 
                         SizedBox(height: 16),
@@ -1693,7 +1693,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              "${AppStrings.amountPerHcp} $amountPerHcp",
+                              "${AppStrings.amountPerHcp} ${amountPerHcp.toStringAsFixed(3)}",
                               style: TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.textSecondary,

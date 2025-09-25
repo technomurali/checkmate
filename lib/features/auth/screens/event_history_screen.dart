@@ -36,6 +36,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
   String _searchQuery = '';
   String? _selectedStatus = 'All';
   String selectedStatusId = '';
+  int numberOfRefresh = 0;
   final List<String> _statusOptions = [
     'All',
     "DISPUTED",
@@ -139,7 +140,9 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
           eventStatus == BasicCodesFromCrm.completed;
     } else if (selectedStatus == "IN COMPLETE") {
       return event?.eventCheckIn == null &&
-          event?.statusText!.toUpperCase() == "PAST" && eventStatus == BasicCodesFromCrm.upcoming && eventStatus != BasicCodesFromCrm.terminated;
+          event?.statusText!.toUpperCase() == "PAST" &&
+          eventStatus == BasicCodesFromCrm.upcoming &&
+          eventStatus != BasicCodesFromCrm.terminated;
     } else if (selectedStatus == "COMPLETED") {
       return event?.eventCheckIn != null &&
           (event?.statusText!.toUpperCase() == "PAST" ||
@@ -213,8 +216,8 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
       }
 
       setState(() {
-        events = v;
-        filteredEvents = v;
+        events = v.reversed.toList();
+        filteredEvents = v.reversed.toList();
         isLoading = false;
       });
 
@@ -223,6 +226,36 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
       setState(() {
         isLoading = false;
       });
+      // Optionally show an error; keeping consistent with existing UX
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to load events')));
+    }
+  }
+
+  Future<void> fetchAllEventsAfter() async {
+    try {
+      List<EventModal> v = [];
+
+      if (userModal.role == UserType.hcp) {
+        v = await _eventController.fetchHcpEvents();
+      } else if (userModal.role == UserType.pharmaRep) {
+        v = await _eventController.fetchEvents();
+      } else if (userModal.role == UserType.hco) {
+        v = await _eventController.fetchOfficeuserEvents(
+          userModal.pharmaCompany,
+        );
+      }
+
+      setState(() {
+        events = v.reversed.toList();
+        filteredEvents = v.reversed.toList();
+        isLoading = false;
+        numberOfRefresh++;
+      });
+
+      _filterEvents();
+    } catch (e) {
       // Optionally show an error; keeping consistent with existing UX
       ScaffoldMessenger.of(
         context,
@@ -379,7 +412,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
           height: MediaQuery.of(context).size.height,
           child: RefreshIndicator(
             onRefresh: () async {
-              await fetchAllEvents();
+              await fetchAllEventsAfter();
             },
             child: Builder(
               builder: (context) {
