@@ -54,6 +54,20 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
       isLoading = false;
     });
   }
+  Future<void> fetchUpcomingEventsAfter() async {
+    
+    // debugPrint("ouser : ${widget.user.hco![0][HCOModalKeys.hcoId]}");
+    final v = await _eventController.fetchEventsHCOWithStatus(
+      status: BasicCodesFromCrm.upcoming,
+      hcoId: widget.user.pharmaCompany,
+    );
+    setState(() {
+      events = v.reversed.take(3).toList();
+      // isLoading = false;
+    });
+    fetchHcoName();
+    await fetchPendingEvents();
+  }
 
   String hcoName = "";
 
@@ -83,7 +97,7 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
       color: Colors.blue,
       backgroundColor: Colors.white,
       displacement: 40,
-      onRefresh: fetchUpcomingEvents,
+      onRefresh: fetchUpcomingEventsAfter,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

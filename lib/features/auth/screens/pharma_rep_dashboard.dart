@@ -53,6 +53,35 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
       });
     }
   }
+Future<void> fetchUpcomingEventsAfter() async {
+    if (!mounted) return;
+   
+    try {
+      final v = await _eventController.fetchEventsWithStatus(
+        status: BasicCodesFromCrm.upcoming,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        events = v.reversed.take(3).toList();
+
+        upcomingEvents = v
+            .where(
+              (e) => e.eventStatus == int.parse(BasicCodesFromCrm.upcoming),
+            )
+            .take(3)
+            .toList();
+      });
+
+      // Also refresh pending events after upcoming are fetched
+      await fetchPendingEvents();
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   Future<void> fetchPendingEvents() async {
     final v = await _eventController.fetchEventsWithPending(
@@ -67,23 +96,6 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
           .toList();
     });
   }
-
-  Future<void> fetchDetails() async {
-    if (!mounted) return;
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      await fetchPendingEvents();
-      await fetchUpcomingEvents();
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -98,7 +110,7 @@ class _PharmaRepDashboardState extends State<PharmaRepDashboard> {
       color: Colors.blue, // loader color
       backgroundColor: Colors.white, // background of loader
       displacement: 40,
-      onRefresh: fetchUpcomingEvents,
+      onRefresh: fetchUpcomingEventsAfter,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: SizedBox(

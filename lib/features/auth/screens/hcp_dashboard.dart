@@ -35,6 +35,17 @@ class _HCPDashboardState extends State<HCPDashboard> {
     await fetchPENDINGEvents();
   }
 
+  Future<void> fetchUpcomingEventsAfter() async {
+    final v = await _eventController.fetchHcpEventsWithStatus(
+      status: BasicCodesFromCrm.upcoming,
+    );
+    setState(() {
+      events = v.take(3).toList();
+      debugPrint("Events ::: $events");
+    });
+    await fetchPENDINGEvents();
+  }
+
   Future<void> fetchPENDINGEvents() async {
     final v = await _eventController.fetchHcpEventsWithPending(
       status: BasicCodesFromCrm.pending,
@@ -58,7 +69,7 @@ class _HCPDashboardState extends State<HCPDashboard> {
       color: Colors.blue, // loader color
       backgroundColor: Colors.white, // background of loader
       displacement: 40,
-      onRefresh: fetchUpcomingEvents,
+      onRefresh: fetchUpcomingEventsAfter,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
