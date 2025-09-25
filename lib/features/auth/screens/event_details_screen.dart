@@ -574,1405 +574,1513 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       height: isLoading ? MediaQuery.of(context).size.height * 0.5 : null,
       alignment: isLoading ? Alignment.bottomCenter : null,
       width: double.infinity,
-      padding: EdgeInsets.all(15),
+      // padding: EdgeInsets.all(10),
+      padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
       child: isLoading
           ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(ifPastStatusText()),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if ((ifPastStatusText() == "IN-COMPLETE EVENT" ||
-                              ifPastStatusText() == "UPCOMING EVENT") &&
-                          userModal.role == UserType.hco) ...{
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+          : RefreshIndicator(
+              onRefresh: () async {
+                fetchEvent();
+              },
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.8,
+                child: ListView(
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(ifPastStatusText()),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            InkWell(
-                              onTap: _handleEditRequest,
-                              child: Icon(
-                                Icons.edit,
-                                color: !isEdit
-                                    ? AppColors.blue
-                                    : AppColors.border,
-                              ),
-                            ),
-                          ],
-                        ),
-                      },
-                      if (event.eventStatus.toString() ==
-                              BasicCodesFromCrm.upcoming &&
-                          !isCheckedIn &&
-                          userModal.role == UserType.pharmaRep) ...{
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            if (isPastEventDate(
-                              event.startDate ?? DateTime.now(),
-                            )) ...{
-                              InkWell(
-                                onTap: _handleEditRequest,
-                                child: Icon(
-                                  Icons.edit,
-                                  color: !isEdit
-                                      ? AppColors.blue
-                                      : AppColors.border,
-                                ),
+                            if ((ifPastStatusText() == "IN-COMPLETE EVENT" ||
+                                    ifPastStatusText() == "UPCOMING EVENT") &&
+                                userModal.role == UserType.hco) ...{
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  InkWell(
+                                    onTap: _handleEditRequest,
+                                    child: Icon(
+                                      Icons.edit,
+                                      color: !isEdit
+                                          ? AppColors.blue
+                                          : AppColors.border,
+                                    ),
+                                  ),
+                                ],
                               ),
                             },
-                            SizedBox(width: 10),
-                            if (isPastEventDate(
-                              event.startDate ?? DateTime.now(),
-                            ))
-                              InkWell(
-                                onTap: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (ctx) => ConfirmAlertDialog(
-                                      title: AppStrings.deleteEvent,
-                                      content: AppStrings.deleteEventContent,
-                                      onConfirm: () {
-                                        deleteEvent(event.eventId!);
-                                      },
+                            if (event.eventStatus.toString() ==
+                                    BasicCodesFromCrm.upcoming &&
+                                !isCheckedIn &&
+                                userModal.role == UserType.pharmaRep) ...{
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  if (isPastEventDate(
+                                    event.startDate ?? DateTime.now(),
+                                  )) ...{
+                                    InkWell(
+                                      onTap: _handleEditRequest,
+                                      child: Icon(
+                                        Icons.edit,
+                                        color: !isEdit
+                                            ? AppColors.blue
+                                            : AppColors.border,
+                                      ),
                                     ),
-                                  );
-                                },
-                                child: Icon(
-                                  Icons.delete,
-                                  color: AppColors.accentError,
+                                  },
+                                  SizedBox(width: 10),
+                                  if (isPastEventDate(
+                                    event.startDate ?? DateTime.now(),
+                                  ))
+                                    InkWell(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (ctx) => ConfirmAlertDialog(
+                                            title: AppStrings.deleteEvent,
+                                            content:
+                                                AppStrings.deleteEventContent,
+                                            onConfirm: () {
+                                              deleteEvent(event.eventId!);
+                                            },
+                                          ),
+                                        );
+                                      },
+                                      child: Icon(
+                                        Icons.delete,
+                                        color: AppColors.accentError,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            },
+                            SizedBox(height: 15),
+                            if (event.hco != null) ...{
+                              TextFormField(
+                                enabled: false,
+                                controller: EventTextControllers.hcoController,
+                                decoration: InputDecoration(
+                                  labelText: AppStrings.labelHCO,
                                 ),
                               ),
-                          ],
-                        ),
-                      },
-                      SizedBox(height: 15),
-                      if (event.hco != null) ...{
-                        TextFormField(
-                          enabled: false,
-                          controller: EventTextControllers.hcoController,
-                          decoration: InputDecoration(
-                            labelText: AppStrings.labelHCO,
-                          ),
-                        ),
 
-                        SizedBox(height: 10),
-                      },
-                      SizedBox(height: 16),
-                      TextFormField(
-                        enabled: false,
-                        controller: EventTextControllers.pharmaRepController,
-                        decoration: InputDecoration(
-                          labelText: AppStrings.pharmaRep,
-                        ),
-                        onChanged: (val) {
-                          setState(() {
-                            event = event.copyWith(userName: val);
-                          });
-                        },
-                      ),
+                              SizedBox(height: 10),
+                            },
+                            SizedBox(height: 16),
+                            TextFormField(
+                              enabled: false,
+                              controller:
+                                  EventTextControllers.pharmaRepController,
+                              decoration: InputDecoration(
+                                labelText: AppStrings.pharmaRep,
+                              ),
+                              onChanged: (val) {
+                                setState(() {
+                                  event = event.copyWith(userName: val);
+                                });
+                              },
+                            ),
 
-                      SizedBox(height: 16),
-                      TextFormField(
-                        enabled:
-                            ((userModal.role == UserType.pharmaRep ||
-                                    userModal.role == UserType.hco) ||
-                                userModal.role == UserType.hco) &&
-                            isEdit,
-                        controller: EventTextControllers.eventNameController,
-                        decoration: InputDecoration(
-                          labelText: AppStrings.labelEventName,
-                        ),
-                        onChanged: (val) {
-                          setState(() {
-                            event = event.copyWith(eventName: val);
-                          });
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      TextField(
-                        enabled:
-                            ((userModal.role == UserType.pharmaRep ||
-                                userModal.role == UserType.hco)) &&
-                            isEdit,
-                        autocorrect: true,
-                        minLines: AppSizes().eventDescriptionMinLines,
-                        controller:
-                            EventTextControllers.eventDescriptionController,
-                        decoration: InputDecoration(
-                          labelText: AppStrings.labelEventDescription,
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        enabled: isEdit,
-                        controller: EventTextControllers.startDateController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: event.isMultiDay
-                              ? AppStrings.labelEventStartDate
-                              : AppStrings.labelStartDate,
-                        ),
-                        onTap: () async {
-                          final DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2100),
-                          );
-                          if (pickedDate != null) {
-                            EventTextControllers.startDateController.text =
-                                "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                            setState(() {
-                              isCheckinPossible = !isPastDate(pickedDate);
-                              event = event.copyWith(startDate: pickedDate);
-                              debugPrint(
-                                "Start Date : ${event.startDate} event : ${json.encode(event)} ",
-                              );
-                            });
-                          }
-                        },
-                      ),
-                      event.isMultiDay ? Divider() : SizedBox(),
-                      SizedBox(height: 16),
-                      event.isMultiDay
-                          ? TextFormField(
+                            SizedBox(height: 16),
+                            TextFormField(
+                              enabled:
+                                  ((userModal.role == UserType.pharmaRep ||
+                                          userModal.role == UserType.hco) ||
+                                      userModal.role == UserType.hco) &&
+                                  isEdit,
+                              controller:
+                                  EventTextControllers.eventNameController,
+                              decoration: InputDecoration(
+                                labelText: AppStrings.labelEventName,
+                              ),
+                              onChanged: (val) {
+                                setState(() {
+                                  event = event.copyWith(eventName: val);
+                                });
+                              },
+                            ),
+                            SizedBox(height: 16),
+                            TextField(
+                              enabled:
+                                  ((userModal.role == UserType.pharmaRep ||
+                                      userModal.role == UserType.hco)) &&
+                                  isEdit,
+                              autocorrect: true,
+                              minLines: AppSizes().eventDescriptionMinLines,
+                              controller: EventTextControllers
+                                  .eventDescriptionController,
+                              decoration: InputDecoration(
+                                labelText: AppStrings.labelEventDescription,
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.multiline,
+                              maxLines: null,
+                            ),
+                            SizedBox(height: 16),
+                            TextFormField(
                               enabled: isEdit,
                               controller:
-                                  EventTextControllers.endDateController,
+                                  EventTextControllers.startDateController,
                               readOnly: true,
                               decoration: InputDecoration(
-                                labelText: AppStrings.labelEndDate,
+                                labelText: event.isMultiDay
+                                    ? AppStrings.labelEventStartDate
+                                    : AppStrings.labelStartDate,
                               ),
                               onTap: () async {
                                 final DateTime? pickedDate =
                                     await showDatePicker(
                                       context: context,
                                       initialDate: DateTime.now(),
-                                      firstDate: DateTime(2000),
+                                      firstDate: DateTime.now(),
                                       lastDate: DateTime(2100),
                                     );
                                 if (pickedDate != null) {
-                                  EventTextControllers.endDateController.text =
+                                  EventTextControllers
+                                          .startDateController
+                                          .text =
                                       "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
                                   setState(() {
-                                    event = event.copyWith(endDate: pickedDate);
+                                    isCheckinPossible = !isPastDate(pickedDate);
+                                    event = event.copyWith(
+                                      startDate: pickedDate,
+                                    );
+                                    debugPrint(
+                                      "Start Date : ${event.startDate} event : ${json.encode(event)} ",
+                                    );
                                   });
                                 }
                               },
-                            )
-                          : SizedBox(),
-
-                      SizedBox(height: 16),
-
-                      // Text(AppStrings.hcpInEvent),
-                      if (event.eventStatus ==
-                          int.parse(BasicCodesFromCrm.upcoming)) ...{
-                        if (isEdit)
-                          Container(
-                            width: double.infinity,
-                            height: 40,
-                            // padding: EdgeInsets.symmetric(horizontal: 10),
-                            decoration: BoxDecoration(
-                              color: AppColors.border,
-                              border: Border.all(color: AppColors.border),
-                              borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Row(
-                              children: [
-                                Flexible(
-                                  flex: 1,
-                                  child: InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        hcpInHcoSelected = true;
-                                      });
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: hcpInHcoSelected
-                                            ? AppColors.primary
-                                            : AppColors.transparent,
-                                        border: Border.all(
-                                          color: AppColors.border,
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      width: double.infinity,
-                                      height: 50,
-
-                                      child: Center(
-                                        child: Text(
-                                          "HCP in HCO",
-                                          style: TextStyle(
-                                            color: hcpInHcoSelected
-                                                ? AppColors.background
-                                                : AppColors.primary,
-                                          ),
-                                        ),
-                                      ),
+                            event.isMultiDay ? Divider() : SizedBox(),
+                            SizedBox(height: 16),
+                            event.isMultiDay
+                                ? TextFormField(
+                                    enabled: isEdit,
+                                    controller:
+                                        EventTextControllers.endDateController,
+                                    readOnly: true,
+                                    decoration: InputDecoration(
+                                      labelText: AppStrings.labelEndDate,
                                     ),
-                                  ),
-                                ),
-                                Flexible(
-                                  flex: 1,
-                                  child: InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        hcpInHcoSelected = false;
-                                      });
-                                    },
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        color: hcpInHcoSelected
-                                            ? AppColors.transparent
-                                            : AppColors.primary,
-                                        border: Border.all(
-                                          color: AppColors.border,
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          "HCP Practitioner",
-                                          style: TextStyle(
-                                            color: !hcpInHcoSelected
-                                                ? AppColors.background
-                                                : AppColors.primary,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: 10),
-                        SizedBox(height: 10),
-                        if (hcpInHcoSelected)
-                          DropdownSearch<Map<String, dynamic>>.multiSelection(
-                            popupProps: const PopupPropsMultiSelection.menu(
-                              showSearchBox:
-                                  true, // <- this brings the search field
-                              searchFieldProps: TextFieldProps(
-                                // customise it if you like
-                                decoration: InputDecoration(
-                                  labelText: 'Search HCP',
-                                  prefixIcon: Icon(Icons.search),
-                                ),
-                              ),
-                            ),
-                            enabled:
-                                ((userModal.role == UserType.pharmaRep ||
-                                    userModal.role == UserType.hco)) &&
-                                isEdit,
-                            items: (filter, loadProps) => hcpList
-                                .map<Map<String, dynamic>>(
-                                  (e) => {
-                                    "hcpId": (e.hcpId).toString(),
-                                    "hcpName": e.hcpName,
-                                  },
-                                )
-                                .toList(),
-                            selectedItems: (event.contactDtos ?? [])
-                                .map<Map<String, dynamic>>(
-                                  (e) => {
-                                    "hcpId": (e.id ?? "").toString(),
-                                    "hcpName": "${e.firstName} ${e.lastName}",
-                                  },
-                                )
-                                .toList(),
-                            itemAsString: (item) => item["hcpName"] ?? "",
-                            compareFn: (item, selectedItem) =>
-                                item["hcpId"] == selectedItem["hcpId"],
-                            decoratorProps: const DropDownDecoratorProps(
-                              decoration: InputDecoration(
-                                labelText: AppStrings.hcpInEvent,
-                              ),
-                            ),
-                            onChanged: (value) {
-                              var a = FocusScope.of(context).focusedChild;
-                              if (a != null) {
-                                a.unfocus();
-                              }
-                              int noOfselecteHcps = value.length;
-                              int noOfStaff = int.parse(
-                                EventTextControllers
-                                        .numberOfStaffController
-                                        .text
-                                        .isNotEmpty
-                                    ? EventTextControllers
-                                          .numberOfStaffController
-                                          .text
-                                    : '0',
-                              );
-
-                              setState(() {
-                                event = event.copyWith(
-                                  contactDtos: value
-                                      .map(
-                                        (e) => ContactDto(
-                                          id: e["hcpId"] ?? "0",
-                                          firstName: (e["hcpName"] ?? "")
-                                              .split(" ")
-                                              .first,
-                                          lastName:
-                                              (e["hcpName"] ?? "")
-                                                      .split(" ")
-                                                      .length >
-                                                  1
-                                              ? (e["hcpName"] ?? "")
-                                                    .split(" ")
-                                                    .sublist(1)
-                                                    .join(" ")
-                                              : "",
-                                          approval: BasicCodesFromCrm.pending,
-                                        ),
-                                      )
-                                      .toList(),
-                                );
-                              });
-                            },
-                            validator: (value) => value == null || value.isEmpty
-                                ? AppStrings.selectHCP
-                                : null,
-                          ),
-
-                        if (!hcpInHcoSelected)
-                          DropdownSearch<Map<String, dynamic>>.multiSelection(
-                            popupProps: const PopupPropsMultiSelection.menu(
-                              showSearchBox:
-                                  true, // <- this brings the search field
-                              searchFieldProps: TextFieldProps(
-                                // customise it if you like
-                                decoration: InputDecoration(
-                                  labelText: 'Search HCP Practitioners',
-                                  prefixIcon: Icon(Icons.search),
-                                ),
-                              ),
-                            ),
-                            enabled:
-                                ((userModal.role == UserType.pharmaRep ||
-                                    userModal.role == UserType.hco)) &&
-                                isEdit,
-                            items: (filter, loadProps) =>
-                                hcpPractioners.map<Map<String, dynamic>>((e) {
-                                  return {
-                                    "hcpId": (e.hcpId).toString(),
-                                    "hcpName": e.hcpName,
-                                  };
-                                }).toList(),
-                            selectedItems: (event.contactDtos ?? [])
-                                .map<Map<String, dynamic>>(
-                                  (e) => {
-                                    "hcpId": (e.id ?? "").toString(),
-                                    "hcpName": "${e.firstName} ${e.lastName}",
-                                  },
-                                )
-                                .toList(),
-                            itemAsString: (item) => item["hcpName"] ?? "",
-                            compareFn: (item, selectedItem) =>
-                                item["hcpId"] == selectedItem["hcpId"],
-                            decoratorProps: const DropDownDecoratorProps(
-                              decoration: InputDecoration(
-                                labelText: AppStrings.hcpInEvent,
-                              ),
-                            ),
-                            onChanged: (value) {
-                              var a = FocusScope.of(context).focusedChild;
-                              if (a != null) {
-                                a.unfocus();
-                              }
-                              int noOfselecteHcps = value.length;
-                              int noOfStaff = int.parse(
-                                EventTextControllers
-                                        .numberOfStaffController
-                                        .text
-                                        .isNotEmpty
-                                    ? EventTextControllers
-                                          .numberOfStaffController
-                                          .text
-                                    : '0',
-                              );
-
-                              /*else {
-                              setState(() {
-                                _selectedHCP = value;
-
-                                hcpContactDto = value.map((e) {
-                                  return {
-                                    HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
-                                    "": "",
-                                  };
-                                }).toList();
-                              });
-                            }
-                          },
-                         
-                              */
-
-                              setState(() {
-                                event = event.copyWith(
-                                  contactDtos: value
-                                      .map(
-                                        (e) => ContactDto(
-                                          id: e["hcpId"] ?? "0",
-                                          firstName: (e["hcpName"] ?? "")
-                                              .split(" ")
-                                              .first,
-                                          lastName:
-                                              (e["hcpName"] ?? "")
-                                                      .split(" ")
-                                                      .length >
-                                                  1
-                                              ? (e["hcpName"] ?? "")
-                                                    .split(" ")
-                                                    .sublist(1)
-                                                    .join(" ")
-                                              : "",
-                                          approval: BasicCodesFromCrm.pending,
-                                        ),
-                                      )
-                                      .toList(),
-                                );
-                              });
-                            },
-                            validator: (value) => value == null || value.isEmpty
-                                ? AppStrings.selectHCP
-                                : null,
-                          ),
-                      },
-
-                      SizedBox(height: 16),
-                      TextFormField(
-                        keyboardType: TextInputType.number,
-                        enabled:
-                            ((userModal.role == UserType.pharmaRep ||
-                                userModal.role == UserType.hco)) &&
-                            isEdit,
-                        controller:
-                            EventTextControllers.numberOfStaffController,
-                        decoration: InputDecoration(
-                          labelText: AppStrings.labelNumberOfStaff,
-                        ),
-                        onChanged: (val) {
-                          setState(() {
-                            event = event.copyWith(
-                              numberOfStaff: int.parse(val),
-                            );
-                          });
-                        },
-                      ),
-                      //
-                      SizedBox(height: 16),
-                      if (event.contactDtos != null) ...{
-                        if (event.contactDtos!.isNotEmpty) ...{
-                          Text(
-                            "Total HCP's in Event: ${event.contactDtos!.length}",
-                          ),
-                          const SizedBox(height: 10),
-                        },
-                        if (event.contactDtos!.isNotEmpty &&
-                            EventTextControllers
-                                .numberOfStaffController
-                                .text
-                                .isNotEmpty) ...{
-                          Text(
-                            "Total Participants in Event: ${event.contactDtos!.length + int.parse(EventTextControllers.numberOfStaffController.text)}",
-                          ),
-                          const SizedBox(height: 10),
-                        },
-                      },
-
-                      if (event.eventStatus ==
-                          int.parse(BasicCodesFromCrm.completed)) ...{
-                        SizedBox(height: 16),
-                        TextFormField(
-                          keyboardType: TextInputType.number,
-                          controller: EventTextControllers.amountController,
-                          decoration: InputDecoration(
-                            counter: SizedBox(),
-                            labelText: '${AppStrings.amount} *',
-                            prefixIcon: Icon(Icons.monetization_on_outlined),
-                          ),
-                          enabled: isCheckedIn,
-                          onChanged: (val) {
-                            setState(() {
-                              if (val.isNotEmpty) {
-                                event = event.copyWith(
-                                  amount: double.parse(val),
-                                );
-                                if (event.contactDtos != null &&
-                                    event.contactDtos!.isNotEmpty &&
-                                    EventTextControllers
-                                        .numberOfStaffController
-                                        .text
-                                        .isNotEmpty) {
-                                  int numberOfStaff =
-                                      int.tryParse(
-                                        EventTextControllers
-                                            .numberOfStaffController
-                                            .text,
-                                      ) ??
-                                      0;
-                                  int totalParticipants =
-                                      event.contactDtos!.length + numberOfStaff;
-                                  final amount = double.tryParse(val) ?? 0.0;
-                                  amountPerHcp = totalParticipants > 0
-                                      ? amount / totalParticipants
-                                      : 0.0;
-                                } else {
-                                  amountPerHcp = 0.0;
-                                }
-                              } else {
-                                amountPerHcp = 0.0;
-                              }
-                            });
-                          },
-                        ),
-                        if (event.amount != null) ...{
-                          SizedBox(height: 8),
-                          if (event.amount! > 0)
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "${AppStrings.amountPerHcp} ${amountPerHcp.toStringAsFixed(3)}",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                        },
-
-                        SizedBox(height: 16),
-                      },
-
-                      if (event.eventStatus ==
-                          int.parse(BasicCodesFromCrm.completed))
-                        Column(
-                          children: [
-                            Text("HCPs Attendees"),
-                            SizedBox(height: 10),
-                            for (var contact in event.contactDtos ?? []) ...{
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      "${contact.firstName} ${contact.lastName}",
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  //contact.approval.toString() == BasicCodesFromCrm.pending
-                                  if (contact.approval.toString() !=
-                                      BasicCodesFromCrm.pending)
-                                    InkWell(
-                                      onTap: () {
-                                        if (userModal.role == UserType.hco &&
-                                            contact.approval.toString() ==
-                                                BasicCodesFromCrm.rejected) {
-                                          eventParticipantApproval(
-                                            contact.id,
-                                            "",
+                                    onTap: () async {
+                                      final DateTime? pickedDate =
+                                          await showDatePicker(
+                                            context: context,
+                                            initialDate: DateTime.now(),
+                                            firstDate: DateTime(2000),
+                                            lastDate: DateTime(2100),
                                           );
-                                        }
-                                      },
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        padding: EdgeInsets.only(right: 24),
-                                        child: Text(
-                                          eventApprovalCodeToText(
-                                            contact.approval ?? '0',
-                                          ),
-                                          style: TextStyle(
-                                            color:
-                                                contact.approval.toString() ==
-                                                    BasicCodesFromCrm.approval
-                                                ? AppColors.successGreen
-                                                : contact.approval.toString() ==
-                                                      BasicCodesFromCrm.rejected
-                                                ? AppColors.accentError
-                                                : AppColors.pending,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  if (contact.approval.toString() ==
-                                          BasicCodesFromCrm.pending &&
-                                      (userModal.role == UserType.pharmaRep))
-                                    ElevatedButton(
-                                      style: ButtonStyle(
-                                        backgroundColor:
-                                            WidgetStateProperty.all(
-                                              AppColors.upcomingStatusBadge,
-                                            ),
-                                      ),
-                                      onPressed: () {
+                                      if (pickedDate != null) {
+                                        EventTextControllers
+                                                .endDateController
+                                                .text =
+                                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
                                         setState(() {
-                                          isLoading = true;
+                                          event = event.copyWith(
+                                            endDate: pickedDate,
+                                          );
                                         });
-                                        NotificationsController()
-                                            .sendApprovalNotification(
-                                              contact.id ?? '',
-                                              event.eventId ?? '',
-                                            )
-                                            .then((result) {
-                                              setState(() {
-                                                isLoading = false;
-                                              });
-                                              showGeneralDialog(
-                                                context: context,
-                                                barrierDismissible: false,
-                                                barrierLabel:
-                                                    'Submission Status',
-                                                barrierColor: Colors.black54,
-                                                transitionDuration:
-                                                    const Duration(
-                                                      milliseconds: 240,
-                                                    ),
-                                                pageBuilder: (_, __, ___) =>
-                                                    const SizedBox.shrink(),
-                                                transitionBuilder: (ctx, anim, _, __) {
-                                                  final curved =
-                                                      CurvedAnimation(
-                                                        parent: anim,
-                                                        curve:
-                                                            Curves.easeOutBack,
-                                                      );
-                                                  return Transform.scale(
-                                                    scale:
-                                                        0.95 +
-                                                        0.05 * curved.value,
-                                                    child: Opacity(
-                                                      opacity: anim.value,
-                                                      child: ApprovalDialog(
-                                                        contactDto: contact,
-                                                        event: event,
-                                                        secondaryLabel:
-                                                            result.body,
-                                                        success:
-                                                            result.statusCode ==
-                                                            AppApiStatusCodes
-                                                                .success, // adjust to your return type
-                                                        onPrimary: () =>
-                                                            Navigator.of(
-                                                              ctx,
-                                                            ).pop(),
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                              );
+                                      }
+                                    },
+                                  )
+                                : SizedBox(),
+
+                            SizedBox(height: 16),
+
+                            // Text(AppStrings.hcpInEvent),
+                            if (event.eventStatus ==
+                                int.parse(BasicCodesFromCrm.upcoming)) ...{
+                              if (isEdit)
+                                Container(
+                                  width: double.infinity,
+                                  height: 40,
+                                  // padding: EdgeInsets.symmetric(horizontal: 10),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.border,
+                                    border: Border.all(color: AppColors.border),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Flexible(
+                                        flex: 1,
+                                        child: InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              hcpInHcoSelected = true;
                                             });
-                                      },
-                                      child: Text(
-                                        AppStrings.sendForApproval,
-                                        style: TextStyle(
-                                          color: AppColors
-                                              .upcomingStatusBadgeTextColor,
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: hcpInHcoSelected
+                                                  ? AppColors.primary
+                                                  : AppColors.transparent,
+                                              border: Border.all(
+                                                color: AppColors.border,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            width: double.infinity,
+                                            height: 50,
+
+                                            child: Center(
+                                              child: Text(
+                                                "HCP in HCO",
+                                                style: TextStyle(
+                                                  color: hcpInHcoSelected
+                                                      ? AppColors.background
+                                                      : AppColors.primary,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  if (contact.approval.toString() ==
-                                          BasicCodesFromCrm.pending &&
-                                      (userModal.role == UserType.hcp ||
-                                          userModal.role == UserType.hco))
-                                    Column(
-                                      children: [
-                                        ElevatedButton(
-                                          style: ButtonStyle(
-                                            padding: WidgetStateProperty.all(
-                                              EdgeInsets.zero,
+                                      Flexible(
+                                        flex: 1,
+                                        child: InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              hcpInHcoSelected = false;
+                                            });
+                                          },
+                                          child: Container(
+                                            width: double.infinity,
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                              color: hcpInHcoSelected
+                                                  ? AppColors.transparent
+                                                  : AppColors.primary,
+                                              border: Border.all(
+                                                color: AppColors.border,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
                                             ),
-                                            fixedSize: WidgetStateProperty.all(
-                                              Size(70, 40),
-                                            ),
-                                            backgroundColor:
-                                                (contact.id ==
-                                                        userModal.kiosk ||
-                                                    userModal.role ==
-                                                        UserType.hco)
-                                                ? WidgetStateProperty.all(
-                                                    AppColors.successGreen,
-                                                  )
-                                                : WidgetStateProperty.all(
-                                                    AppColors.border,
-                                                  ),
-                                          ),
-                                          onPressed:
-                                              (contact.id == userModal.kiosk ||
-                                                  userModal.role ==
-                                                      UserType.hco)
-                                              ? () {
-                                                  eventParticipantApproval(
-                                                    contact.id,
-                                                    "",
-                                                  );
-                                                }
-                                              : null,
-                                          child: Text(
-                                            "Approve",
-                                            style: TextStyle(
-                                              color: AppColors.background,
+                                            child: Center(
+                                              child: Text(
+                                                "HCP Practitioner",
+                                                style: TextStyle(
+                                                  color: !hcpInHcoSelected
+                                                      ? AppColors.background
+                                                      : AppColors.primary,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              const SizedBox(height: 10),
+                              SizedBox(height: 10),
+                              if (hcpInHcoSelected)
+                                DropdownSearch<
+                                  Map<String, dynamic>
+                                >.multiSelection(
+                                  popupProps: const PopupPropsMultiSelection.menu(
+                                    showSearchBox:
+                                        true, // <- this brings the search field
+                                    searchFieldProps: TextFieldProps(
+                                      // customise it if you like
+                                      decoration: InputDecoration(
+                                        labelText: 'Search HCP',
+                                        prefixIcon: Icon(Icons.search),
+                                      ),
+                                    ),
+                                  ),
+                                  enabled:
+                                      ((userModal.role == UserType.pharmaRep ||
+                                          userModal.role == UserType.hco)) &&
+                                      isEdit,
+                                  items: (filter, loadProps) => hcpList
+                                      .map<Map<String, dynamic>>(
+                                        (e) => {
+                                          "hcpId": (e.hcpId).toString(),
+                                          "hcpName": e.hcpName,
+                                        },
+                                      )
+                                      .toList(),
+                                  selectedItems: (event.contactDtos ?? [])
+                                      .map<Map<String, dynamic>>(
+                                        (e) => {
+                                          "hcpId": (e.id ?? "").toString(),
+                                          "hcpName":
+                                              "${e.firstName} ${e.lastName}",
+                                        },
+                                      )
+                                      .toList(),
+                                  itemAsString: (item) => item["hcpName"] ?? "",
+                                  compareFn: (item, selectedItem) =>
+                                      item["hcpId"] == selectedItem["hcpId"],
+                                  decoratorProps: const DropDownDecoratorProps(
+                                    decoration: InputDecoration(
+                                      labelText: AppStrings.hcpInEvent,
+                                    ),
+                                  ),
+                                  onChanged: (value) {
+                                    var a = FocusScope.of(context).focusedChild;
+                                    if (a != null) {
+                                      a.unfocus();
+                                    }
+                                    int noOfselecteHcps = value.length;
+                                    int noOfStaff = int.parse(
+                                      EventTextControllers
+                                              .numberOfStaffController
+                                              .text
+                                              .isNotEmpty
+                                          ? EventTextControllers
+                                                .numberOfStaffController
+                                                .text
+                                          : '0',
+                                    );
 
-                                        ElevatedButton(
-                                          style: ButtonStyle(
-                                            padding: WidgetStateProperty.all(
-                                              EdgeInsets.zero,
-                                            ),
-                                            fixedSize: WidgetStateProperty.all(
-                                              Size(70, 40),
-                                            ),
-                                            backgroundColor:
-                                                (contact.id ==
-                                                        userModal.kiosk ||
-                                                    userModal.role ==
-                                                        UserType.hco)
-                                                ? WidgetStateProperty.all(
-                                                    AppColors.rejectedRed,
-                                                  )
-                                                : WidgetStateProperty.all(
-                                                    AppColors.border,
-                                                  ),
+                                    setState(() {
+                                      event = event.copyWith(
+                                        contactDtos: value
+                                            .map(
+                                              (e) => ContactDto(
+                                                id: e["hcpId"] ?? "0",
+                                                firstName: (e["hcpName"] ?? "")
+                                                    .split(" ")
+                                                    .first,
+                                                lastName:
+                                                    (e["hcpName"] ?? "")
+                                                            .split(" ")
+                                                            .length >
+                                                        1
+                                                    ? (e["hcpName"] ?? "")
+                                                          .split(" ")
+                                                          .sublist(1)
+                                                          .join(" ")
+                                                    : "",
+                                                approval:
+                                                    BasicCodesFromCrm.pending,
+                                              ),
+                                            )
+                                            .toList(),
+                                      );
+                                    });
+                                  },
+                                  validator: (value) =>
+                                      value == null || value.isEmpty
+                                      ? AppStrings.selectHCP
+                                      : null,
+                                ),
+
+                              if (!hcpInHcoSelected)
+                                DropdownSearch<
+                                  Map<String, dynamic>
+                                >.multiSelection(
+                                  popupProps: const PopupPropsMultiSelection.menu(
+                                    showSearchBox:
+                                        true, // <- this brings the search field
+                                    searchFieldProps: TextFieldProps(
+                                      // customise it if you like
+                                      decoration: InputDecoration(
+                                        labelText: 'Search HCP Practitioners',
+                                        prefixIcon: Icon(Icons.search),
+                                      ),
+                                    ),
+                                  ),
+                                  enabled:
+                                      ((userModal.role == UserType.pharmaRep ||
+                                          userModal.role == UserType.hco)) &&
+                                      isEdit,
+                                  items: (filter, loadProps) => hcpPractioners
+                                      .map<Map<String, dynamic>>((e) {
+                                        return {
+                                          "hcpId": (e.hcpId).toString(),
+                                          "hcpName": e.hcpName,
+                                        };
+                                      })
+                                      .toList(),
+                                  selectedItems: (event.contactDtos ?? [])
+                                      .map<Map<String, dynamic>>(
+                                        (e) => {
+                                          "hcpId": (e.id ?? "").toString(),
+                                          "hcpName":
+                                              "${e.firstName} ${e.lastName}",
+                                        },
+                                      )
+                                      .toList(),
+                                  itemAsString: (item) => item["hcpName"] ?? "",
+                                  compareFn: (item, selectedItem) =>
+                                      item["hcpId"] == selectedItem["hcpId"],
+                                  decoratorProps: const DropDownDecoratorProps(
+                                    decoration: InputDecoration(
+                                      labelText: AppStrings.hcpInEvent,
+                                    ),
+                                  ),
+                                  onChanged: (value) {
+                                    var a = FocusScope.of(context).focusedChild;
+                                    if (a != null) {
+                                      a.unfocus();
+                                    }
+                                    int noOfselecteHcps = value.length;
+                                    int noOfStaff = int.parse(
+                                      EventTextControllers
+                                              .numberOfStaffController
+                                              .text
+                                              .isNotEmpty
+                                          ? EventTextControllers
+                                                .numberOfStaffController
+                                                .text
+                                          : '0',
+                                    );
+
+                                    /*else {
+                                  setState(() {
+                                    _selectedHCP = value;
+                  
+                                    hcpContactDto = value.map((e) {
+                                      return {
+                                        HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
+                                        "": "",
+                                      };
+                                    }).toList();
+                                  });
+                                }
+                              },
+                             
+                                  */
+
+                                    setState(() {
+                                      event = event.copyWith(
+                                        contactDtos: value
+                                            .map(
+                                              (e) => ContactDto(
+                                                id: e["hcpId"] ?? "0",
+                                                firstName: (e["hcpName"] ?? "")
+                                                    .split(" ")
+                                                    .first,
+                                                lastName:
+                                                    (e["hcpName"] ?? "")
+                                                            .split(" ")
+                                                            .length >
+                                                        1
+                                                    ? (e["hcpName"] ?? "")
+                                                          .split(" ")
+                                                          .sublist(1)
+                                                          .join(" ")
+                                                    : "",
+                                                approval:
+                                                    BasicCodesFromCrm.pending,
+                                              ),
+                                            )
+                                            .toList(),
+                                      );
+                                    });
+                                  },
+                                  validator: (value) =>
+                                      value == null || value.isEmpty
+                                      ? AppStrings.selectHCP
+                                      : null,
+                                ),
+                            },
+
+                            SizedBox(height: 16),
+                            TextFormField(
+                              keyboardType: TextInputType.number,
+                              enabled:
+                                  ((userModal.role == UserType.pharmaRep ||
+                                      userModal.role == UserType.hco)) &&
+                                  isEdit,
+                              controller:
+                                  EventTextControllers.numberOfStaffController,
+                              decoration: InputDecoration(
+                                labelText: AppStrings.labelNumberOfStaff,
+                              ),
+                              onChanged: (val) {
+                                setState(() {
+                                  event = event.copyWith(
+                                    numberOfStaff: int.parse(val),
+                                  );
+                                });
+                              },
+                            ),
+                            //
+                            SizedBox(height: 16),
+                            if (event.contactDtos != null) ...{
+                              if (event.contactDtos!.isNotEmpty) ...{
+                                Text(
+                                  "Total HCP's in Event: ${event.contactDtos!.length}",
+                                ),
+                                const SizedBox(height: 10),
+                              },
+                              if (event.contactDtos!.isNotEmpty &&
+                                  EventTextControllers
+                                      .numberOfStaffController
+                                      .text
+                                      .isNotEmpty) ...{
+                                Text(
+                                  "Total Participants in Event: ${event.contactDtos!.length + int.parse(EventTextControllers.numberOfStaffController.text)}",
+                                ),
+                                const SizedBox(height: 10),
+                              },
+                            },
+
+                            if (event.eventStatus ==
+                                int.parse(BasicCodesFromCrm.completed)) ...{
+                              SizedBox(height: 16),
+                              TextFormField(
+                                keyboardType: TextInputType.number,
+                                controller:
+                                    EventTextControllers.amountController,
+                                decoration: InputDecoration(
+                                  counter: SizedBox(),
+                                  labelText: '${AppStrings.amount} *',
+                                  prefixIcon: Icon(
+                                    Icons.monetization_on_outlined,
+                                  ),
+                                ),
+                                enabled: isCheckedIn,
+                                onChanged: (val) {
+                                  setState(() {
+                                    if (val.isNotEmpty) {
+                                      event = event.copyWith(
+                                        amount: double.parse(val),
+                                      );
+                                      if (event.contactDtos != null &&
+                                          event.contactDtos!.isNotEmpty &&
+                                          EventTextControllers
+                                              .numberOfStaffController
+                                              .text
+                                              .isNotEmpty) {
+                                        int numberOfStaff =
+                                            int.tryParse(
+                                              EventTextControllers
+                                                  .numberOfStaffController
+                                                  .text,
+                                            ) ??
+                                            0;
+                                        int totalParticipants =
+                                            event.contactDtos!.length +
+                                            numberOfStaff;
+                                        final amount =
+                                            double.tryParse(val) ?? 0.0;
+                                        amountPerHcp = totalParticipants > 0
+                                            ? amount / totalParticipants
+                                            : 0.0;
+                                      } else {
+                                        amountPerHcp = 0.0;
+                                      }
+                                    } else {
+                                      amountPerHcp = 0.0;
+                                    }
+                                  });
+                                },
+                              ),
+                              if (event.amount != null) ...{
+                                SizedBox(height: 8),
+                                if (event.amount! > 0)
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "${AppStrings.amountPerHcp} ${amountPerHcp.toStringAsFixed(3)}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                              },
+
+                              SizedBox(height: 16),
+                            },
+
+                            if (event.eventStatus ==
+                                int.parse(BasicCodesFromCrm.completed))
+                              Column(
+                                children: [
+                                  Text("HCPs Attendees"),
+                                  SizedBox(height: 10),
+                                  for (var contact
+                                      in event.contactDtos ?? []) ...{
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            "${contact.firstName} ${contact.lastName}",
                                           ),
-                                          onPressed:
-                                              (contact.id == userModal.kiosk ||
-                                                  userModal.role ==
-                                                      UserType.hco)
-                                              ? () {
-                                                  //murali_clear_rejection_remarks
-                                                  ReceiptRejectionTextController
-                                                      .remarksController
-                                                      .clear();
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (BuildContext context) {
-                                                      return StatefulBuilder(
-                                                        builder: (context, setState) {
-                                                          return AlertDialog(
-                                                            title: Text(
-                                                              AppStrings
-                                                                  .confirmRejection,
+                                        ),
+                                        SizedBox(width: 10),
+                                        //contact.approval.toString() == BasicCodesFromCrm.pending
+                                        if (contact.approval.toString() !=
+                                            BasicCodesFromCrm.pending)
+                                          InkWell(
+                                            onTap: () {
+                                              if (userModal.role ==
+                                                      UserType.hco &&
+                                                  contact.approval.toString() ==
+                                                      BasicCodesFromCrm
+                                                          .rejected) {
+                                                eventParticipantApproval(
+                                                  contact.id,
+                                                  "",
+                                                );
+                                              }
+                                            },
+                                            child: Container(
+                                              alignment: Alignment.center,
+                                              padding: EdgeInsets.only(
+                                                right: 24,
+                                              ),
+                                              child: Text(
+                                                eventApprovalCodeToText(
+                                                  contact.approval ?? '0',
+                                                ),
+                                                style: TextStyle(
+                                                  color:
+                                                      contact.approval
+                                                              .toString() ==
+                                                          BasicCodesFromCrm
+                                                              .approval
+                                                      ? AppColors.successGreen
+                                                      : contact.approval
+                                                                .toString() ==
+                                                            BasicCodesFromCrm
+                                                                .rejected
+                                                      ? AppColors.accentError
+                                                      : AppColors.pending,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        if (contact.approval.toString() ==
+                                                BasicCodesFromCrm.pending &&
+                                            (userModal.role ==
+                                                UserType.pharmaRep))
+                                          ElevatedButton(
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  WidgetStateProperty.all(
+                                                    AppColors
+                                                        .upcomingStatusBadge,
+                                                  ),
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                isLoading = true;
+                                              });
+                                              NotificationsController()
+                                                  .sendApprovalNotification(
+                                                    contact.id ?? '',
+                                                    event.eventId ?? '',
+                                                  )
+                                                  .then((result) {
+                                                    setState(() {
+                                                      isLoading = false;
+                                                    });
+                                                    showGeneralDialog(
+                                                      context: context,
+                                                      barrierDismissible: false,
+                                                      barrierLabel:
+                                                          'Submission Status',
+                                                      barrierColor:
+                                                          Colors.black54,
+                                                      transitionDuration:
+                                                          const Duration(
+                                                            milliseconds: 240,
+                                                          ),
+                                                      pageBuilder: (_, __, ___) =>
+                                                          const SizedBox.shrink(),
+                                                      transitionBuilder: (ctx, anim, _, __) {
+                                                        final curved =
+                                                            CurvedAnimation(
+                                                              parent: anim,
+                                                              curve: Curves
+                                                                  .easeOutBack,
+                                                            );
+                                                        return Transform.scale(
+                                                          scale:
+                                                              0.95 +
+                                                              0.05 *
+                                                                  curved.value,
+                                                          child: Opacity(
+                                                            opacity: anim.value,
+                                                            child: ApprovalDialog(
+                                                              contactDto:
+                                                                  contact,
+                                                              event: event,
+                                                              secondaryLabel:
+                                                                  result.body,
+                                                              success:
+                                                                  result
+                                                                      .statusCode ==
+                                                                  AppApiStatusCodes
+                                                                      .success, // adjust to your return type
+                                                              onPrimary: () =>
+                                                                  Navigator.of(
+                                                                    ctx,
+                                                                  ).pop(),
                                                             ),
-                                                            content: SizedBox(
-                                                              height: 220,
-                                                              child: Column(
-                                                                children: [
-                                                                  Text(
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  });
+                                            },
+                                            child: Text(
+                                              AppStrings.sendForApproval,
+                                              style: TextStyle(
+                                                color: AppColors
+                                                    .upcomingStatusBadgeTextColor,
+                                              ),
+                                            ),
+                                          ),
+                                        if (contact.approval.toString() ==
+                                                BasicCodesFromCrm.pending &&
+                                            (userModal.role == UserType.hcp ||
+                                                userModal.role == UserType.hco))
+                                          Column(
+                                            children: [
+                                              ElevatedButton(
+                                                style: ButtonStyle(
+                                                  padding:
+                                                      WidgetStateProperty.all(
+                                                        EdgeInsets.zero,
+                                                      ),
+                                                  fixedSize:
+                                                      WidgetStateProperty.all(
+                                                        Size(70, 40),
+                                                      ),
+                                                  backgroundColor:
+                                                      (contact.id ==
+                                                              userModal.kiosk ||
+                                                          userModal.role ==
+                                                              UserType.hco)
+                                                      ? WidgetStateProperty.all(
+                                                          AppColors
+                                                              .successGreen,
+                                                        )
+                                                      : WidgetStateProperty.all(
+                                                          AppColors.border,
+                                                        ),
+                                                ),
+                                                onPressed:
+                                                    (contact.id ==
+                                                            userModal.kiosk ||
+                                                        userModal.role ==
+                                                            UserType.hco)
+                                                    ? () {
+                                                        eventParticipantApproval(
+                                                          contact.id,
+                                                          "",
+                                                        );
+                                                      }
+                                                    : null,
+                                                child: Text(
+                                                  "Approve",
+                                                  style: TextStyle(
+                                                    color: AppColors.background,
+                                                  ),
+                                                ),
+                                              ),
+
+                                              ElevatedButton(
+                                                style: ButtonStyle(
+                                                  padding:
+                                                      WidgetStateProperty.all(
+                                                        EdgeInsets.zero,
+                                                      ),
+                                                  fixedSize:
+                                                      WidgetStateProperty.all(
+                                                        Size(70, 40),
+                                                      ),
+                                                  backgroundColor:
+                                                      (contact.id ==
+                                                              userModal.kiosk ||
+                                                          userModal.role ==
+                                                              UserType.hco)
+                                                      ? WidgetStateProperty.all(
+                                                          AppColors.rejectedRed,
+                                                        )
+                                                      : WidgetStateProperty.all(
+                                                          AppColors.border,
+                                                        ),
+                                                ),
+                                                onPressed:
+                                                    (contact.id ==
+                                                            userModal.kiosk ||
+                                                        userModal.role ==
+                                                            UserType.hco)
+                                                    ? () {
+                                                        //murali_clear_rejection_remarks
+                                                        ReceiptRejectionTextController
+                                                            .remarksController
+                                                            .clear();
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (BuildContext context) {
+                                                            return StatefulBuilder(
+                                                              builder: (context, setState) {
+                                                                return AlertDialog(
+                                                                  title: Text(
                                                                     AppStrings
-                                                                        .rejectMessage,
+                                                                        .confirmRejection,
                                                                   ),
-                                                                  SizedBox(
-                                                                    height: 20,
+                                                                  content: SizedBox(
+                                                                    height: 220,
+                                                                    child: Column(
+                                                                      children: [
+                                                                        Text(
+                                                                          AppStrings
+                                                                              .rejectMessage,
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              20,
+                                                                        ),
+                                                                        TextField(
+                                                                          controller:
+                                                                              ReceiptRejectionTextController.remarksController,
+                                                                          decoration: InputDecoration(
+                                                                            // labelText:
+                                                                            //     'Remarks',
+                                                                            label: AppTextThemes.labelWithImportant(
+                                                                              AppStrings.remarks,
+                                                                            ),
+                                                                          ),
+                                                                          onChanged:
+                                                                              (
+                                                                                value,
+                                                                              ) => setState(
+                                                                                () {},
+                                                                              ),
+                                                                          maxLines:
+                                                                              3,
+                                                                        ),
+                                                                      ],
+                                                                    ),
                                                                   ),
-                                                                  TextField(
-                                                                    controller:
-                                                                        ReceiptRejectionTextController
-                                                                            .remarksController,
-                                                                    decoration: InputDecoration(
-                                                                      // labelText:
-                                                                      //     'Remarks',
-                                                                      label: AppTextThemes.labelWithImportant(
+                                                                  actions: <Widget>[
+                                                                    TextButton(
+                                                                      child: Text(
+                                                                        'Cancel',
+                                                                      ),
+                                                                      onPressed: () {
+                                                                        Navigator.of(
+                                                                          context,
+                                                                        ).pop();
+                                                                      },
+                                                                    ),
+                                                                    TextButton(
+                                                                      onPressed:
+                                                                          ReceiptRejectionTextController
+                                                                              .remarksController
+                                                                              .text
+                                                                              .isNotEmpty
+                                                                          ? () {
+                                                                              //murali rejection confirmation issue fix
+                                                                              final dialogContext = context;
+                                                                              Navigator.of(
+                                                                                dialogContext,
+                                                                                rootNavigator: true,
+                                                                              ).pop();
+                                                                              _eventController
+                                                                                  .reject(
+                                                                                    event.eventId,
+                                                                                    userModal.kiosk,
+                                                                                    ReceiptRejectionTextController.remarksController.text,
+                                                                                  )
+                                                                                  .then(
+                                                                                    (
+                                                                                      v,
+                                                                                    ) {
+                                                                                      final navProvider =
+                                                                                          Provider.of<
+                                                                                            TopNavProvider
+                                                                                          >(
+                                                                                            this.context,
+                                                                                            listen: false,
+                                                                                          );
+                                                                                      final didGoBack = navProvider.goBack();
+                                                                                      if (!didGoBack) {
+                                                                                        //murali_rejection_close_back
+                                                                                        Navigator.maybePop(
+                                                                                          this.context,
+                                                                                        );
+                                                                                      }
+                                                                                    },
+                                                                                  );
+                                                                              // Navigator.of(context).pop();
+                                                                            }
+                                                                          : null,
+                                                                      child: Text(
                                                                         AppStrings
-                                                                            .remarks,
+                                                                            .reject,
                                                                       ),
                                                                     ),
-                                                                    onChanged:
-                                                                        (
-                                                                          value,
-                                                                        ) => setState(
-                                                                          () {},
-                                                                        ),
-                                                                    maxLines: 3,
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            actions: <Widget>[
-                                                              TextButton(
-                                                                child: Text(
-                                                                  'Cancel',
-                                                                ),
-                                                                onPressed: () {
-                                                                  Navigator.of(
-                                                                    context,
-                                                                  ).pop();
-                                                                },
-                                                              ),
-                                                              TextButton(
-                                                                onPressed:
-                                                                    ReceiptRejectionTextController
-                                                                        .remarksController
-                                                                        .text
-                                                                        .isNotEmpty
-                                                                    ? () {
-                                                                        //murali rejection confirmation issue fix
-                                                                        final dialogContext =
-                                                                            context;
-                                                                        Navigator.of(
-                                                                          dialogContext,
-                                                                          rootNavigator:
-                                                                              true,
-                                                                        ).pop();
-                                                                        _eventController
-                                                                            .reject(
-                                                                              event.eventId,
-                                                                              userModal.kiosk,
-                                                                              ReceiptRejectionTextController.remarksController.text,
-                                                                            )
-                                                                            .then((
-                                                                              v,
-                                                                            ) {
-                                                                              final navProvider =
-                                                                                  Provider.of<
-                                                                                    TopNavProvider
-                                                                                  >(
-                                                                                    this.context,
-                                                                                    listen: false,
-                                                                                  );
-                                                                              final didGoBack = navProvider.goBack();
-                                                                              if (!didGoBack) {
-                                                                                //murali_rejection_close_back
-                                                                                Navigator.maybePop(
-                                                                                  this.context,
-                                                                                );
-                                                                              }
-                                                                            });
-                                                                        // Navigator.of(context).pop();
-                                                                      }
-                                                                    : null,
-                                                                child: Text(
-                                                                  AppStrings
-                                                                      .reject,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    },
-                                                  );
-                                                }
-                                              : null,
-                                          child: Text(
-                                            AppStrings.reject,
-                                            style: TextStyle(
-                                              color: AppColors.background,
-                                            ),
+                                                                  ],
+                                                                );
+                                                              },
+                                                            );
+                                                          },
+                                                        );
+                                                      }
+                                                    : null,
+                                                child: Text(
+                                                  AppStrings.reject,
+                                                  style: TextStyle(
+                                                    color: AppColors.background,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ),
+
+                                        SizedBox(width: 8),
                                       ],
                                     ),
 
-                                  SizedBox(width: 8),
+                                    SizedBox(height: 16),
+                                  },
                                 ],
                               ),
+                            if (event.contactDtos!.length > 3)
+                              if (event.eventApproval !=
+                                      int.parse(BasicCodesFromCrm.approval) &&
+                                  event.eventStatus ==
+                                      int.parse(BasicCodesFromCrm.completed) &&
+                                  (userModal.role == UserType.hco)) ...{
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        isLoading = true;
+                                      });
+                                      for (var contact
+                                          in event.contactDtos ?? []) {
+                                        if (contact.approval.toString() ==
+                                            BasicCodesFromCrm.pending) {
+                                          eventParticipantApproval(
+                                            contact.id,
+                                            "Approved By Office User ${userModal.firstName} ${userModal.lastName} working for ${EventTextControllers.hcoController.text} ",
+                                          );
+                                        }
+                                      }
+                                      setState(() {
+                                        isLoading = false;
+                                      });
+                                      Provider.of<TopNavProvider>(
+                                        context,
+                                        listen: false,
+                                      ).goBack();
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all(
+                                        AppColors.successGreen,
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      "Approve All",
+                                      style: TextStyle(
+                                        color: AppColors.background,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      //murali_clear_rejection_remarks
+                                      ReceiptRejectionTextController
+                                          .remarksController
+                                          .clear();
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return StatefulBuilder(
+                                            builder: (context, setState) {
+                                              return AlertDialog(
+                                                title: Text(
+                                                  AppStrings.confirmRejection,
+                                                ),
+                                                content: SizedBox(
+                                                  height: 220,
+                                                  child: Column(
+                                                    children: [
+                                                      Text(
+                                                        AppStrings
+                                                            .rejectMessage,
+                                                      ),
+                                                      SizedBox(height: 20),
+                                                      TextField(
+                                                        controller:
+                                                            ReceiptRejectionTextController
+                                                                .remarksController,
+                                                        decoration: InputDecoration(
+                                                          label:
+                                                              AppTextThemes.labelWithImportant(
+                                                                AppStrings
+                                                                    .remarks,
+                                                              ),
+                                                        ),
+                                                        onChanged: (value) =>
+                                                            setState(() {}),
+                                                        maxLines: 3,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    child: Text('Cancel'),
+                                                    onPressed: () {
+                                                      Navigator.of(
+                                                        context,
+                                                      ).pop();
+                                                    },
+                                                  ),
+                                                  TextButton(
+                                                    onPressed:
+                                                        ReceiptRejectionTextController
+                                                            .remarksController
+                                                            .text
+                                                            .isNotEmpty
+                                                        ? () {
+                                                            //murali rejection confirmation issue fix
+                                                            final dialogContext =
+                                                                context;
+                                                            Navigator.of(
+                                                              dialogContext,
+                                                              rootNavigator:
+                                                                  true,
+                                                            ).pop();
+                                                            _eventController
+                                                                .reject(
+                                                                  event.eventId,
+                                                                  userModal
+                                                                      .kiosk,
+                                                                  ReceiptRejectionTextController
+                                                                      .remarksController
+                                                                      .text,
+                                                                )
+                                                                .then((v) {
+                                                                  final navProvider =
+                                                                      Provider.of<
+                                                                        TopNavProvider
+                                                                      >(
+                                                                        this.context,
+                                                                        listen:
+                                                                            false,
+                                                                      );
+                                                                  navProvider
+                                                                      .goBack();
+                                                                });
+                                                          }
+                                                        : null,
+                                                    child: Text('Reject'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all(
+                                        AppColors.rejectedRed,
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      "Reject All",
+                                      style: TextStyle(
+                                        color: AppColors.background,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              },
+                            SizedBox(height: 16),
+                            if (isCheckedIn && _checkInDateTime != null)
+                              Container(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  'Checked in at: '
+                                  '${_checkInDateTime!.day}/${_checkInDateTime!.month}/${_checkInDateTime!.year} '
+                                  '${_checkInDateTime!.hour}:${_checkInDateTime!.minute.toString().padLeft(2, '0')}',
+                                  style: TextStyle(
+                                    color: AppColors.accentSuccess,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            if (isCheckedIn) ...{
+                              SizedBox(height: 16),
+                              TextFormField(
+                                keyboardType: TextInputType.number,
+                                controller:
+                                    EventTextControllers.amountController,
+                                maxLength: 5,
+                                decoration: InputDecoration(
+                                  counter: SizedBox(),
+                                  labelText: '${AppStrings.amount} *',
+                                  prefixIcon: Icon(
+                                    Icons.monetization_on_outlined,
+                                  ),
+                                ),
+                                enabled: isCheckedIn,
+                                onChanged: (val) {
+                                  setState(() {
+                                    if (val.isNotEmpty) {
+                                      event = event.copyWith(
+                                        amount: double.parse(val),
+                                      );
+                                      if (event.contactDtos != null &&
+                                          event.contactDtos!.isNotEmpty &&
+                                          EventTextControllers
+                                              .numberOfStaffController
+                                              .text
+                                              .isNotEmpty) {
+                                        int numberOfStaff =
+                                            int.tryParse(
+                                              EventTextControllers
+                                                  .numberOfStaffController
+                                                  .text,
+                                            ) ??
+                                            0;
+                                        int totalParticipants =
+                                            event.contactDtos!.length +
+                                            numberOfStaff;
+                                        final amount =
+                                            double.tryParse(val) ?? 0.0;
+                                        amountPerHcp = totalParticipants > 0
+                                            ? amount / totalParticipants
+                                            : 0.0;
+                                      } else {
+                                        amountPerHcp = 0.0;
+                                      }
+                                    } else {
+                                      amountPerHcp = 0.0;
+                                    }
+                                  });
+                                },
+                              ),
+                              if (amountPerHcp > 0) ...{
+                                SizedBox(height: 8),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    "${AppStrings.amountPerHcp} ${amountPerHcp.toStringAsFixed(3)}",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              },
+                              SizedBox(height: 16),
+                              // Receipt upload button
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Upload Receipt'),
+                                  ElevatedButton(
+                                    onPressed: isCheckedIn
+                                        ? () async {
+                                            FilePickerResult? result =
+                                                await FilePicker.platform
+                                                    .pickFiles(
+                                                      type: FileType.image,
+                                                    );
 
+                                            if (result != null &&
+                                                result.files.single.bytes !=
+                                                    null) {
+                                              setState(() {
+                                                _selectedReceiptFileName =
+                                                    result.files.single.name;
+                                                receiptBase64 = base64Encode(
+                                                  result.files.single.bytes!,
+                                                );
+                                              });
+                                            } else {
+                                              final bytes = await File(
+                                                result!.files.single.path!,
+                                              ).readAsBytes();
+                                              setState(() {
+                                                _selectedReceiptFileName =
+                                                    result.files.single.name;
+                                                receiptBase64 = base64Encode(
+                                                  bytes,
+                                                );
+                                              });
+                                            }
+
+                                            debugPrint(
+                                              "Receipt Base64 : $receiptBase64",
+                                            );
+                                          }
+                                        : () {
+                                            debugPrint('Not checked in');
+                                          },
+                                    child: Text('Choose File'),
+                                  ),
+                                ],
+                              ),
+                              if (_selectedReceiptFileName != null)
+                                Container(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Text(
+                                    'Selected:  $_selectedReceiptFileName',
+                                  ),
+                                ),
+                              SizedBox(height: 16),
+                              // Receipt upload button
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Upload Sign-In Sheet'),
+                                  ElevatedButton(
+                                    onPressed: isCheckedIn
+                                        ? () async {
+                                            FilePickerResult? result =
+                                                await FilePicker.platform
+                                                    .pickFiles(
+                                                      type: FileType.image,
+                                                    );
+                                            if (result != null &&
+                                                result.files.isNotEmpty) {
+                                              if (result.files.single.bytes !=
+                                                  null) {
+                                                setState(() {
+                                                  _selectedSignInSheetFileName =
+                                                      result.files.single.name;
+                                                  signInSheetBase64 =
+                                                      base64Encode(
+                                                        result
+                                                            .files
+                                                            .single
+                                                            .bytes!,
+                                                      );
+                                                });
+                                              } else {
+                                                final bytes = await File(
+                                                  result.files.single.path!,
+                                                ).readAsBytes();
+                                                setState(() {
+                                                  _selectedSignInSheetFileName =
+                                                      result.files.single.name;
+                                                  signInSheetBase64 =
+                                                      base64Encode(bytes);
+                                                });
+                                              }
+                                            }
+                                          }
+                                        : () {
+                                            debugPrint('Not checked in');
+                                          },
+                                    child: Text('Choose File'),
+                                  ),
+                                ],
+                              ),
+                              if (_selectedSignInSheetFileName != null)
+                                Container(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Text(
+                                    'Selected:  $_selectedSignInSheetFileName',
+                                  ),
+                                ),
                               SizedBox(height: 16),
                             },
                           ],
                         ),
-                      if (event.contactDtos!.length > 3)
-                        if (event.eventApproval !=
-                                int.parse(BasicCodesFromCrm.approval) &&
-                            event.eventStatus ==
-                                int.parse(BasicCodesFromCrm.completed) &&
-                            (userModal.role == UserType.hco)) ...{
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  isLoading = true;
-                                });
-                                for (var contact in event.contactDtos ?? []) {
-                                  if (contact.approval.toString() ==
-                                      BasicCodesFromCrm.pending) {
-                                    eventParticipantApproval(
-                                      contact.id,
-                                      "Approved By Office User ${userModal.firstName} ${userModal.lastName} working for ${EventTextControllers.hcoController.text} ",
-                                    );
-                                  }
-                                }
-                                setState(() {
-                                  isLoading = false;
-                                });
-                                Provider.of<TopNavProvider>(
-                                  context,
-                                  listen: false,
-                                ).goBack();
-                              },
-                              style: ButtonStyle(
-                                backgroundColor: WidgetStateProperty.all(
-                                  AppColors.successGreen,
-                                ),
-                              ),
-                              child: const Text(
-                                "Approve All",
-                                style: TextStyle(color: AppColors.background),
-                              ),
-                            ),
+                        if (isEdit)
+                          Button(
+                            text: AppStrings.updateEvent,
+                            onPressed: () {
+                              updateEvent();
+                            },
                           ),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
+                        if (isEdit) SizedBox(height: 12),
+                        if (isEdit)
+                          Button(
+                            text: AppStrings.cancelupdateEvent,
+                            onPressed: () {
+                              setState(() {
+                                isEdit = !isEdit;
+                              });
+                            },
+                          ),
+                        if ((userModal.role == UserType.pharmaRep ||
+                                userModal.role == UserType.hco) &&
+                            // ignore: unrelated_type_equality_checks
+                            event.eventStatus ==
+                                int.parse(BasicCodesFromCrm.upcoming) &&
+                            !isEdit) ...{
+                          if (isCheckedIn) ...{
+                            Button(
+                              isDisabled:
+                                  (_selectedReceiptFileName == null ||
+                                      EventTextControllers
+                                          .amountController
+                                          .text
+                                          .isEmpty ||
+                                      _selectedSignInSheetFileName == null) &&
+                                  isCheckedIn,
+                              text: AppStrings.submitCheckIn,
                               onPressed: () {
-                                //murali_clear_rejection_remarks
-                                ReceiptRejectionTextController.remarksController
-                                    .clear();
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return StatefulBuilder(
-                                      builder: (context, setState) {
-                                        return AlertDialog(
-                                          title: Text(
-                                            AppStrings.confirmRejection,
-                                          ),
-                                          content: SizedBox(
-                                            height: 220,
+                                debugPrint(
+                                  "Submit Check-In ${json.encode(event)}",
+                                );
+                                checkinDialog();
+                              },
+                            ),
+                          },
+                          if (!isCheckinPossible) ...{
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppStrings.checkInNotPossible,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.accentError,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 12),
+                          },
+                          if (!isCheckedIn) ...{
+                            Button(
+                              isDisabled: !isCheckinPossible,
+                              text: AppStrings.checkIn,
+                              onPressed: () {
+                                if (!isCheckinPossible) {
+                                  showdialogforcheckAvailability();
+                                } else {
+                                  setState(() {
+                                    isCheckedIn = true;
+                                    _checkInDateTime = DateTime.now();
+                                    EventTextControllers.amountController.text =
+                                        "";
+                                  });
+                                }
+                              },
+                            ),
+                          },
+                          SizedBox(height: 12),
+                          if (isCheckedIn)
+                            Button(
+                              color: AppColors.accentError,
+                              isDisabled: !isCheckedIn,
+                              text: AppStrings.cancelCheckIn,
+                              onPressed: () {
+                                setState(() {
+                                  isCheckedIn = !isCheckedIn;
+                                  _checkInDateTime = null;
+                                });
+                              },
+                            ),
+                        },
+                        if (event.eventStatus ==
+                            int.parse(BasicCodesFromCrm.completed)) ...{
+                          if (eventAttachments.isNotEmpty) Text("Attachments"),
+                          SizedBox(height: 10),
+                          Row(
+                            children: [
+                              SizedBox(width: 10),
+                              for (
+                                var i = 0;
+                                i < eventAttachments.length;
+                                i++
+                              ) ...{
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    // shape: RoundedRectangleBorder(
+                                    //   borderRadius: BorderRadius.circular(8),
+                                    // ),
+                                    shape: LinearBorder(),
+                                  ),
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      builder: (context) => StatefulBuilder(
+                                        builder: (context, setState) {
+                                          return Container(
+                                            color: Colors.black,
+                                            height:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.height *
+                                                0.75,
                                             child: Column(
                                               children: [
-                                                Text(AppStrings.rejectMessage),
-                                                SizedBox(height: 20),
-                                                TextField(
-                                                  controller:
-                                                      ReceiptRejectionTextController
-                                                          .remarksController,
-                                                  decoration: InputDecoration(
-                                                    label:
-                                                        AppTextThemes.labelWithImportant(
-                                                          AppStrings.remarks,
-                                                        ),
+                                                Align(
+                                                  alignment: Alignment.topRight,
+                                                  child: IconButton(
+                                                    icon: Icon(
+                                                      Icons.close,
+                                                      color: Colors.white,
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.of(
+                                                        context,
+                                                      ).pop();
+                                                    },
                                                   ),
-                                                  onChanged: (value) =>
-                                                      setState(() {}),
-                                                  maxLines: 3,
+                                                ),
+                                                Expanded(
+                                                  child: InteractiveViewer(
+                                                    child: Image.memory(
+                                                      eventAttachments[i],
+                                                      fit: BoxFit.contain,
+                                                    ),
+                                                  ),
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              child: Text('Cancel'),
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                            ),
-                                            TextButton(
-                                              onPressed:
-                                                  ReceiptRejectionTextController
-                                                      .remarksController
-                                                      .text
-                                                      .isNotEmpty
-                                                  ? () {
-                                                      //murali rejection confirmation issue fix
-                                                      final dialogContext =
-                                                          context;
-                                                      Navigator.of(
-                                                        dialogContext,
-                                                        rootNavigator: true,
-                                                      ).pop();
-                                                      _eventController
-                                                          .reject(
-                                                            event.eventId,
-                                                            userModal.kiosk,
-                                                            ReceiptRejectionTextController
-                                                                .remarksController
-                                                                .text,
-                                                          )
-                                                          .then((v) {
-                                                            final navProvider =
-                                                                Provider.of<
-                                                                  TopNavProvider
-                                                                >(
-                                                                  this.context,
-                                                                  listen: false,
-                                                                );
-                                                            navProvider
-                                                                .goBack();
-                                                          });
-                                                    }
-                                                  : null,
-                                              child: Text('Reject'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  },
-                                );
-                              },
-                              style: ButtonStyle(
-                                backgroundColor: WidgetStateProperty.all(
-                                  AppColors.rejectedRed,
-                                ),
-                              ),
-                              child: const Text(
-                                "Reject All",
-                                style: TextStyle(color: AppColors.background),
-                              ),
-                            ),
-                          ),
-                        },
-                      SizedBox(height: 16),
-                      if (isCheckedIn && _checkInDateTime != null)
-                        Container(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            'Checked in at: '
-                            '${_checkInDateTime!.day}/${_checkInDateTime!.month}/${_checkInDateTime!.year} '
-                            '${_checkInDateTime!.hour}:${_checkInDateTime!.minute.toString().padLeft(2, '0')}',
-                            style: TextStyle(
-                              color: AppColors.accentSuccess,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      if (isCheckedIn) ...{
-                        SizedBox(height: 16),
-                        TextFormField(
-                          keyboardType: TextInputType.number,
-                          controller: EventTextControllers.amountController,
-                          maxLength: 5,
-                          decoration: InputDecoration(
-                            counter: SizedBox(),
-                            labelText: '${AppStrings.amount} *',
-                            prefixIcon: Icon(Icons.monetization_on_outlined),
-                          ),
-                          enabled: isCheckedIn,
-                          onChanged: (val) {
-                            setState(() {
-                              if (val.isNotEmpty) {
-                                event = event.copyWith(
-                                  amount: double.parse(val),
-                                );
-                                if (event.contactDtos != null &&
-                                    event.contactDtos!.isNotEmpty &&
-                                    EventTextControllers
-                                        .numberOfStaffController
-                                        .text
-                                        .isNotEmpty) {
-                                  int numberOfStaff =
-                                      int.tryParse(
-                                        EventTextControllers
-                                            .numberOfStaffController
-                                            .text,
-                                      ) ??
-                                      0;
-                                  int totalParticipants =
-                                      event.contactDtos!.length + numberOfStaff;
-                                  final amount = double.tryParse(val) ?? 0.0;
-                                  amountPerHcp = totalParticipants > 0
-                                      ? amount / totalParticipants
-                                      : 0.0;
-                                } else {
-                                  amountPerHcp = 0.0;
-                                }
-                              } else {
-                                amountPerHcp = 0.0;
-                              }
-                            });
-                          },
-                        ),
-                        if (amountPerHcp > 0) ...{
-                          SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              "${AppStrings.amountPerHcp} ${amountPerHcp.toStringAsFixed(3)}",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ),
-                        },
-                        SizedBox(height: 16),
-                        // Receipt upload button
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Upload Receipt'),
-                            ElevatedButton(
-                              onPressed: isCheckedIn
-                                  ? () async {
-                                      FilePickerResult? result =
-                                          await FilePicker.platform.pickFiles(
-                                            type: FileType.image,
                                           );
-
-                                      if (result != null &&
-                                          result.files.single.bytes != null) {
-                                        setState(() {
-                                          _selectedReceiptFileName =
-                                              result.files.single.name;
-                                          receiptBase64 = base64Encode(
-                                            result.files.single.bytes!,
-                                          );
-                                        });
-                                      } else {
-                                        final bytes = await File(
-                                          result!.files.single.path!,
-                                        ).readAsBytes();
-                                        setState(() {
-                                          _selectedReceiptFileName =
-                                              result.files.single.name;
-                                          receiptBase64 = base64Encode(bytes);
-                                        });
-                                      }
-
-                                      debugPrint(
-                                        "Receipt Base64 : $receiptBase64",
-                                      );
-                                    }
-                                  : () {
-                                      debugPrint('Not checked in');
-                                    },
-                              child: Text('Choose File'),
-                            ),
-                          ],
-                        ),
-                        if (_selectedReceiptFileName != null)
-                          Container(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text('Selected:  $_selectedReceiptFileName'),
-                          ),
-                        SizedBox(height: 16),
-                        // Receipt upload button
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Upload Sign-In Sheet'),
-                            ElevatedButton(
-                              onPressed: isCheckedIn
-                                  ? () async {
-                                      FilePickerResult? result =
-                                          await FilePicker.platform.pickFiles(
-                                            type: FileType.image,
-                                          );
-                                      if (result != null &&
-                                          result.files.isNotEmpty) {
-                                        if (result.files.single.bytes != null) {
-                                          setState(() {
-                                            _selectedSignInSheetFileName =
-                                                result.files.single.name;
-                                            signInSheetBase64 = base64Encode(
-                                              result.files.single.bytes!,
-                                            );
-                                          });
-                                        } else {
-                                          final bytes = await File(
-                                            result.files.single.path!,
-                                          ).readAsBytes();
-                                          setState(() {
-                                            _selectedSignInSheetFileName =
-                                                result.files.single.name;
-                                            signInSheetBase64 = base64Encode(
-                                              bytes,
-                                            );
-                                          });
-                                        }
-                                      }
-                                    }
-                                  : () {
-                                      debugPrint('Not checked in');
-                                    },
-                              child: Text('Choose File'),
-                            ),
-                          ],
-                        ),
-                        if (_selectedSignInSheetFileName != null)
-                          Container(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              'Selected:  $_selectedSignInSheetFileName',
-                            ),
-                          ),
-                        SizedBox(height: 16),
-                      },
-                    ],
-                  ),
-                  if (isEdit)
-                    Button(
-                      text: AppStrings.updateEvent,
-                      onPressed: () {
-                        updateEvent();
-                      },
-                    ),
-                  if (isEdit) SizedBox(height: 12),
-                  if (isEdit)
-                    Button(
-                      text: AppStrings.cancelupdateEvent,
-                      onPressed: () {
-                        setState(() {
-                          isEdit = !isEdit;
-                        });
-                      },
-                    ),
-                  if ((userModal.role == UserType.pharmaRep ||
-                          userModal.role == UserType.hco) &&
-                      // ignore: unrelated_type_equality_checks
-                      event.eventStatus ==
-                          int.parse(BasicCodesFromCrm.upcoming) &&
-                      !isEdit) ...{
-                    if (isCheckedIn) ...{
-                      Button(
-                        isDisabled:
-                            (_selectedReceiptFileName == null ||
-                                EventTextControllers
-                                    .amountController
-                                    .text
-                                    .isEmpty ||
-                                _selectedSignInSheetFileName == null) &&
-                            isCheckedIn,
-                        text: AppStrings.submitCheckIn,
-                        onPressed: () {
-                          debugPrint("Submit Check-In ${json.encode(event)}");
-                          checkinDialog();
-                        },
-                      ),
-                    },
-                    if (!isCheckinPossible) ...{
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppStrings.checkInNotPossible,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.accentError,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12),
-                    },
-                    if (!isCheckedIn) ...{
-                      Button(
-                        isDisabled: !isCheckinPossible,
-                        text: AppStrings.checkIn,
-                        onPressed: () {
-                          if (!isCheckinPossible) {
-                            showdialogforcheckAvailability();
-                          } else {
-                            setState(() {
-                              isCheckedIn = true;
-                              _checkInDateTime = DateTime.now();
-                              EventTextControllers.amountController.text = "";
-                            });
-                          }
-                        },
-                      ),
-                    },
-                    SizedBox(height: 12),
-                    if (isCheckedIn)
-                      Button(
-                        color: AppColors.accentError,
-                        isDisabled: !isCheckedIn,
-                        text: AppStrings.cancelCheckIn,
-                        onPressed: () {
-                          setState(() {
-                            isCheckedIn = !isCheckedIn;
-                            _checkInDateTime = null;
-                          });
-                        },
-                      ),
-                  },
-                  if (event.eventStatus ==
-                      int.parse(BasicCodesFromCrm.completed)) ...{
-                    if (eventAttachments.isNotEmpty) Text("Attachments"),
-                    SizedBox(height: 10),
-                    Row(
-                      children: [
-                        SizedBox(width: 10),
-                        for (var i = 0; i < eventAttachments.length; i++) ...{
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              // shape: RoundedRectangleBorder(
-                              //   borderRadius: BorderRadius.circular(8),
-                              // ),
-                              shape: LinearBorder(),
-                            ),
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (context) => StatefulBuilder(
-                                  builder: (context, setState) {
-                                    return Container(
-                                      color: Colors.black,
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                          0.75,
-                                      child: Column(
-                                        children: [
-                                          Align(
-                                            alignment: Alignment.topRight,
-                                            child: IconButton(
-                                              icon: Icon(
-                                                Icons.close,
-                                                color: Colors.white,
-                                              ),
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: InteractiveViewer(
-                                              child: Image.memory(
-                                                eventAttachments[i],
-                                                fit: BoxFit.contain,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                        },
                                       ),
                                     );
                                   },
+                                  child: Image.memory(
+                                    eventAttachments[i],
+                                    height: 50,
+                                    width: 50,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                              );
-                            },
-                            child: Image.memory(
-                              eventAttachments[i],
-                              height: 50,
-                              width: 50,
-                              fit: BoxFit.cover,
-                            ),
+                                SizedBox(width: 10),
+                              },
+                            ],
                           ),
-                          SizedBox(width: 10),
+                        },
+                        if (_reEnableReasonController.text != '') ...{
+                          SizedBox(height: 10),
+                          TextField(
+                            enabled: false,
+                            controller: _reEnableReasonController,
+                            decoration: InputDecoration(
+                              label: AppTextThemes.labelWithImportant(
+                                AppStrings.remarks,
+                              ),
+                            ),
+                            maxLines: 3,
+                          ),
                         },
                       ],
                     ),
-                  },
-                  if (_reEnableReasonController.text != '') ...{
-                    SizedBox(height: 10),
-                    TextField(
-                      enabled: false,
-                      controller: _reEnableReasonController,
-                      decoration: InputDecoration(
-                        label: AppTextThemes.labelWithImportant(
-                          AppStrings.remarks,
-                        ),
-                      ),
-                      maxLines: 3,
-                    ),
-                  },
-                ],
+                  ],
+                ),
               ),
             ),
     );
