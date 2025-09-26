@@ -62,7 +62,7 @@ class EventModal {
     bool? isMultiDay,
     String? statusText,
     DateTime? eventCheckIn,
-    String? remarks
+    String? remarks,
   }) => EventModal(
     eventId: eventId ?? this.eventId,
     eventName: eventName ?? this.eventName,
@@ -114,7 +114,7 @@ class EventModal {
       eventCheckIn: json["eventCheckIn"] == null
           ? null
           : _parseDateTime(json["eventCheckIn"]),
-      remarks: json['remarks'] ?? ""
+      remarks: json['remarks'] ?? "",
     );
   }
 
@@ -151,7 +151,7 @@ class EventModal {
     "isMultiDay": isMultiDay,
     "status": statusText,
     "eventCheckIn": eventCheckIn?.toIso8601String(),
-    "remarks":remarks,
+    "remarks": remarks,
   };
 
   factory EventModal.empty() => EventModal(
@@ -172,7 +172,7 @@ class EventModal {
     isMultiDay: false,
     statusText: "UPCOMING",
     eventCheckIn: null,
-    remarks: ""
+    remarks: "",
   );
 }
 
@@ -185,6 +185,7 @@ class ContactDto {
   final String? jobTitle;
   final String? company;
   final String approval;
+  final String? remarks;
 
   ContactDto({
     this.id,
@@ -195,6 +196,7 @@ class ContactDto {
     this.jobTitle,
     this.company,
     required this.approval,
+    this.remarks,
   });
 
   ContactDto copyWith({
@@ -206,6 +208,7 @@ class ContactDto {
     String? jobTitle,
     String? company,
     String? approval,
+    String? remarks,
   }) => ContactDto(
     id: id ?? this.id,
     firstName: firstName ?? this.firstName,
@@ -215,6 +218,7 @@ class ContactDto {
     jobTitle: jobTitle ?? this.jobTitle,
     company: company ?? this.company,
     approval: approval ?? this.approval,
+    remarks: remarks ?? this.remarks,
   );
 
   factory ContactDto.fromJson(Map<String, dynamic> json) => ContactDto(
@@ -228,6 +232,7 @@ class ContactDto {
     approval: json["approval"] == null
         ? BasicCodesFromCrm.pending
         : json["approval"].toString(),
+    remarks: json["remarks"] ?? "",
   );
 
   Map<String, dynamic> toJson() => {
@@ -239,5 +244,6 @@ class ContactDto {
     "jobTitle": jobTitle,
     "company": company,
     "approval": approval,
+    "remarks": remarks,
   };
 }

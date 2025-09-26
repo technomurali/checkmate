@@ -146,7 +146,11 @@ class AppStrings {
       "Once submitted, check-in cannot be modified";
   static const String cancel = "Cancel";
   static const String remarks = "Remarks";
+  static const String reasonForRenablement = "Reason For Reenablement";
+  static const String reasonForTermination = "Reason For Termination";
+  static const String reasonForRejection = "Reason For Rejection";
   static const String confirmRejection = 'Confirm Rejection';
+  static const String pleaseCheckTheDate = "Please check the date";
 }
 
 class ErrorText {

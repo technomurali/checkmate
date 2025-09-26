@@ -37,6 +37,18 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
   String? _selectedStatus = 'All';
   String selectedStatusId = '';
   int numberOfRefresh = 0;
+  bool sorted = false;
+  // Date range filter (null => no range active)
+  DateTimeRange? _activeRange;
+
+  // Helper: normalize to date-only (prevents time-zone boundary issues)
+  DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  // TODO: Map your event date field here. Replace `eventDate` if different in EventModal.
+  DateTime? _eventDate(EventModal e) {
+    return e.startDate; // e.g., e.eventDate or e.scheduledAt or e.createdAt
+  }
+
   final List<String> _statusOptions = [
     'All',
     "DISPUTED",
@@ -159,9 +171,29 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     setState(() {
       isLoading = true;
       filteredEvents = events.where((event) {
+        // 0) Date range match (inclusive)
+        bool matchesRange = true;
+        if (_activeRange != null) {
+          final d = _eventDate(event);
+          if (d == null) {
+            matchesRange =
+                false; // events without date are excluded when range active
+          } else {
+            final day = _dateOnly(d);
+            final start = _dateOnly(_activeRange!.start);
+            final end = _dateOnly(_activeRange!.end);
+            matchesRange =
+                (day.isAfter(start) || day.isAtSameMomentAs(start)) &&
+                (day.isBefore(end) || day.isAtSameMomentAs(end));
+          }
+        }
+
+        // 1) Search query match
         final matchesQuery = event.eventName!.toLowerCase().contains(
           _searchQuery.toLowerCase(),
         );
+
+        // 2) Status match (existing logic preserved)
         debugPrint('Selected status: ${userModal.kiosk}');
         bool matchesStatus;
 
@@ -187,7 +219,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
               statusCodeFor(_selectedStatus!)['statusId'];
         }
 
-        return matchesQuery && matchesStatus;
+        return matchesRange && matchesQuery && matchesStatus;
       }).toList();
       if (_selectedStatus == "UPCOMING") {
         filteredEvents = filteredEvents.reversed.toList();
@@ -289,59 +321,129 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.event,
-                  size: 24,
-                  color: AppColors.eventTitleIconColor,
-                ),
-                SizedBox(width: 10),
-                Text(
-                  "Events",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.eventTitleTextColor,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.event,
+                    size: 24,
+                    color: AppColors.eventTitleIconColor,
                   ),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                if (userModal.role != UserType.hcp)
-                  InkWell(
-                    onTap: () {
-                      Provider.of<TopNavProvider>(
-                        context,
-                        listen: false,
-                      ).navigateTo(TopNavScreen.newEvent);
-                    },
-                    child: Icon(
-                      Icons.add,
-                      size: 24,
-                      color: AppColors.eventTitleIconColor,
+                  SizedBox(width: 10),
+                  Text(
+                    "Events",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.eventTitleTextColor,
                     ),
                   ),
+                ],
+              ),
+              Row(
+                children: [
+                  if (userModal.role != UserType.hcp)
+                    InkWell(
+                      onTap: () {
+                        Provider.of<TopNavProvider>(
+                          context,
+                          listen: false,
+                        ).navigateTo(TopNavScreen.newEvent);
+                      },
+                      child: Icon(
+                        Icons.add,
+                        size: 24,
+                        color: AppColors.eventTitleIconColor,
+                      ),
+                    ),
 
-                // SizedBox(width: 10),
-                // Icon(
-                //   Icons.bar_chart,
-                //   size: 24,
-                //   color: AppColors.eventTitleIconColor,
-                // ),
-                // SizedBox(width: 10),
-                // Icon(
-                //   Icons.access_time,
-                //   size: 24,
-                //   color: AppColors.eventTitleIconColor,
-                // ),
-              ],
-            ),
-          ],
+                  SizedBox(width: 10),
+                  if (!sorted) ...{
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          sorted = true;
+                          filteredEvents.sort(
+                            (a, b) => a.eventName!.toLowerCase().compareTo(
+                              b.eventName!.toLowerCase(),
+                            ),
+                          );
+                        });
+                      },
+                      child: Icon(
+                        Icons.swap_vert,
+                        size: 24,
+                        color: AppColors.eventTitleIconColor,
+                      ),
+                    ),
+                  } else ...{
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          sorted = false;
+                          filteredEvents.sort(
+                            (a, b) => b.eventName!.toLowerCase().compareTo(
+                              a.eventName!.toLowerCase(),
+                            ),
+                          );
+                        });
+                      },
+                      child: Transform.rotate(
+                        angle: 3.1416,
+                        child: Icon(
+                          Icons.swap_vert,
+
+                          // weight: 9,
+                          size: 24,
+                          color: AppColors.eventTitleIconColor,
+                        ),
+                      ),
+                    ),
+                  },
+                  SizedBox(width: 10),
+                  Tooltip(
+                    message: _activeRange == null
+                        ? 'Filter by date range'
+                        : '${_activeRange!.start.toString().split(' ').first} → ${_activeRange!.end.toString().split(' ').first} (long-press to clear)',
+                    child: InkWell(
+                      onTap: () async {
+                        final picked = await showDateRangePicker(
+                          
+                          context: context,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                          initialDateRange: _activeRange,
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            _activeRange = picked;
+                          });
+                          _filterEvents();
+                        }
+                      },
+                      onLongPress: () {
+                        if (_activeRange != null) {
+                          setState(() {
+                            _activeRange = null; // clear range
+                          });
+                          _filterEvents();
+                        }
+                      },
+                      child: Icon(
+                        Icons.date_range,
+                        size: 24,
+                        color: AppColors.eventTitleIconColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         SizedBox(height: 10),
         Padding(

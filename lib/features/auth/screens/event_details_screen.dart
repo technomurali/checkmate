@@ -322,6 +322,24 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   }
 
   updateEvent() {
+    if (isPastDate(event.startDate ?? DateTime.now())) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(AppStrings.updateEvent),
+          content: Text(AppStrings.pleaseCheckTheDate),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+              child: Text('Ok'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
     setState(() {
       isLoading = true;
     });
@@ -1202,7 +1220,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 children: [
                                   Text("HCPs Attendees"),
                                   SizedBox(height: 10),
-                                  for (var contact
+                                  for (ContactDto contact
                                       in event.contactDtos ?? []) ...{
                                     Row(
                                       children: [
@@ -1223,7 +1241,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                       BasicCodesFromCrm
                                                           .rejected) {
                                                 eventParticipantApproval(
-                                                  contact.id,
+                                                  contact.id ?? '',
                                                   "",
                                                 );
                                               }
@@ -1373,7 +1391,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                             UserType.hco)
                                                     ? () {
                                                         eventParticipantApproval(
-                                                          contact.id,
+                                                          contact.id ?? '',
                                                           "",
                                                         );
                                                       }
@@ -1541,7 +1559,27 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                         SizedBox(width: 8),
                                       ],
                                     ),
-
+                                    SizedBox(height: 10),
+                                    SizedBox(
+                                      child: TextFormField(
+                                        minLines: 1,
+                                        maxLines: null,
+                                        decoration: InputDecoration(
+                                          contentPadding: EdgeInsets.symmetric(
+                                            vertical: 8,
+                                            horizontal: 12,
+                                          ),
+                                          isDense: true,
+                                          label:
+                                              AppTextThemes.labelWithImportant(
+                                                AppStrings.reasonForRejection,
+                                              ),
+                                        ),
+                                        style: TextStyle(fontSize: 14),
+                                        initialValue: contact.remarks,
+                                        enabled: false,
+                                      ),
+                                    ),
                                     SizedBox(height: 16),
                                   },
                                 ],
@@ -2071,10 +2109,17 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             controller: _reEnableReasonController,
                             decoration: InputDecoration(
                               label: AppTextThemes.labelWithImportant(
-                                AppStrings.remarks,
+                                event.eventStatus!.toString() ==
+                                        BasicCodesFromCrm.upcoming
+                                    ? AppStrings.reasonForRenablement
+                                    : event.eventStatus!.toString() ==
+                                          BasicCodesFromCrm.rejected
+                                    ? AppStrings.reasonForRejection
+                                    : AppStrings.reasonForTermination,
                               ),
                             ),
-                            maxLines: 3,
+                            minLines: 1,
+                            maxLines: null,
                           ),
                         },
                       ],
