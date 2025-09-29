@@ -359,8 +359,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
         (event.eventType ?? BasicCodesFromCrm.upcoming).toString(),
       ),
       "eventStatus": int.parse(BasicCodesFromCrm.upcoming),
-      "eventDescription":
-          NewEventTextControllers.eventDescriptionController.text,
+      "eventDescription": EventTextControllers.eventDescriptionController.text,
       "eventApproval": int.parse(BasicCodesFromCrm.pending),
       "userName": "/contacts(${event.userName ?? userModal.kiosk})",
       "isMultiDay": event.isMultiDay,
@@ -2139,7 +2138,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             ],
                           ),
                         },
-                        if (_reEnableReasonController.text != '') ...{
+                        if (_reEnableReasonController.text != '' &&
+                            event.eventStatus.toString() !=
+                                BasicCodesFromCrm.terminated) ...{
                           SizedBox(height: 10),
 
                           TextField(

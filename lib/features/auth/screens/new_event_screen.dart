@@ -24,6 +24,8 @@ class NewEventScreen extends StatefulWidget {
 
 class _NewEventScreenState extends State<NewEventScreen> {
   bool _isLoading = false;
+  bool isEventTypeIsLoading = false;
+  bool fetchingHcpInHco = false;
   late TextEditingController _autocompleteController;
   late TextEditingController _autocompleteControllerHCO;
   TextEditingController hcoNameController = TextEditingController();
@@ -55,17 +57,17 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
   void fetchEventTypes() async {
     setState(() {
-      _isLoading = true;
+      isEventTypeIsLoading = true;
     });
     await _newEventController.getEventTypes().then((value) {
       if (value.isNotEmpty) {
         setState(() {
-          _isLoading = false;
+          isEventTypeIsLoading = false;
           eventTypes = value;
         });
       } else {
         setState(() {
-          _isLoading = false;
+          isEventTypeIsLoading = false;
         });
       }
     });
@@ -141,7 +143,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
   void fetchHCPbyHCO(id) {
     setState(() {
-      _isLoading = true;
+      fetchingHcpInHco = true;
     });
     _newEventController.getHCPbyHCO(id).then((result) {
       if (result['success'] == true && result['data'] != null) {
@@ -154,7 +156,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
         });
       }
       setState(() {
-        _isLoading = false;
+        fetchingHcpInHco = false;
       });
     });
   }
@@ -383,7 +385,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                     /// Event Type Dropdown
                     DropdownButtonFormField<String>(
                       // hint: _isLoading ? Text("Loading....") : null,
-                      icon: _isLoading
+                      icon: isEventTypeIsLoading
                           ? Transform.scale(
                               scale: 0.5, // shrink proportionally
                               child: CircularProgressIndicator(),
@@ -760,7 +762,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                       AppStrings.searchHcpPractitioners,
                                     ),
                                     // suffixIcon: Icon(Icons.search),
-                                    suffixIcon: _isLoading
+                                    suffixIcon: fetchingHcpInHco
                                         ? Transform.scale(
                                             scale: 0.5, // shrink proportionally
                                             child: CircularProgressIndicator(),
