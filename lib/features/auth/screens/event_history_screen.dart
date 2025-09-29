@@ -44,7 +44,6 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
   // Helper: normalize to date-only (prevents time-zone boundary issues)
   DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
-  // TODO: Map your event date field here. Replace `eventDate` if different in EventModal.
   DateTime? _eventDate(EventModal e) {
     return e.startDate; // e.g., e.eventDate or e.scheduledAt or e.createdAt
   }
@@ -60,6 +59,23 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
     'IN REVIEW',
     'REJECTED',
   ];
+  DateTime? _eventDatet(EventModal e) {
+    final d = e.startDate; // adjust if your model uses another field
+    if (d == null) return null;
+    return DateTime(d.year, d.month, d.day); // strips out time
+  }
+
+  int _compareByStartDate(EventModal a, EventModal b, {required bool asc}) {
+    final da = _eventDatet(a);
+    final db = _eventDatet(b);
+
+    if (da == null && db == null) return 0;
+    if (da == null) return asc ? 1 : -1; // put nulls last in ASC
+    if (db == null) return asc ? -1 : 1;
+
+    final cmp = da.compareTo(db);
+    return asc ? cmp : -cmp;
+  }
 
   @override
   void initState() {
@@ -367,10 +383,13 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
                       onTap: () {
                         setState(() {
                           sorted = true;
+                          // filteredEvents.sort(
+                          //   (a, b) => a.eventName!.toLowerCase().compareTo(
+                          //     b.eventName!.toLowerCase(),
+                          //   ),
+                          // );
                           filteredEvents.sort(
-                            (a, b) => a.eventName!.toLowerCase().compareTo(
-                              b.eventName!.toLowerCase(),
-                            ),
+                            (a, b) => _compareByStartDate(a, b, asc: true),
                           );
                         });
                       },
@@ -385,10 +404,13 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
                       onTap: () {
                         setState(() {
                           sorted = false;
+                          // filteredEvents.sort(
+                          //   (a, b) => b.eventName!.toLowerCase().compareTo(
+                          //     a.eventName!.toLowerCase(),
+                          //   ),
+                          // );
                           filteredEvents.sort(
-                            (a, b) => b.eventName!.toLowerCase().compareTo(
-                              a.eventName!.toLowerCase(),
-                            ),
+                            (a, b) => _compareByStartDate(a, b, asc: false),
                           );
                         });
                       },
@@ -412,7 +434,6 @@ class _EventHistoryScreenState extends State<EventHistoryScreen>
                     child: InkWell(
                       onTap: () async {
                         final picked = await showDateRangePicker(
-                          
                           context: context,
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2100),

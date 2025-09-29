@@ -627,6 +627,25 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                           : AppColors.border,
                                     ),
                                   ),
+                                  InkWell(
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (ctx) => ConfirmAlertDialog(
+                                          title: AppStrings.deleteEvent,
+                                          content:
+                                              AppStrings.deleteEventContent,
+                                          onConfirm: () {
+                                            deleteEvent(event.eventId!);
+                                          },
+                                        ),
+                                      );
+                                    },
+                                    child: Icon(
+                                      Icons.delete,
+                                      color: AppColors.accentError,
+                                    ),
+                                  ),
                                 ],
                               ),
                             },
@@ -1274,6 +1293,45 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                             ),
                                           ),
                                         if (contact.approval.toString() ==
+                                            BasicCodesFromCrm.rejected) ...{
+                                          SizedBox(width: 10),
+                                          Expanded(
+                                            // <-- gives tight width to the field
+                                            child: ConstrainedBox(
+                                              constraints: const BoxConstraints(
+                                                minHeight: 40,
+                                                maxHeight:
+                                                    150, // cap growth to avoid infinite height
+                                              ),
+                                              child: TextFormField(
+                                                minLines: 1,
+                                                maxLines:
+                                                    null, // grows with content
+                                                decoration: InputDecoration(
+                                                  contentPadding:
+                                                      const EdgeInsets.symmetric(
+                                                        vertical: 8,
+                                                        horizontal: 12,
+                                                      ),
+                                                  isDense: true,
+                                                  label:
+                                                      AppTextThemes.labelWithImportant(
+                                                        AppStrings
+                                                            .reasonForRejection,
+                                                      ),
+                                                  // border: const OutlineInputBorder(), // optional
+                                                ),
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                ),
+                                                initialValue: contact.remarks,
+                                                enabled:
+                                                    false, // or: readOnly: true (keeps style enabled)
+                                              ),
+                                            ),
+                                          ),
+                                        }, //SEND FOR APPROVAL BUTTON FOR REP
+                                        if (contact.approval.toString() ==
                                                 BasicCodesFromCrm.pending &&
                                             (userModal.role ==
                                                 UserType.pharmaRep))
@@ -1507,7 +1565,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                                                               _eventController
                                                                                   .reject(
                                                                                     event.eventId,
-                                                                                    userModal.kiosk,
+                                                                                    contact.id,
                                                                                     ReceiptRejectionTextController.remarksController.text,
                                                                                   )
                                                                                   .then(
@@ -1558,27 +1616,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
                                         SizedBox(width: 8),
                                       ],
-                                    ),
-                                    SizedBox(height: 10),
-                                    SizedBox(
-                                      child: TextFormField(
-                                        minLines: 1,
-                                        maxLines: null,
-                                        decoration: InputDecoration(
-                                          contentPadding: EdgeInsets.symmetric(
-                                            vertical: 8,
-                                            horizontal: 12,
-                                          ),
-                                          isDense: true,
-                                          label:
-                                              AppTextThemes.labelWithImportant(
-                                                AppStrings.reasonForRejection,
-                                              ),
-                                        ),
-                                        style: TextStyle(fontSize: 14),
-                                        initialValue: contact.remarks,
-                                        enabled: false,
-                                      ),
                                     ),
                                     SizedBox(height: 16),
                                   },
@@ -2104,6 +2141,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                         },
                         if (_reEnableReasonController.text != '') ...{
                           SizedBox(height: 10),
+
                           TextField(
                             enabled: false,
                             controller: _reEnableReasonController,

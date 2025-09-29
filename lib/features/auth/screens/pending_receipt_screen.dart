@@ -295,7 +295,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                             Text("${event.amount}"),
                           ],
                         ),
-            
+
                         SizedBox(height: 16),
                         Divider(),
                         Row(
@@ -311,14 +311,18 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                         Text(AppStrings.hcpInEvent),
                         SizedBox(height: 10),
                         if (event.contactDtos != null) ...{
-                          for (var i = 0; i < event.contactDtos!.length; i++) ...{
+                          for (
+                            var i = 0;
+                            i < event.contactDtos!.length;
+                            i++
+                          ) ...{
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   "${i + 1}. ${event.contactDtos![i].firstName} ${event.contactDtos![i].lastName}",
                                 ),
-            
+
                                 if (event.contactDtos![i].approval.toString() !=
                                     BasicCodesFromCrm.pending)
                                   Container(
@@ -451,7 +455,9 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                                               AppStrings
                                                                   .rejectMessage,
                                                             ),
-                                                            SizedBox(height: 20),
+                                                            SizedBox(
+                                                              height: 20,
+                                                            ),
                                                             TextField(
                                                               controller:
                                                                   ReceiptRejectionTextController
@@ -498,24 +504,25 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                                                       .reject(
                                                                         event
                                                                             .eventId,
-                                                                        userModal
-                                                                            .kiosk,
+                                                                        event
+                                                                            .contactDtos![i]
+                                                                            .id,
                                                                         ReceiptRejectionTextController
                                                                             .remarksController
                                                                             .text,
                                                                       )
-                                                                      .then((v) {
+                                                                      .then((
+                                                                        v,
+                                                                      ) {
                                                                         final navProvider =
                                                                             Provider.of<
                                                                               TopNavProvider
                                                                             >(
                                                                               this.context,
-                                                                              listen:
-                                                                                  false,
+                                                                              listen: false,
                                                                             );
                                                                         final didGoBack =
-                                                                            navProvider
-                                                                                .goBack();
+                                                                            navProvider.goBack();
                                                                         if (!didGoBack) {
                                                                           //murali_rejection_close_back
                                                                           Navigator.maybePop(
@@ -731,7 +738,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                   ],
                 ),
               ),
-          ),
+            ),
     );
   }
 }
