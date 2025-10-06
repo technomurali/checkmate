@@ -2,10 +2,13 @@ import 'package:checkmate/core/constants/app_colors.dart';
 import 'package:checkmate/core/constants/app_sizes.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/top_nav_tile.dart';
+import 'package:checkmate/features/auth/model/openpayments_modal.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:checkmate/features/auth/screens/dispute_form_screen.dart';
 import 'package:checkmate/features/auth/screens/dispute_history_screen.dart';
 import 'package:checkmate/features/auth/screens/new_event_screen.dart';
+import 'package:checkmate/features/auth/screens/open_payments_details.dart';
+import 'package:checkmate/features/auth/screens/open_payments_screen.dart';
 import 'package:checkmate/features/auth/screens/profile_screen.dart';
 import 'package:checkmate/features/auth/screens/signin_screen.dart';
 import 'package:checkmate/features/auth/screens/pharma_rep_dashboard.dart';
@@ -207,6 +210,34 @@ class TopNav extends StatelessWidget {
                         ),
                       ],
                     ),
+                    if (userModal.role != UserType.pharmaRep)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          InkWell(
+                            onTap: () => navProvider.navigateTo(
+                              TopNavScreen.openPayemtsScreen,
+                            ),
+                            child: TopNavTile(
+                              icon: Icon(
+                                Icons.report_problem,
+                                size: AppSizes().headerIconSize,
+                              ),
+                              label: AppStrings.openPayemts,
+                            ),
+                          ),
+                          Container(
+                            height: 5,
+                            width: 100,
+                            color:
+                                currentScreen == TopNavScreen.openPayemtsScreen
+                                ? AppColors.topNavTileColor
+                                : Colors.transparent,
+                            child: const Text(""),
+                          ),
+                        ],
+                      ),
+
                     InkWell(
                       onTap: () {
                         userModal = UserModal.empty();
@@ -287,6 +318,10 @@ class TopNav extends StatelessWidget {
         return PendingReceiptScreen(eventId: argument as String);
       case TopNavScreen.receiptHistory:
         return ReceiptHistoryScreen();
+      case TopNavScreen.openPayemtsScreen:
+        return OpenPaymentsScreen();
+        case TopNavScreen.openPaymentDetails:
+        return OpenPaymentsDetails(openPayment: argument as OpenPaymentsModal);
     }
   }
 }

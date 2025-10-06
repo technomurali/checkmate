@@ -12,6 +12,8 @@ enum TopNavScreen {
   disputeDetails,
   pendingReceipt,
   receiptHistory,
+  openPayemtsScreen,
+  openPaymentDetails,
   // Add more as needed
 }
 
@@ -34,8 +36,7 @@ class TopNavProvider extends ChangeNotifier {
   }
 
   set history(TopNavScreen value) {
-    _history
-      .add(value);
+    _history.add(value);
     notifyListeners();
   }
 

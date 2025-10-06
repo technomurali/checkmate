@@ -1,3 +1,5 @@
+// ignore_for_file: control_flow_in_finally
+
 import 'package:checkmate/core/constants/app_Api.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
 import 'package:checkmate/core/widgets/events_recipts_card.dart';

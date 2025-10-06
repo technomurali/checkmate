@@ -47,6 +47,7 @@ class SigninController {
           role: data['result']["userRoleId"],
           kiosk: data['result']["kiosk"].toString(),
           token: data["accessToken"] ?? '',
+          npiNumber: data['result'][ModalKeys().userNpiNumber],
         );
         prefs.setString('user', jsonEncode(user.toJson()));
         return {

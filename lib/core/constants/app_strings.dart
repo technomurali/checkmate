@@ -43,6 +43,7 @@ class AppStrings {
   static const String receiptHistory = "Receipt History";
   static const String disputeHistory = "Dispute History";
   static const String fileDispute = "File Dispute";
+  static const String openPayemts = "CMS History";
   static const String createNewEvent = "Create New Event";
   static const String receiptForApproval = "Awaiting Approval";
   static const String numberOfStaff = "Number of staff";

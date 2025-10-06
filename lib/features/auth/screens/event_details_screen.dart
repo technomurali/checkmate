@@ -1271,7 +1271,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                               ),
                                               child: Text(
                                                 eventApprovalCodeToText(
-                                                  contact.approval ?? '0',
+                                                  contact.approval,
                                                 ),
                                                 style: TextStyle(
                                                   color:
