@@ -72,15 +72,19 @@ class UserModal {
   }
 
   factory UserModal.fromJson(Map<String, dynamic> json) {
+    // Keep backward compatibility while moving to CRM field names.
+    final roleValue = json[ModalKeys().userRole] ?? json['userRoleId'];
+    final emailValue = json[ModalKeys().userEmail] ?? json['email'];
+
     return UserModal(
       id: json[ModalKeys().userId],
-      email: json[ModalKeys().userEmail],
+      email: emailValue,
       password: json[ModalKeys().userPassword],
       firstName: json[ModalKeys().userFirstName],
       lastName: json[ModalKeys().userLastName],
       city: json[ModalKeys().userCity],
       pharmaCompany: json[ModalKeys().userPharmaCompany],
-      role: json[ModalKeys().userRole],
+      role: roleValue?.toString(),
       hco: json[ModalKeys().userHco],
       profileUrl: json[ModalKeys().userProfileUrl],
       modeOfAuthentication: json[ModalKeys().userModeOfAuthentication],
@@ -94,12 +98,15 @@ class UserModal {
   Map<String, dynamic> toJson() => {
     ModalKeys().userId: id,
     ModalKeys().userEmail: email,
+    // Legacy mirrors for old payload consumers.
+    'email': email,
     ModalKeys().userPassword: password,
     ModalKeys().userFirstName: firstName,
     ModalKeys().userLastName: lastName,
     ModalKeys().userCity: city,
     ModalKeys().userPharmaCompany: pharmaCompany,
     ModalKeys().userRole: role,
+    'userRoleId': role,
     ModalKeys().userHco: hco,
     ModalKeys().userProfileUrl: profileUrl,
     ModalKeys().userModeOfAuthentication: modeOfAuthentication,

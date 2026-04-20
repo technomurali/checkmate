@@ -87,6 +87,8 @@ class NewEventController {
       var jsonWalaBody = json.encode(data);
       dynamic g = json.decode(jsonWalaBody);
       debugPrint("jsonWalaBody: $g");
+      // ignore: avoid_print
+      print("EVENT create payload: $jsonWalaBody");
       final response = await http.post(
         uri,
         body: jsonWalaBody,

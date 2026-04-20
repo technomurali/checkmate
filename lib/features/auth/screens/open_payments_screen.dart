@@ -16,7 +16,7 @@ class OpenPaymentsScreen extends StatefulWidget {
 }
 
 class _OpenPaymentsScreenState extends State<OpenPaymentsScreen> {
-  OpenPayemtsController _openPayemtsController = OpenPayemtsController();
+  final OpenPayemtsController _openPayemtsController = OpenPayemtsController();
   List<OpenPaymentsModal> openPayments = [];
   bool _loading = false;
   @override

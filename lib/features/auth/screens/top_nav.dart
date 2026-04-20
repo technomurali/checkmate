@@ -25,6 +25,7 @@ import 'package:provider/provider.dart';
 
 class TopNav extends StatelessWidget {
   const TopNav({super.key});
+  static const bool _isDisputeFormEnabled = false;
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +139,8 @@ class TopNav extends StatelessWidget {
                         ),
                       ],
                     ),
-                    if (userModal.role != UserType.pharmaRep)
+                    if (userModal.role != UserType.pharmaRep &&
+                        _isDisputeFormEnabled)
                       Column(
                         children: [
                           InkWell(
@@ -297,7 +299,9 @@ class TopNav extends StatelessWidget {
           );
         }
       case TopNavScreen.fileDispute:
-        return DisputeFormScreen();
+        return _isDisputeFormEnabled
+            ? DisputeFormScreen()
+            : DisputeHistoryScreen();
       case TopNavScreen.disputeHistory:
         return DisputeHistoryScreen();
       case TopNavScreen.profile:

@@ -9,6 +9,7 @@ import 'package:checkmate/features/auth/controllers/profile_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -99,7 +100,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     super.dispose();
   }
 
-  void _handleSave() {
+  Future<void> _handleSave() async {
     setState(() {
       isLoading = true;
     });
@@ -108,8 +109,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         email: UserProfileTextControllers.emailController.text.trim(),
         firstName: UserProfileTextControllers.firstNameController.text.trim(),
         lastName: UserProfileTextControllers.lastNameController.text.trim(),
+        city: UserProfileTextControllers.cityController.text.trim(),
         profileUrl: UserProfileTextControllers.profileUrlController.text.trim(),
         modeOfAuthentication: userModal.modeOfAuthentication,
+        pharmaCompany: UserProfileTextControllers.companyIdController.text
+                .trim()
+                .isNotEmpty
+            ? UserProfileTextControllers.companyIdController.text.trim()
+            : userModal.pharmaCompany,
       );
       var updateProfileData = {
         "Id": userModal.id ?? "",
@@ -127,6 +134,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       _profileController.updateProfile(updateProfileData).then((value) {
         debugPrint("Update Profile Response $value");
         if (value['status'] == true) {
+          userModal = updated;
+          SharedPreferences.getInstance().then((prefs) {
+            prefs.setString('user', jsonEncode(userModal.toJson()));
+          });
           setState(() {
             isLoading = false;
           });
@@ -145,6 +156,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
           );
         }
+      });
+    } else {
+      setState(() {
+        isLoading = false;
       });
     }
   }

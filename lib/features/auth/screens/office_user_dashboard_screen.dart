@@ -27,6 +27,7 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
   List<EventModal> pendingEvents = [];
   bool isLoading = false;
   Future<void> fetchUpcomingEvents() async {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
@@ -35,6 +36,7 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
       status: BasicCodesFromCrm.upcoming,
       hcoId: widget.user.pharmaCompany,
     );
+    if (!mounted) return;
     setState(() {
       events = v.take(3).toList();
       isLoading = false;
@@ -44,6 +46,7 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
   }
 
   Future<void> fetchPendingEvents() async {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
@@ -51,6 +54,7 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
       status: BasicCodesFromCrm.pending,
       hcoId: widget.user.pharmaCompany,
     );
+    if (!mounted) return;
     setState(() {
       pendingEvents = v.take(3).toList();
       isLoading = false;
@@ -63,6 +67,7 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
       status: BasicCodesFromCrm.upcoming,
       hcoId: widget.user.pharmaCompany,
     );
+    if (!mounted) return;
     setState(() {
       events = v.reversed.take(3).toList();
       // isLoading = false;
@@ -80,12 +85,14 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
   }
 
   fetchHcoName() {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
     _profileController.getCompanyName(userModal.pharmaCompany ?? '').then((
       value,
     ) {
+      if (!mounted) return;
       setState(() {
         hcoName = value;
         isLoading = false;

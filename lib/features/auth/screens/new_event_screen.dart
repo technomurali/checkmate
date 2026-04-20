@@ -10,6 +10,7 @@ import 'package:checkmate/features/auth/controllers/profile_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:checkmate/features/auth/controllers/new_event_controller.dart';
 import 'package:checkmate/core/constants/app_Api.dart';
@@ -56,24 +57,22 @@ class _NewEventScreenState extends State<NewEventScreen> {
   }
 
   void fetchEventTypes() async {
+    if (!mounted) return;
     setState(() {
       isEventTypeIsLoading = true;
     });
-    await _newEventController.getEventTypes().then((value) {
+    final value = await _newEventController.getEventTypes();
+    if (!mounted) return;
+    setState(() {
+      isEventTypeIsLoading = false;
       if (value.isNotEmpty) {
-        setState(() {
-          isEventTypeIsLoading = false;
-          eventTypes = value;
-        });
-      } else {
-        setState(() {
-          isEventTypeIsLoading = false;
-        });
+        eventTypes = value;
       }
     });
   }
 
   void fetchHCOs() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
     });
@@ -102,28 +101,23 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
       // }
 
-      await _eventController
-          .getCompanyName(userModal.pharmaCompany ?? "")
-          .then(
-            (v) => {
-              setState(() {
-                _hcos = [
-                  {"id": userModal.pharmaCompany, "accountName": v},
-                ];
-
-                _selectedHCOId = userModal.pharmaCompany;
-
-                _selectedHCOName = v;
-
-                hcoNameController.text = v;
-
-                _isLoading = false;
-              }),
-              fetchHCPbyHCO(_selectedHCOId),
-            },
-          );
+      final v = await _eventController.getCompanyName(
+        userModal.pharmaCompany ?? "",
+      );
+      if (!mounted) return;
+      setState(() {
+        _hcos = [
+          {"id": userModal.pharmaCompany, "accountName": v},
+        ];
+        _selectedHCOId = userModal.pharmaCompany;
+        _selectedHCOName = v;
+        hcoNameController.text = v;
+        _isLoading = false;
+      });
+      fetchHCPbyHCO(_selectedHCOId);
     } else {
       final result = await _newEventController.getHCO();
+      if (!mounted) return;
 
       if (result['success'] == true && result['data'] != null) {
         setState(() {
@@ -142,10 +136,12 @@ class _NewEventScreenState extends State<NewEventScreen> {
   }
 
   void fetchHCPbyHCO(id) {
+    if (!mounted) return;
     setState(() {
       fetchingHcpInHco = true;
     });
     _newEventController.getHCPbyHCO(id).then((result) {
+      if (!mounted) return;
       if (result['success'] == true && result['data'] != null) {
         setState(() {
           _hcps = List<Map<String, dynamic>>.from(result['data']);
@@ -162,35 +158,120 @@ class _NewEventScreenState extends State<NewEventScreen> {
   }
 
   void fetchHCPs() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
     });
-    await _newEventController
-        .getHCP()
-        .then((value) {
-          if (value['success'] == true && value['data'] != null) {
-            setState(() {
-              _hcpPractitioners = List<Map<String, dynamic>>.from(
-                value['data'],
-              );
-            });
-          } else {
-            setState(() {
-              _hcpPractitioners = [];
-            });
-          }
-          setState(() {
-            _isLoading = false;
-          });
-        })
-        .catchError((error) {
-          setState(() {
-            _isLoading = false;
-          });
-        });
+    try {
+      final value = await _newEventController.getHCP();
+      if (!mounted) return;
+      setState(() {
+        if (value['success'] == true && value['data'] != null) {
+          _hcpPractitioners = List<Map<String, dynamic>>.from(value['data']);
+        } else {
+          _hcpPractitioners = [];
+        }
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   List<Map<String, dynamic>> hcpContactDto = [];
+
+  static const String _fallbackNpi = '9999999';
+
+  String _extractNpi(Map<String, dynamic> source) {
+    final dynamic raw =
+        source['npiNumber'] ??
+        source['NpiNumber'] ??
+        source['npinumber'] ??
+        source['npi_number'] ??
+        source['npi'] ??
+        source['npiNo'];
+    final value = raw?.toString().trim() ?? '';
+    // Backend has null NPI for some HCP rows; use agreed fallback.
+    if (value.isEmpty || value.toLowerCase() == 'null') return _fallbackNpi;
+    return value;
+  }
+
+  void _logSelectedHcpNpi(List<Map<String, dynamic>> selected, String source) {
+    final summary = selected
+        .map((hcp) {
+          final id =
+              (hcp[HCPModalKeys.hcpId] ?? hcp['id'] ?? '').toString().trim();
+          final name =
+              (hcp[HCPModalKeys.hcpName] ??
+                      '${hcp['firstName'] ?? ''} ${hcp['lastName'] ?? ''}')
+                  .toString()
+                  .trim();
+          final npi = _extractNpi(hcp);
+          return {'id': id, 'name': name, 'npiNumber': npi};
+        })
+        .toList();
+    debugPrint('HCP NPI check [$source]: $summary');
+  }
+
+  Map<String, dynamic> _toHcpSelectionMap(
+    Map<String, dynamic> source, {
+    String? defaultCompany,
+  }) {
+    final String id =
+        (source[HCPModalKeys.hcpId] ?? source['id'] ?? source['contactId'] ?? '')
+            .toString();
+    final String firstName = (source['firstName']?.toString() ?? '').trim();
+    final String lastName = (source['lastName']?.toString() ?? '').trim();
+
+    return {
+      HCPModalKeys.hcpId: id,
+      HCPModalKeys.hcpName:
+          (source[HCPModalKeys.hcpName]?.toString() ?? '$firstName $lastName')
+              .trim(),
+      'firstName': firstName,
+      'lastName': lastName,
+      'email':
+          source['email']?.toString() ?? source['emailaddress1']?.toString(),
+      'phoneNumber': source['phoneNumber']?.toString(),
+      'jobTitle': source['jobTitle']?.toString(),
+      'company': source['company']?.toString() ?? defaultCompany,
+      'approval': source['approval'],
+      'approvalLabel': source['approvalLabel']?.toString() ?? '',
+      'remarks': source['remarks']?.toString() ?? '',
+      'npiNumber': _extractNpi(source),
+    };
+  }
+
+  Map<String, dynamic> _toContactDto(Map<String, dynamic> selectedHcp) {
+    final dynamic id =
+        selectedHcp[HCPModalKeys.hcpId] ??
+        selectedHcp['id'] ??
+        selectedHcp['contactId'];
+    final String npi = _extractNpi(selectedHcp);
+
+    final String firstName =
+        (selectedHcp['firstName']?.toString() ?? '').trim();
+    final String lastName = (selectedHcp['lastName']?.toString() ?? '').trim();
+
+    return {
+      'id': id?.toString() ?? '',
+      'firstName': firstName,
+      'lastName': lastName,
+      'email':
+          selectedHcp['email']?.toString() ??
+          selectedHcp['emailaddress1']?.toString(),
+      'phoneNumber': selectedHcp['phoneNumber']?.toString(),
+      'jobTitle': selectedHcp['jobTitle']?.toString(),
+      'company': selectedHcp['company']?.toString(),
+      'approval': selectedHcp['approval'],
+      'approvalLabel': selectedHcp['approvalLabel']?.toString() ?? '',
+      'remarks': selectedHcp['remarks']?.toString() ?? '',
+      'npiNumber': npi,
+    };
+  }
 
   void _submitForm() {
     setState(() {
@@ -198,29 +279,77 @@ class _NewEventScreenState extends State<NewEventScreen> {
     });
 
     if (_formKey.currentState!.validate()) {
+      // Rebuild from currently selected chips to avoid stale entries.
+      final currentContactDtos = _selectedHCP.map(_toContactDto).toList();
+      hcpContactDto = currentContactDtos;
+      _logSelectedHcpNpi(_selectedHCP, 'submit');
+
+      final bool hasMissingNpi = currentContactDtos.any(
+        (e) => (e['npiNumber']?.toString().trim().isEmpty ?? true),
+      );
+      if (hasMissingNpi) {
+        final missingIds = currentContactDtos
+            .where((e) => (e['npiNumber']?.toString().trim().isEmpty ?? true))
+            .map((e) => e['id']?.toString() ?? '')
+            .toList();
+        debugPrint('HCP NPI missing for IDs: $missingIds');
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Selected HCP is missing NPI Number.'),
+          ),
+        );
+        return;
+      }
+
+      final int amount = int.tryParse(
+            NewEventTextControllers.amountController.text.trim(),
+          ) ??
+          0;
+      final int staffCount = int.parse(
+        NewEventTextControllers.numberOfStaffController.text,
+      );
+      final int eventCostByPerson = staffCount > 0 ? (amount ~/ staffCount) : 0;
+      final String eventStatusLabel = startDatePicked.isBefore(DateTime.now())
+          ? "Past"
+          : "Upcoming";
+      final String? hcoRef = (_selectedHCOId != null && _selectedHCOId!.isNotEmpty)
+          ? "/accounts($_selectedHCOId)"
+          : null;
+      final String? userRef =
+          (userModal.kiosk != null && userModal.kiosk!.isNotEmpty)
+          ? "/contacts(${userModal.kiosk})"
+          : null;
+
       var testData = {
+        "eventId": null,
         "eventName": NewEventTextControllers.eventNameController.text,
         "startDate": startDatePicked.toIso8601String(),
         "endDate": isMultiDay
             ? endDatePicked.toIso8601String()
             : startDatePicked.toIso8601String(),
-        "numberOfStaff": int.parse(
-          NewEventTextControllers.numberOfStaffController.text,
-        ),
-        "amount": 0,
-        "eventCostByPerson": 0,
-        "hco": "/accounts($_selectedHCOId)",
-        "contactDtos": hcpContactDto,
+        "numberOfStaff": staffCount,
+        "amount": amount,
+        "eventCostByPerson": eventCostByPerson,
+        "remarks": "",
+        "hco": hcoRef,
+        "contactDtos": currentContactDtos,
         "eventType": int.parse(_selectedEventType!),
         "eventStatus": int.parse(BasicCodesFromCrm.upcoming),
+        "eventApproval": int.parse(BasicCodesFromCrm.pending),
         "eventDescription":
             NewEventTextControllers.eventDescriptionController.text,
-        "eventApproval": int.parse(BasicCodesFromCrm.pending),
-        "userName": "/contacts(${userModal.kiosk})",
+        // History endpoints are keyed by this contact reference.
+        "userName": userRef,
         "isMultiDay": isMultiDay,
+        "eventCheckIn": startDatePicked.toIso8601String(),
+        "status": eventStatusLabel,
       };
 
       _newEventController.createEvent(testData).then((value) {
+        if (!mounted) return;
         if (value['success']) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text(AppStrings.eventCreated)),
@@ -269,6 +398,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
         }
       });
     } else {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -696,7 +826,9 @@ class _NewEventScreenState extends State<NewEventScreen> {
                               children: _selectedHCP.map((hcp) {
                                 return Chip(
                                   label: Text(
-                                    hcp["name"],
+                                    hcp["name"] ??
+                                        hcp[HCPModalKeys.hcpName] ??
+                                        "${hcp['firstName'] ?? ''} ${hcp['lastName'] ?? ''}",
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -709,6 +841,9 @@ class _NewEventScreenState extends State<NewEventScreen> {
                                   onDeleted: () {
                                     setState(() {
                                       _selectedHCP.remove(hcp);
+                                      hcpContactDto = _selectedHCP
+                                          .map(_toContactDto)
+                                          .toList();
                                     });
                                   },
                                   materialTapTargetSize:
@@ -779,14 +914,25 @@ class _NewEventScreenState extends State<NewEventScreen> {
                             }
 
                             if (!_selectedHCP.any(
-                              (hcp) => hcp['id'] == selection['id'],
+                              (hcp) =>
+                                  hcp[HCPModalKeys.hcpId] ==
+                                  (selection[HCPModalKeys.hcpId] ??
+                                      selection['id']),
                             )) {
                               setState(() {
-                                _selectedHCP.add({
-                                  "id": selection['id'],
-                                  "name":
-                                      "${selection['firstName']} ${selection['lastName']}",
-                                });
+                                _selectedHCP.add(
+                                  _toHcpSelectionMap(
+                                    Map<String, dynamic>.from(selection),
+                                    defaultCompany: _selectedHCOId,
+                                  ),
+                                );
+                                hcpContactDto = _selectedHCP
+                                    .map(_toContactDto)
+                                    .toList();
+                                _logSelectedHcpNpi(
+                                  _selectedHCP,
+                                  'autocomplete-select',
+                                );
                               });
 
                               Future.delayed(Duration(milliseconds: 100), () {
@@ -813,21 +959,19 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           items: (filter, loadProps) {
                             return _hcps
                                 .map<Map<String, dynamic>>(
-                                  (e) => {
-                                    HCPModalKeys.hcpId: (e['id']).toString(),
-                                    HCPModalKeys.hcpName:
-                                        "${e['firstName']}  ${e['lastName']}",
-                                  },
+                                  (e) => _toHcpSelectionMap(
+                                    Map<String, dynamic>.from(e),
+                                    defaultCompany: _selectedHCOId,
+                                  ),
                                 )
                                 .toList();
                           },
                           selectedItems: _selectedHCP
                               .map<Map<String, dynamic>>(
-                                (e) => {
-                                  HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
-                                      .toString(),
-                                  HCPModalKeys.hcpName: e[HCPModalKeys.hcpName],
-                                },
+                                (e) => _toHcpSelectionMap(
+                                  Map<String, dynamic>.from(e),
+                                  defaultCompany: _selectedHCOId,
+                                ),
                               )
                               .toList(),
                           itemAsString: (item) {
@@ -878,12 +1022,11 @@ class _NewEventScreenState extends State<NewEventScreen> {
                             setState(() {
                               _selectedHCP = value;
 
-                              hcpContactDto = value.map((e) {
-                                return {
-                                  HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
-                                  "": "",
-                                };
-                              }).toList();
+                              hcpContactDto = value.map(_toContactDto).toList();
+                              _logSelectedHcpNpi(
+                                _selectedHCP,
+                                'hco-multiselect-change',
+                              );
                             });
                           },
                           validator: (value) => value == null || value.isEmpty
@@ -911,27 +1054,18 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         ),
                         items: (filter, loadProps) => _hcpPractitioners
                             .map<Map<String, dynamic>>(
-                              (e) => {
-                                HCPModalKeys.hcpId: (e[HCPModalKeys.hcpId])
-                                    .toString(),
-                                HCPModalKeys.hcpName:
-                                    "${e['firstName']}  ${e['lastName']}",
-                              },
+                              (e) => _toHcpSelectionMap(
+                                Map<String, dynamic>.from(e),
+                                defaultCompany: userModal.pharmaCompany,
+                              ),
                             )
                             .toList(),
                         selectedItems: _selectedHCP
                             .map<Map<String, dynamic>>(
-                              (e) => {
-                                HCPModalKeys.hcpId:
-                                    (e[HCPModalKeys.hcpId] ??
-                                            e[HCPModalKeys.hcpId] ??
-                                            "")
-                                        .toString(),
-                                HCPModalKeys.hcpName:
-                                    e[HCPModalKeys.hcpName] ??
-                                    e[HCPModalKeys.hcpName] ??
-                                    e.toString(),
-                              },
+                              (e) => _toHcpSelectionMap(
+                                Map<String, dynamic>.from(e),
+                                defaultCompany: userModal.pharmaCompany,
+                              ),
                             )
                             .toList(),
                         dropdownBuilder: (context, selectedItems) =>
@@ -990,11 +1124,11 @@ class _NewEventScreenState extends State<NewEventScreen> {
 
                           setState(() {
                             _selectedHCP = value;
-                            hcpContactDto = value.map((e) {
-                              return {
-                                HCPModalKeys.hcpId: e[HCPModalKeys.hcpId],
-                              };
-                            }).toList();
+                            hcpContactDto = value.map(_toContactDto).toList();
+                            _logSelectedHcpNpi(
+                              _selectedHCP,
+                              'practitioner-multiselect-change',
+                            );
                           });
                         },
                         validator: (value) => value == null || value.isEmpty
@@ -1005,6 +1139,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                     SizedBox(height: 10),
                     TextFormField(
                       keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       controller:
                           NewEventTextControllers.numberOfStaffController,
                       decoration: InputDecoration(
@@ -1013,9 +1148,16 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           AppStrings.labelNumberOfStaff,
                         ),
                       ),
-                      validator: (value) => value == null || value.isEmpty
-                          ? AppStrings.requiredField
-                          : null,
+                      validator: (value) {
+                        final text = value?.trim() ?? '';
+                        if (text.isEmpty) return AppStrings.requiredField;
+                        final parsed = int.tryParse(text);
+                        if (parsed == null) return 'Enter numbers only';
+                        if (parsed <= 0) {
+                          return 'Number of staff must be greater than 0';
+                        }
+                        return null;
+                      },
                       onChanged: (value) {
                         setState(() {});
                       },

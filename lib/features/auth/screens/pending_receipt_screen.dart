@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/core/constants/app_colors.dart';
+import 'package:checkmate/core/utils/event_status_mapper.dart';
 import 'package:checkmate/core/utils/top_nav_provider.dart';
+import 'package:checkmate/core/widgets/rejection_remarks_dialog.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/user_modal.dart';
 import 'package:checkmate/firebase/notifications.dart';
@@ -34,12 +36,14 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
   }
 
   eventParticipantApproval(String doctorId, String remarks) {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
     _eventController.approve(event.eventId ?? '', doctorId, remarks).then((
       response,
     ) {
+      if (!mounted) return;
       if (response.statusCode == AppApiStatusCodes.success) {
         fetchEvent();
         setState(() {
@@ -56,12 +60,14 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
   }
 
   eventParticipantRejection(String doctorId, String remarks) {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
     _eventController.reject(event.eventId ?? '', doctorId, remarks).then((
       response,
     ) {
+      if (!mounted) return;
       if (response.statusCode == AppApiStatusCodes.success) {
         setState(() {
           isLoading = false;
@@ -83,18 +89,18 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
     await _eventController.fetchEventAttachments(eventId).then((value) {
       if (value.statusCode == AppApiStatusCodes.success) {
         var body = jsonDecode(value.body);
-        List attachments = [];
+        final List attachments = [];
         for (var attachment in body) {
           attachments.add(attachment['base64']);
-          setState(() {
-            eventAttachments = attachments
-                .map<Uint8List>(
-                  (base64Str) =>
-                      base64Decode(base64Str.toString().split(',').last),
-                )
-                .toList();
-          });
         }
+        if (!mounted) return;
+        setState(() {
+          eventAttachments = attachments
+              .map<Uint8List>(
+                (base64Str) => base64Decode(base64Str.toString().split(',').last),
+              )
+              .toList();
+        });
         /*
         .forEach((attachment) {
           List attachments = [];
@@ -112,6 +118,7 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
       } else {
         debugPrint("Failed to load attachments");
       }
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });
@@ -119,39 +126,37 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
   }
 
   String eventApprovalCodeToText(String statusCode) {
-    if (statusCode == BasicCodesFromCrm.approval) {
-      return "Approved";
-    } else if (statusCode == BasicCodesFromCrm.pending) {
-      return "Pending";
-    } else if (statusCode == BasicCodesFromCrm.rejected) {
-      return "Rejected";
-    } else {
-      return "Unknown";
-    }
+    return EventStatusMapper.approvalLabel(statusCode);
   }
 
   fetchEvent() {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
     _eventController
         .fetchEvent(eventId: widget.eventId)
         .then(
-          (v) => {
-            v.hco != null ? fetchHcoName(v.hco.toString()) : null,
+          (v) {
+            if (!mounted) return;
+            if (v.hco != null) {
+              fetchHcoName(v.hco.toString());
+            }
             setState(() {
               event = v;
-            }),
-            fetchImagesOfEvent(v.eventId ?? widget.eventId),
+            });
+            fetchImagesOfEvent(v.eventId ?? widget.eventId);
           },
         );
   }
 
   fetchHcoName(String hcoId) {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
     _eventController.getHcoName(hcoId).then((value) {
+      if (!mounted) return;
       setState(() {
         EventTextControllers.hcoController.text = value;
         isLoading = false;
@@ -437,109 +442,30 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                         (event.contactDtos![i].id ==
                                                 userModal.kiosk ||
                                             userModal.role == UserType.hco)
-                                        ? () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return StatefulBuilder(
-                                                  builder: (context, setState) {
-                                                    return AlertDialog(
-                                                      title: Text(
-                                                        'Confirm Rejection',
-                                                      ),
-                                                      content: SizedBox(
-                                                        height: 220,
-                                                        child: Column(
-                                                          children: [
-                                                            Text(
-                                                              AppStrings
-                                                                  .rejectMessage,
-                                                            ),
-                                                            SizedBox(
-                                                              height: 20,
-                                                            ),
-                                                            TextField(
-                                                              controller:
-                                                                  ReceiptRejectionTextController
-                                                                      .remarksController,
-                                                              decoration:
-                                                                  InputDecoration(
-                                                                    labelText:
-                                                                        'Remarks',
-                                                                  ),
-                                                              onChanged:
-                                                                  (value) =>
-                                                                      setState(
-                                                                        () {},
-                                                                      ),
-                                                              maxLines: 3,
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      actions: <Widget>[
-                                                        TextButton(
-                                                          child: Text('Cancel'),
-                                                          onPressed: () {
-                                                            Navigator.of(
-                                                              context,
-                                                            ).pop();
-                                                          },
-                                                        ),
-                                                        TextButton(
-                                                          onPressed:
-                                                              ReceiptRejectionTextController
-                                                                  .remarksController
-                                                                  .text
-                                                                  .isNotEmpty
-                                                              ? () {
-                                                                  final dialogContext =
-                                                                      context;
-                                                                  Navigator.of(
-                                                                    dialogContext,
-                                                                    rootNavigator:
-                                                                        true,
-                                                                  ).pop();
-                                                                  _eventController
-                                                                      .reject(
-                                                                        event
-                                                                            .eventId,
-                                                                        event
-                                                                            .contactDtos![i]
-                                                                            .id,
-                                                                        ReceiptRejectionTextController
-                                                                            .remarksController
-                                                                            .text,
-                                                                      )
-                                                                      .then((
-                                                                        v,
-                                                                      ) {
-                                                                        final navProvider =
-                                                                            Provider.of<
-                                                                              TopNavProvider
-                                                                            >(
-                                                                              this.context,
-                                                                              listen: false,
-                                                                            );
-                                                                        final didGoBack =
-                                                                            navProvider.goBack();
-                                                                        if (!didGoBack) {
-                                                                          //murali_rejection_close_back
-                                                                          Navigator.maybePop(
-                                                                            this.context,
-                                                                          );
-                                                                        }
-                                                                      });
-                                                                }
-                                                              : null,
-                                                          child: Text('Reject'),
-                                                        ),
-                                                      ],
-                                                    );
-                                                  },
+                                        ? () async {
+                                            final remarks =
+                                                await showRejectionRemarksDialog(
+                                                  context,
                                                 );
-                                              },
-                                            );
+                                            if (remarks == null) return;
+                                            _eventController
+                                                .reject(
+                                                  event.eventId,
+                                                  event.contactDtos![i].id,
+                                                  remarks,
+                                                )
+                                                .then((v) {
+                                                  final navProvider = Provider.of<
+                                                    TopNavProvider
+                                                  >(this.context, listen: false);
+                                                  final didGoBack = navProvider
+                                                      .goBack();
+                                                  if (!didGoBack) {
+                                                    Navigator.maybePop(
+                                                      this.context,
+                                                    );
+                                                  }
+                                                });
                                           }
                                         : null,
                                     child: Text(
@@ -655,81 +581,20 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                         SizedBox(height: 10),
                         Button(
                           text: AppStrings.reject,
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return StatefulBuilder(
-                                  builder: (context, setState) {
-                                    return AlertDialog(
-                                      title: Text('Confirm Rejection'),
-                                      content: SizedBox(
-                                        height: 220,
-                                        child: Column(
-                                          children: [
-                                            Text(AppStrings.rejectMessage),
-                                            SizedBox(height: 20),
-                                            TextField(
-                                              controller:
-                                                  ReceiptRejectionTextController
-                                                      .remarksController,
-                                              decoration: InputDecoration(
-                                                labelText: 'Remarks',
-                                              ),
-                                              onChanged: (value) =>
-                                                  setState(() {}),
-                                              maxLines: 3,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          child: Text('Cancel'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                        TextButton(
-                                          onPressed:
-                                              ReceiptRejectionTextController
-                                                  .remarksController
-                                                  .text
-                                                  .isNotEmpty
-                                              ? () {
-                                                  final dialogContext = context;
-                                                  Navigator.of(
-                                                    dialogContext,
-                                                    rootNavigator: true,
-                                                  ).pop();
-                                                  _eventController
-                                                      .reject(
-                                                        event.eventId,
-                                                        userModal.kiosk,
-                                                        ReceiptRejectionTextController
-                                                            .remarksController
-                                                            .text,
-                                                      )
-                                                      .then((v) {
-                                                        final navProvider =
-                                                            Provider.of<
-                                                              TopNavProvider
-                                                            >(
-                                                              this.context,
-                                                              listen: false,
-                                                            );
-                                                        navProvider.goBack();
-                                                      });
-                                                }
-                                              : null,
-                                          child: Text('Reject'),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
+                          onPressed: () async {
+                            final remarks = await showRejectionRemarksDialog(
+                              context,
                             );
+                            if (remarks == null) return;
+                            _eventController
+                                .reject(event.eventId, userModal.kiosk, remarks)
+                                .then((v) {
+                                  final navProvider = Provider.of<TopNavProvider>(
+                                    this.context,
+                                    listen: false,
+                                  );
+                                  navProvider.goBack();
+                                });
                           },
                           color: Colors.red,
                         ),

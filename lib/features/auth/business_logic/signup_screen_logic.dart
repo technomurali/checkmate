@@ -4,6 +4,7 @@ import 'package:checkmate/features/auth/controllers/signup_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/features/auth/model/signup_modal.dart';
 import 'package:checkmate/core/constants/app_strings.dart';
+import 'package:checkmate/core/utils/validators.dart';
 
 class SignupScreenLogic extends ChangeNotifier {
   final PharmaController _pharmaController = PharmaController();
@@ -93,7 +94,7 @@ class SignupScreenLogic extends ChangeNotifier {
   void validatePassword() {
     final password = TextControllers.password.text.trim();
     if (!isValidPassword(password)) {
-      passwordError = "Must be 6+ chars, include upper, lower, digit, special";
+      passwordError = ErrorText.invalidPassword;
     } else {
       passwordError = null;
     }
@@ -101,14 +102,7 @@ class SignupScreenLogic extends ChangeNotifier {
   }
 
   bool isValidPassword(String password) {
-    // if (password != "") {
-    //   if (password.length < 6) return false;
-    //   if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
-    //   if (!RegExp(r'[a-z]').hasMatch(password)) return false;
-    //   if (!RegExp(r'[0-9]').hasMatch(password)) return false;
-    //   if (!RegExp(r'[!@#\$&*~%^(),.?":{}|<>]').hasMatch(password)) return false;
-    // }
-    return true;
+    return Validators().isStrongPassword(password);
   }
 
   void toggleSocialSignup(bool? value) {
@@ -150,27 +144,30 @@ class SignupScreenLogic extends ChangeNotifier {
     notifyListeners();
   }
 
-  void signupUser(VoidCallback onSuccess) async {
+  Future<Map<String, dynamic>> signupUser() async {
     isLoading = true;
     notifyListeners();
     final data = SignUpModel(
-      email: TextControllers.email.text,
+      emailaddress1: TextControllers.email.text,
       password: TextControllers.password.text,
       firstName: TextControllers.firstName.text,
       lastName: TextControllers.lastName.text,
       city: TextControllers.city.text,
       pharmaCompany: TextControllers.pharma.text,
-      userRoleId: "546170001",
+      crddbContacttype: "546170001",
       companyId: TextControllers.companyId.text,
     );
 
-    await _signupController.signupUser(data);
+    final result = await _signupController.signupUser(data);
 
-    // Clear controllers
-    clearAllTextControllers();
     isLoading = false;
     notifyListeners();
-    onSuccess();
+
+    if (result['success'] == true) {
+      clearAllTextControllers();
+    }
+
+    return result;
   }
 
   clearAllTextControllers() {

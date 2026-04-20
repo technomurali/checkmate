@@ -273,13 +273,23 @@ class _SignupScreenState extends State<SignupScreen> {
                   text: AppStrings.signup,
                   isDisabled:
                       signupScreenLogic.isSignUpDisabled || !_acceptedTerms,
-                  onPressed: () {
-                    signupScreenLogic.signupUser(() {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Signup successful!')),
-                      );
+                  onPressed: () async {
+                    final result = await signupScreenLogic.signupUser();
+                    if (!context.mounted) return;
+
+                    final message =
+                        result['message']?.toString() ??
+                        (result['success'] == true
+                            ? 'Signup successful!'
+                            : 'Signup failed');
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(message)),
+                    );
+
+                    if (result['success'] == true) {
                       Navigator.pushReplacementNamed(context, RouteName.signIn);
-                    });
+                    }
                   },
                 ),
               TextButton(

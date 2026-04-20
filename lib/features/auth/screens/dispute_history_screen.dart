@@ -19,42 +19,68 @@ class DisputeHistoryScreen extends StatefulWidget {
 class _DisputeHistoryScreenState extends State<DisputeHistoryScreen> {
   DisputeController disputeController = DisputeController();
   List<DisputeModal> disputes = [];
+  bool isLoading = false;
+  String? errorMessage;
+
   @override
   void initState() {
     super.initState();
-    // fetchDisputes();
+    fetchDisputes();
   }
 
-  fetchDisputes() {
-    disputeController.fetchAllDisputes().then((value) {
+  Future<void> fetchDisputes() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+    try {
+      final value = await disputeController.fetchAllDisputes();
       setState(() {
         disputes = value;
+        isLoading = false;
       });
-    });
+    } catch (_) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Failed to load disputes';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        if (disputes.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Text(
-              AppStrings.comingSoon,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-          )
-        else
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.only(top: 10, bottom: 10),
-              itemBuilder: (ctx, i) => historyItemBuilder(i),
-              separatorBuilder: (ctx, i) => const Divider(height: 1),
-              itemCount: disputes.length,
-            ),
-          ),
-      ],
+    if (isLoading) {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.7,
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (errorMessage != null) {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.7,
+        child: Center(child: Text(errorMessage!)),
+      );
+    }
+
+    if (disputes.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Text(
+          AppStrings.noDisputes,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: fetchDisputes,
+      child: ListView.separated(
+        padding: const EdgeInsets.only(top: 10, bottom: 10),
+        itemBuilder: (ctx, i) => historyItemBuilder(i),
+        separatorBuilder: (ctx, i) => const Divider(height: 1),
+        itemCount: disputes.length,
+      ),
     );
   }
 

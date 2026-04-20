@@ -1,8 +1,10 @@
 import 'package:checkmate/core/widgets/app_logo.dart';
 import 'package:checkmate/core/widgets/custom_button.dart';
 import 'package:checkmate/core/widgets/custom_text_field.dart';
+import 'package:checkmate/core/utils/top_nav_provider.dart';
 import 'package:checkmate/features/auth/business_logic/signin_screen_logic.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
+import 'package:checkmate/features/auth/screens/top_nav.dart';
 import 'package:checkmate/routes/route_name.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -81,23 +83,11 @@ class SigninScreen extends StatelessWidget {
                     onPressed: () async {
                       final user = await logic.signinUser(context);
                       if (user != null) {
-                        debugPrint("user: ${user.role}");
-                        if (user.role == UserType.hcp) {
-                          Navigator.pushReplacementNamed(
-                            context,
-                            RouteName.hcpDashboard,
-                          );
-                        } else if (user.role == UserType.hco) {
-                          Navigator.pushReplacementNamed(
-                            context,
-                            RouteName.officeUserDashboard,
-                          );
-                        } else if (user.role == UserType.pharmaRep) {
-                          Navigator.pushReplacementNamed(
-                            context,
-                            RouteName.pharmaRepDashboard,
-                          );
-                        }
+                        if (!context.mounted) return;
+                        context.read<TopNavProvider>().reset();
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (_) => const TopNav()),
+                        );
                       }
                     },
                   ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:checkmate/core/constants/app_api.dart';
 import 'package:checkmate/features/auth/social_media_auth/services/apple_auth_service.dart';
 import 'package:checkmate/features/auth/social_media_auth/services/google_auth_service.dart';
 import 'package:checkmate/features/auth/social_media_auth/services/linkedin_auth_service.dart';
@@ -57,7 +58,7 @@ class AuthRepository {
     //   return false;
     // }
     final responce = await http.post(
-      Uri.parse('https://172.32.32.69:7133/api/Auth/validate'),
+      Uri.parse('${AppApi.baseUrl1}Auth/validate'),
       body: json.encode({'token': payload.idToken}),
       headers: {'Content-Type': 'application/json'},
     );

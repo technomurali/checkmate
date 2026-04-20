@@ -21,6 +21,7 @@ class DisputeDetailsScreen extends StatefulWidget {
 class _DisputeDetailsScreenState extends State<DisputeDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
   bool isEdit = false;
+  bool isLoading = false;
   String? selectedDisputeCategory;
   DisputeController disputeController = DisputeController();
   PharmaController pharmaCompanyController = PharmaController();
@@ -44,34 +45,51 @@ class _DisputeDetailsScreenState extends State<DisputeDetailsScreen> {
   @override
   initState() {
     super.initState();
+    getPharmaCompany();
+    getDisputeDetails();
+  }
 
-    // getPharmaCompany();
-    // getDisputeDetails();
+  String _resolveOrganizationName() {
+    final hco = userModal.hco;
+    if (hco == null || hco.isEmpty) return '';
+    final first = hco.first;
+    if (first is Map && first[HCOModalKeys.hcoName] != null) {
+      return first[HCOModalKeys.hcoName].toString();
+    }
+    return '';
   }
 
   getPharmaCompany() {
     pharmaCompanyController.fetchPharmaCompanies().then((value) {
+      if (!mounted) return;
       setState(() {
-        // pharmaCompanies = value.pharmaCompanies;
+        pharmaCompanies = value.pharmaCompanies
+            .map<String>((e) => (e['accountName'] ?? '').toString())
+            .where((name) => name.isNotEmpty)
+            .toList();
       });
     });
   }
 
   getDisputeDetails() {
+    setState(() {
+      isLoading = true;
+    });
     disputeController.fetchDisputeDetails(disputeId: widget.disputeId).then((
       value,
     ) {
+      if (!mounted) return;
       setState(() {
         disputeDetails = value;
         DisputeFormTextControllers.fullNameController.text =
-            "${userModal.firstName!} ${userModal.lastName!}";
+            "${userModal.firstName ?? ''} ${userModal.lastName ?? ''}".trim();
         DisputeFormTextControllers.npiNumberController.text =
-            userModal.npiNumber!;
+            userModal.npiNumber ?? '';
         DisputeFormTextControllers.organizationNameController.text =
-            userModal.hco![0][HCOModalKeys.hcoName];
-        DisputeFormTextControllers.emailController.text = userModal.email!;
+            _resolveOrganizationName();
+        DisputeFormTextControllers.emailController.text = userModal.email ?? '';
         DisputeFormTextControllers.phoneController.text =
-            userModal.phoneNumber!;
+            userModal.phoneNumber ?? '';
         DisputeFormTextControllers.pharmaCompanyController.text =
             disputeDetails.transactionDetails?.pharmaCompany ?? '';
         DisputeFormTextControllers.eventInteractionController.text =
@@ -89,6 +107,12 @@ class _DisputeDetailsScreenState extends State<DisputeDetailsScreen> {
         selectedDisputeCategory = disputeDetails.disputeReason?.disputeCategory;
         selectedPharmaCompany =
             disputeDetails.transactionDetails?.pharmaCompany;
+        isLoading = false;
+      });
+    }).catchError((_) {
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
       });
     });
   }
@@ -166,6 +190,13 @@ class _DisputeDetailsScreenState extends State<DisputeDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.7,
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(16),
       child: Form(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:checkmate/features/auth/controllers/signin_controller.dart';
 import 'package:checkmate/features/auth/controllers/text_controllers.dart';
 import 'package:checkmate/core/constants/modal_keys.dart';
+import 'package:checkmate/core/utils/validators.dart';
 
 class SigninScreenLogic extends ChangeNotifier {
   final SigninController _signinController;
@@ -44,7 +45,7 @@ class SigninScreenLogic extends ChangeNotifier {
   bool validatePassword() {
     final password = SigninTextControllers.password.text.trim();
     if (!isValidPassword(password)) {
-      passwordError = "Must be 6+ chars, include upper, lower, digit, special";
+      passwordError = "Password can't be empty";
       notifyListeners();
       return false;
     } else {
@@ -67,14 +68,8 @@ class SigninScreenLogic extends ChangeNotifier {
   }
 
   bool isValidPassword(String password) {
-    // if (password != "") {
-    //   if (password.length < 6) return false;
-    //   if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
-    //   if (!RegExp(r'[a-z]').hasMatch(password)) return false;
-    //   if (!RegExp(r'[0-9]').hasMatch(password)) return false;
-    //   if (!RegExp(r'[!@#\$&*~%^(),.?":{}|<>]').hasMatch(password)) return false;
-    // }
-    return true;
+    // Keep sign-in backward compatible for legacy accounts.
+    return Validators().isLegacySigninPasswordValid(password);
   }
 
   Future<UserModal?> signinUser(BuildContext context) async {

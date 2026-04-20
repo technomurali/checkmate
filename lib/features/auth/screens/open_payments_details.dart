@@ -35,11 +35,11 @@ class _OpenPaymentsDetailsState extends State<OpenPaymentsDetails> {
                 color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: theme.colorScheme.onSurface.withOpacity(0.12),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
@@ -206,12 +206,12 @@ class _ReadonlyField extends StatelessWidget {
         label: Text(label),
         // Subtle filled background to feel like a card form field
         filled: true,
-        fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
+        fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: theme.colorScheme.onSurface.withOpacity(0.15),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.15),
           ),
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -234,10 +234,10 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: theme.colorScheme.onSurface.withOpacity(0.12),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
         ),
       ),
       child: Row(
@@ -246,13 +246,13 @@ class _Chip extends StatelessWidget {
           Icon(
             icon,
             size: 16,
-            color: theme.colorScheme.onSurface.withOpacity(0.75),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
           ),
           const SizedBox(width: 6),
           Text(
             label,
             style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.85),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
             ),
           ),
         ],

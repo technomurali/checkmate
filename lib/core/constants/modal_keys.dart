@@ -9,7 +9,8 @@ class ModalKeys
         HCOModalKeys {}
 
 mixin SignUpModalKeys {
-  final String email = "email";
+  // CRM expects `emailaddress1` for contact email.
+  final String email = "emailaddress1";
   final String password = "password";
   final String firstName = "firstName";
   final String lastName = "lastName";
@@ -28,13 +29,15 @@ mixin SigninModalKeys {
 
 mixin UserModalKeys {
   final String userId = 'id';
-  final String userEmail = 'email';
+  // CRM response usually returns `emailaddress1` instead of `email`.
+  final String userEmail = 'emailaddress1';
   final String userPassword = 'password';
   final String userFirstName = 'firstName';
   final String userLastName = 'lastName';
   final String userCity = 'city';
   final String userPharmaCompany = 'companyId';
-  final String userRole = 'userRoleId';
+  // CRM response usually returns `crddb_contacttype` instead of `userRoleId`.
+  final String userRole = 'crddb_contacttype';
   final String userHco = 'hco';
   final String userProfileUrl = 'profileUrl';
   final String userModeOfAuthentication = 'modeOfAuthentication';

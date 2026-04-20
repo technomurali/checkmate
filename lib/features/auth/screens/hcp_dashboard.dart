@@ -22,12 +22,14 @@ class _HCPDashboardState extends State<HCPDashboard> {
   List<EventModal> events = [];
   List<EventModal> pendingEvents = [];
   Future<void> fetchUpcomingEvents() async {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
     final v = await _eventController.fetchHcpEventsWithStatus(
       status: BasicCodesFromCrm.upcoming,
     );
+    if (!mounted) return;
     setState(() {
       events = v.take(3).toList();
       debugPrint("Events ::: $events");
@@ -39,6 +41,7 @@ class _HCPDashboardState extends State<HCPDashboard> {
     final v = await _eventController.fetchHcpEventsWithStatus(
       status: BasicCodesFromCrm.upcoming,
     );
+    if (!mounted) return;
     setState(() {
       events = v.take(3).toList();
       debugPrint("Events ::: $events");
@@ -50,6 +53,7 @@ class _HCPDashboardState extends State<HCPDashboard> {
     final v = await _eventController.fetchHcpEventsWithPending(
       status: BasicCodesFromCrm.pending,
     );
+    if (!mounted) return;
     setState(() {
       pendingEvents = v.take(3).toList();
       debugPrint("Events ::: $pendingEvents");
