@@ -3,7 +3,7 @@
 ## 1. Project Overview
 
 Checkmate Mobile is a healthcare compliance platform delivery across Flutter (mobile app), .NET APIs, Dynamics CRM integration, and Power Apps workflow/reporting.  
-This plan is aligned to the approved execution window: **2025-06-11 to 2025-10-27** (weekends treated as holidays).
+This plan is aligned to the approved execution window: **2025-06-11 to 2025-10-10** (weekends treated as holidays).
 
 ## 2. Goals and Outcomes
 
@@ -68,7 +68,7 @@ This plan is aligned to the approved execution window: **2025-06-11 to 2025-10-2
 - **M4 (Late August 2025)**: Event lifecycle complete with attachment/check-in workflows.
 - **M5 (Mid September 2025)**: Approval workflow and notifications complete.
 - **M6 (Early October 2025)**: CMS/Dispute integration complete.
-- **M7 (27 Oct 2025)**: UAT sign-off and release readiness complete.
+- **M7 (10 Oct 2025)**: UAT sign-off and release readiness complete.
 
 ## 8. Quality Plan
 
