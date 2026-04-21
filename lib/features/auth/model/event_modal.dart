@@ -93,8 +93,10 @@ class EventModal {
           : json["eventName"],
       startDate: json["startDate"] == null
           ? null
-          : _parseDateTime(json["startDate"]),
-      endDate: json["endDate"] == null ? null : _parseDateTime(json["endDate"]),
+          : _parseCalendarDate(json["startDate"]),
+      endDate: json["endDate"] == null
+          ? null
+          : _parseCalendarDate(json["endDate"]),
       numberOfStaff: json["numberOfStaff"],
       amount: double.parse(json["amount"].toString()),
       eventCostByPerson: double.parse(json["eventCostByPerson"].toString()),
@@ -118,6 +120,21 @@ class EventModal {
     );
   }
 
+  static DateTime? _parseCalendarDate(dynamic dateValue) {
+    if (dateValue == null) return null;
+    if (dateValue is DateTime) return dateValue;
+    if (dateValue is String) {
+      try {
+        final parsed = DateTime.parse(dateValue);
+        // Keep only calendar components to avoid timezone day shifts.
+        return DateTime(parsed.year, parsed.month, parsed.day);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
   static DateTime? _parseDateTime(dynamic dateValue) {
     if (dateValue == null) return null;
     if (dateValue is DateTime) return dateValue;
@@ -131,11 +148,19 @@ class EventModal {
     return null;
   }
 
+  static String? _toCalendarDateTime(DateTime? value) {
+    if (value == null) return null;
+    final y = value.year.toString().padLeft(4, '0');
+    final m = value.month.toString().padLeft(2, '0');
+    final d = value.day.toString().padLeft(2, '0');
+    return '$y-$m-${d}T00:00:00';
+  }
+
   Map<String, dynamic> toJson() => {
     "eventId": eventId,
     "eventName": eventName,
-    "startDate": startDate?.toIso8601String(),
-    "endDate": endDate?.toIso8601String(),
+    "startDate": _toCalendarDateTime(startDate),
+    "endDate": _toCalendarDateTime(endDate),
     "numberOfStaff": numberOfStaff,
     "amount": amount,
     "eventCostByPerson": eventCostByPerson,

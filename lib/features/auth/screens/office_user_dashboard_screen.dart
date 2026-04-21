@@ -165,7 +165,6 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
                           {
                             "title": events[i].eventName!,
                             "date": events[i].startDate!
-                                .toLocal()
                                 .toString()
                                 .split(' ')
                                 .first,
@@ -233,7 +232,6 @@ class _OfficeUserDashboardScreenState extends State<OfficeUserDashboardScreen> {
                           {
                             "title": pendingEvents[i].eventName!,
                             "date": pendingEvents[i].startDate!
-                                .toLocal()
                                 .toString()
                                 .split(' ')
                                 .first,

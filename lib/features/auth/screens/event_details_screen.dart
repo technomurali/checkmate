@@ -58,6 +58,15 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   bool isCheckinPossible = true;
   int amountForIndividualHcp = 0;
   List<Uint8List> eventAttachments = [];
+
+  String _toCalendarDateTime(DateTime value) {
+    final y = value.year.toString().padLeft(4, '0');
+    final m = value.month.toString().padLeft(2, '0');
+    final d = value.day.toString().padLeft(2, '0');
+    // Preserve selected calendar date regardless of timezone.
+    return '$y-$m-${d}T00:00:00';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -348,8 +357,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     final navProvider = Provider.of<TopNavProvider>(context, listen: false);
     var testData = {
       "eventName": event.eventName,
-      "startDate": event.startDate!.toIso8601String(),
-      "endDate": event.endDate!.toIso8601String(),
+      "startDate": _toCalendarDateTime(event.startDate!),
+      "endDate": _toCalendarDateTime(event.endDate!),
       "numberOfStaff": event.numberOfStaff,
       "amount": EventTextControllers.amountController.text.isNotEmpty
           ? double.parse(EventTextControllers.amountController.text)

@@ -169,10 +169,10 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
     final DateTime? start = event.startDate;
     final DateTime? end = event.endDate;
     final String startDateStr = start != null
-        ? start.toLocal().toString().split(' ').first
+        ? start.toString().split(' ').first
         : '';
     final String endDateStr = end != null
-        ? end.toLocal().toString().split(' ').first
+        ? end.toString().split(' ').first
         : '';
     final bool hasValidRange =
         start != null &&
@@ -221,7 +221,6 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                               Text(AppStrings.labelEventStartDate),
                               Text(
                                 event.startDate!
-                                    .toLocal()
                                     .toString()
                                     .split(' ')
                                     .first,
@@ -237,7 +236,6 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                                 Text(AppStrings.labelEndDate),
                                 Text(
                                   event.endDate!
-                                      .toLocal()
                                       .toString()
                                       .split(' ')
                                       .first,
@@ -254,7 +252,6 @@ class _PendingReceiptScreenState extends State<PendingReceiptScreen> {
                               Text(AppStrings.labelStartDate),
                               Text(
                                 event.startDate!
-                                    .toLocal()
                                     .toString()
                                     .split(' ')
                                     .first,

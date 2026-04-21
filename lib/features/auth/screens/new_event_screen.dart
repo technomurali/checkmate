@@ -48,6 +48,14 @@ class _NewEventScreenState extends State<NewEventScreen> {
   List<Map<String, dynamic>> _hcpPractitioners = [];
   bool hcpInHcoSelected = true;
 
+  String _toCalendarDateTime(DateTime value) {
+    final y = value.year.toString().padLeft(4, '0');
+    final m = value.month.toString().padLeft(2, '0');
+    final d = value.day.toString().padLeft(2, '0');
+    // Keep start/end as date-only semantics (midnight, no timezone marker).
+    return '$y-$m-${d}T00:00:00';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -326,10 +334,10 @@ class _NewEventScreenState extends State<NewEventScreen> {
       var testData = {
         "eventId": null,
         "eventName": NewEventTextControllers.eventNameController.text,
-        "startDate": startDatePicked.toIso8601String(),
+        "startDate": _toCalendarDateTime(startDatePicked),
         "endDate": isMultiDay
-            ? endDatePicked.toIso8601String()
-            : startDatePicked.toIso8601String(),
+            ? _toCalendarDateTime(endDatePicked)
+            : _toCalendarDateTime(startDatePicked),
         "numberOfStaff": staffCount,
         "amount": amount,
         "eventCostByPerson": eventCostByPerson,
@@ -344,7 +352,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
         // History endpoints are keyed by this contact reference.
         "userName": userRef,
         "isMultiDay": isMultiDay,
-        "eventCheckIn": startDatePicked.toIso8601String(),
+        "eventCheckIn": _toCalendarDateTime(startDatePicked),
         "status": eventStatusLabel,
       };
 

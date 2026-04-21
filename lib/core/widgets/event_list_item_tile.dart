@@ -204,13 +204,13 @@ class EventListItemTile extends StatelessWidget {
                         SizedBox(width: 5),
                         if (event.isMultiDay) ...{
                           Text(
-                            "${DateFormat("dd MMM").format(event.startDate!.toLocal())} - ${DateFormat("dd MMM yyyy").format(event.endDate!.toLocal())}",
+                            "${DateFormat("dd MMM").format(event.startDate!)} - ${DateFormat("dd MMM yyyy").format(event.endDate!)}",
                           ),
                         } else ...{
                           Text(
                             DateFormat(
                               "dd MMM yyyy",
-                            ).format(event.startDate!.toLocal()),
+                            ).format(event.startDate!),
                             style: TextStyle(fontWeight: FontWeight.normal),
                           ),
                         },

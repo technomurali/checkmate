@@ -120,7 +120,6 @@ class _HCPDashboardState extends State<HCPDashboard> {
                         {
                           "title": events[i].eventName!,
                           "date": events[i].startDate!
-                              .toLocal()
                               .toString()
                               .split(' ')
                               .first,
@@ -188,7 +187,6 @@ class _HCPDashboardState extends State<HCPDashboard> {
                         {
                           "title": pendingEvents[i].eventName!,
                           "date": pendingEvents[i].startDate!
-                              .toLocal()
                               .toString()
                               .split(' ')
                               .first,

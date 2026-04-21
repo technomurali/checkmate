@@ -169,7 +169,6 @@ Future<void> fetchUpcomingEventsAfter() async {
                           {
                             "title": upcomingEvents[i].eventName!,
                             "date": upcomingEvents[i].startDate!
-                                .toLocal()
                                 .toString()
                                 .split(' ')
                                 .first,
@@ -237,7 +236,6 @@ Future<void> fetchUpcomingEventsAfter() async {
                           {
                             "title": pendingEvents[i].eventName!,
                             "date": pendingEvents[i].startDate!
-                                .toLocal()
                                 .toString()
                                 .split(' ')
                                 .first,
